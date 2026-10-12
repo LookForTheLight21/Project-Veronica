@@ -1,0 +1,141 @@
+(kicad_sch (version 20231120) (generator "Project_Veronica_EDA")
+
+  (uuid "a28f73b0-4665-4f7b-9442-88746c82001e")
+
+  (paper "A4")
+
+  (title_block
+    (title "Project Veronica — Distributed Edge IoT Hardware Schematic")
+    (date "2026-10-12")
+    (rev "v2.1")
+    (company "Team Arch — Independent Maker Prototype")
+    (comment 1 "Application ID: VK26-AU-HCI-0072 / HSC|UT|00019")
+    (comment 2 "Track: Tangible, Haptic & Multi-Modal Interfaces")
+    (comment 3 "Repository: github.com/LookForTheLight21/Project-Veronica")
+  )
+
+  ;; =========================================================
+  ;; MODULE 1: RASPBERRY PI 5 COMPUTATION HUB (40-PIN HEADER)
+  ;; =========================================================
+  (symbol (lib_id "MCU_RaspberryPi:Raspberry_Pi_5") (at 140.0 95.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "b5e9f982-1209-411f-827b-c990262c8230")
+    (property "Reference" "U1" (at 140.0 65.0 0))
+    (property "Value" "Raspberry_Pi_5_8GB" (at 140.0 68.0 0))
+    (property "Footprint" "Module:RaspberryPi_5_HAT" (at 140.0 60.0 0))
+    (property "Datasheet" "https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf" (at 140.0 55.0 0))
+    (property "Description" "Single Board Computer: BCM2712 Quad-core Cortex-A76 @ 2.4GHz, 8GB LPDDR4X" (at 140.0 50.0 0))
+  )
+
+  ;; =========================================================
+  ;; MODULE 2: PN532 NFC BREAKOUT BOARD (I2C INTERFACE)
+  ;; =========================================================
+  (symbol (lib_id "Sensor_RFID:PN532_Breakout") (at 60.0 70.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "c4e10982-5509-421f-818b-c990262c9910")
+    (property "Reference" "U2" (at 60.0 55.0 0))
+    (property "Value" "PN532_NFC_I2C" (at 60.0 58.0 0))
+    (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 50.0 0))
+    (property "Description" "NXP PN532 13.56MHz RFID/NFC Module (DIP: SEL0=0, SEL1=1 for I2C mode)" (at 60.0 45.0 0))
+  )
+
+  ;; =========================================================
+  ;; MODULE 3: TTP229 CAPACITIVE TOUCH 16-KEY MATRIX
+  ;; =========================================================
+  (symbol (lib_id "Sensor_Touch:TTP229_Module") (at 60.0 140.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "d7e20982-7709-431f-998b-c990262c1145")
+    (property "Reference" "U3" (at 60.0 120.0 0))
+    (property "Value" "TTP229_16Key_Capacitive" (at 60.0 123.0 0))
+    (property "Footprint" "Module:TTP229_Keypad" (at 60.0 115.0 0))
+    (property "Description" "16-Channel Capacitive Touch Controller (Jumper 3 & 7 bridged for active-low serial)" (at 60.0 110.0 0))
+  )
+
+  ;; =========================================================
+  ;; MODULE 4: ACOUSTIC TRANSDUCER & DRIVER (BC547 + BUZZER)
+  ;; =========================================================
+  ;; 5V Active Buzzer
+  (symbol (lib_id "Device:Buzzer") (at 215.0 80.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "e8e30982-8809-441f-aa8b-c990262c2233")
+    (property "Reference" "BZ1" (at 215.0 70.0 0))
+    (property "Value" "Buzzer_5V_Active" (at 215.0 73.0 0))
+    (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 65.0 0))
+  )
+
+  ;; NPN Transistor Buffer (BC547)
+  (symbol (lib_id "Transistor_BJT:BC547") (at 205.0 100.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "f9e40982-9909-451f-bb8b-c990262c3322")
+    (property "Reference" "Q1" (at 205.0 92.0 0))
+    (property "Value" "BC547" (at 205.0 95.0 0))
+    (property "Footprint" "Package_TO_SOT_THT:TO-92_Inline" (at 205.0 88.0 0))
+  )
+
+  ;; Base Current-Limiting Resistor (1k Ohm)
+  (symbol (lib_id "Device:R") (at 180.0 100.0 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "a1e50982-0009-461f-cc8b-c990262c4411")
+    (property "Reference" "R1" (at 180.0 95.0 90))
+    (property "Value" "1k_0.25W" (at 180.0 98.0 90))
+    (property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (at 180.0 90.0 90))
+  )
+
+  ;; Inductive Flyback Protection Diode (1N4148 / 1N4007)
+  (symbol (lib_id "Device:D") (at 225.0 80.0 180) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "b2e60982-1109-471f-dd8b-c990262c5500")
+    (property "Reference" "D1" (at 225.0 72.0 0))
+    (property "Value" "1N4148" (at 225.0 75.0 0))
+    (property "Footprint" "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal" (at 225.0 68.0 0))
+  )
+
+  ;; =========================================================
+  ;; MODULE 5: USB 3.0 UVC OPTICAL SUBSYSTEM & POWER
+  ;; =========================================================
+  (symbol (lib_id "Connector:USB_A") (at 215.0 140.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "c3e70982-2209-481f-ee8b-c990262c6611")
+    (property "Reference" "J1" (at 215.0 130.0 0))
+    (property "Value" "Kreo_Owl_4K_USB3" (at 215.0 133.0 0))
+    (property "Footprint" "Connector_USB:USB3_A_Molex_48393-0001_Horizontal" (at 215.0 125.0 0))
+    (property "Description" "Sony IMX 4K Camera Sensor (MJPEG 3840x2160 @ 30 FPS over USB 3.0)" (at 215.0 120.0 0))
+  )
+
+  ;; =========================================================
+  ;; NET LABELS & BUS CONNECTIONS
+  ;; =========================================================
+  ;; I2C Bus: NXP PN532 to Raspberry Pi 5
+  (wire (pts (xy 75.0 65.0) (xy 120.0 65.0)) (stroke (width 0) (type default)))
+  (label "SDA1_GPIO2_PIN3" (at 95.0 64.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 70.0) (xy 120.0 70.0)) (stroke (width 0) (type default)))
+  (label "SCL1_GPIO3_PIN5" (at 95.0 69.0 0) (fields_autoplaced))
+
+  ;; Bit-Banging Bus: TTP229 to Raspberry Pi 5
+  (wire (pts (xy 75.0 135.0) (xy 120.0 135.0)) (stroke (width 0) (type default)))
+  (label "TTP_DATA_GPIO4_PIN7" (at 95.0 134.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 140.0) (xy 120.0 140.0)) (stroke (width 0) (type default)))
+  (label "TTP_SCL_GPIO17_PIN11" (at 95.0 139.0 0) (fields_autoplaced))
+
+  ;; Transistor Driver Trigger: Raspberry Pi 5 to Base Resistor
+  (wire (pts (xy 155.0 100.0) (xy 175.0 100.0)) (stroke (width 0) (type default)))
+  (label "BUZ_TRIGGER_GPIO23_PIN16" (at 165.0 98.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 185.0 100.0) (xy 200.0 100.0)) (stroke (width 0) (type default)))
+
+  ;; Collector to Buzzer Cathode
+  (wire (pts (xy 205.0 95.0) (xy 215.0 85.0)) (stroke (width 0) (type default)))
+  (label "BUZ_DRIVE_LOW" (at 210.0 90.0 0) (fields_autoplaced))
+
+  ;; =========================================================
+  ;; POWER RAILS & COMMON GROUND
+  ;; =========================================================
+  (label "+3V3_PIN1"   (at 75.0 60.0 0)   (fields_autoplaced))
+  (label "+3V3_PIN17"  (at 75.0 130.0 0)  (fields_autoplaced))
+  (label "+5V_PIN2"    (at 215.0 65.0 0)  (fields_autoplaced))
+  (label "GND_PIN6"    (at 75.0 75.0 0)   (fields_autoplaced))
+  (label "GND_PIN9"    (at 75.0 145.0 0)  (fields_autoplaced))
+  (label "GND_PIN20"   (at 205.0 110.0 0) (fields_autoplaced))
+)
