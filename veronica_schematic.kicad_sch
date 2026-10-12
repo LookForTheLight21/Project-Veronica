@@ -1,30 +1,30 @@
-(kicad_sch (version 20231120) (generator "Project_Veronica_EDA")
+(kicad_sch (version 20231120) (generator "Project_Veronica_ESP32_EDA")
 
-  (uuid "a28f73b0-4665-4f7b-9442-88746c82001e")
+  (uuid "e5792c30-5891-4e8c-8f12-98446c82003b")
 
   (paper "A4")
 
   (title_block
-    (title "Project Veronica — Distributed Edge IoT Hardware Schematic")
+    (title "Project Veronica — Tier 1 ESP32 Podium Interface")
     (date "2026-10-12")
-    (rev "v2.1")
+    (rev "v3.0")
     (company "Team Arch — Independent Maker Prototype")
-    (comment 1 "Application ID: VK26-AU-HCI-0072 / HSC|UT|00019")
+    (comment 1 "Application ID: VK26-AU-HCI-0072")
     (comment 2 "Track: Tangible, Haptic & Multi-Modal Interfaces")
-    (comment 3 "Repository: github.com/LookForTheLight21/Project-Veronica")
+    (comment 3 "Decoupled Desk Pod with ESP-NOW Wireless Telemetry")
   )
 
   ;; =========================================================
-  ;; MODULE 1: RASPBERRY PI 5 COMPUTATION HUB (40-PIN HEADER)
+  ;; MODULE 1: ESP32-WROOM-32D / DEVKIT V1 CONTROLLER
   ;; =========================================================
-  (symbol (lib_id "MCU_RaspberryPi:Raspberry_Pi_5") (at 140.0 95.0 0) (unit 1)
+  (symbol (lib_id "RF_Module:ESP32-WROOM-32D") (at 140.0 95.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
-    (uuid "b5e9f982-1209-411f-827b-c990262c8230")
+    (uuid "a129f982-1209-411f-827b-c990262c9999")
     (property "Reference" "U1" (at 140.0 65.0 0))
-    (property "Value" "Raspberry_Pi_5_8GB" (at 140.0 68.0 0))
-    (property "Footprint" "Module:RaspberryPi_5_HAT" (at 140.0 60.0 0))
-    (property "Datasheet" "https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf" (at 140.0 55.0 0))
-    (property "Description" "Single Board Computer: BCM2712 Quad-core Cortex-A76 @ 2.4GHz, 8GB LPDDR4X" (at 140.0 50.0 0))
+    (property "Value" "ESP32_DevKit_V1" (at 140.0 68.0 0))
+    (property "Footprint" "Module:ESP32-WROOM-32D" (at 140.0 60.0 0))
+    (property "Datasheet" "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32d_datasheet_en.pdf" (at 140.0 55.0 0))
+    (property "Description" "Dual-Core Tensilica LX6 @ 240MHz, 520KB SRAM, 2.4GHz Wi-Fi/ESP-NOW" (at 140.0 50.0 0))
   )
 
   ;; =========================================================
@@ -36,7 +36,7 @@
     (property "Reference" "U2" (at 60.0 55.0 0))
     (property "Value" "PN532_NFC_I2C" (at 60.0 58.0 0))
     (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 50.0 0))
-    (property "Description" "NXP PN532 13.56MHz RFID/NFC Module (DIP: SEL0=0, SEL1=1 for I2C mode)" (at 60.0 45.0 0))
+    (property "Description" "NXP PN532 13.56MHz Contactless Reader (I2C: GPIO 21 SDA, GPIO 22 SCL)" (at 60.0 45.0 0))
   )
 
   ;; =========================================================
@@ -48,13 +48,12 @@
     (property "Reference" "U3" (at 60.0 120.0 0))
     (property "Value" "TTP229_16Key_Capacitive" (at 60.0 123.0 0))
     (property "Footprint" "Module:TTP229_Keypad" (at 60.0 115.0 0))
-    (property "Description" "16-Channel Capacitive Touch Controller (Jumper 3 & 7 bridged for active-low serial)" (at 60.0 110.0 0))
+    (property "Description" "16-Channel Touch Controller (Clock: GPIO 18, SDO: GPIO 19)" (at 60.0 110.0 0))
   )
 
   ;; =========================================================
   ;; MODULE 4: ACOUSTIC TRANSDUCER & DRIVER (BC547 + BUZZER)
   ;; =========================================================
-  ;; 5V Active Buzzer
   (symbol (lib_id "Device:Buzzer") (at 215.0 80.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "e8e30982-8809-441f-aa8b-c990262c2233")
@@ -63,7 +62,6 @@
     (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 65.0 0))
   )
 
-  ;; NPN Transistor Buffer (BC547)
   (symbol (lib_id "Transistor_BJT:BC547") (at 205.0 100.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "f9e40982-9909-451f-bb8b-c990262c3322")
@@ -72,7 +70,6 @@
     (property "Footprint" "Package_TO_SOT_THT:TO-92_Inline" (at 205.0 88.0 0))
   )
 
-  ;; Base Current-Limiting Resistor (1k Ohm)
   (symbol (lib_id "Device:R") (at 180.0 100.0 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "a1e50982-0009-461f-cc8b-c990262c4411")
@@ -81,7 +78,6 @@
     (property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (at 180.0 90.0 90))
   )
 
-  ;; Inductive Flyback Protection Diode (1N4148 / 1N4007)
   (symbol (lib_id "Device:D") (at 225.0 80.0 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "b2e60982-1109-471f-dd8b-c990262c5500")
@@ -91,51 +87,35 @@
   )
 
   ;; =========================================================
-  ;; MODULE 5: USB 3.0 UVC OPTICAL SUBSYSTEM & POWER
+  ;; NET LABELS & BUS CONNECTIONS (ESP32 PINOUT)
   ;; =========================================================
-  (symbol (lib_id "Connector:USB_A") (at 215.0 140.0 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid "c3e70982-2209-481f-ee8b-c990262c6611")
-    (property "Reference" "J1" (at 215.0 130.0 0))
-    (property "Value" "Kreo_Owl_4K_USB3" (at 215.0 133.0 0))
-    (property "Footprint" "Connector_USB:USB3_A_Molex_48393-0001_Horizontal" (at 215.0 125.0 0))
-    (property "Description" "Sony IMX 4K Camera Sensor (MJPEG 3840x2160 @ 30 FPS over USB 3.0)" (at 215.0 120.0 0))
-  )
-
-  ;; =========================================================
-  ;; NET LABELS & BUS CONNECTIONS
-  ;; =========================================================
-  ;; I2C Bus: NXP PN532 to Raspberry Pi 5
+  ;; I2C Bus to ESP32 GPIO 21 & GPIO 22
   (wire (pts (xy 75.0 65.0) (xy 120.0 65.0)) (stroke (width 0) (type default)))
-  (label "SDA1_GPIO2_PIN3" (at 95.0 64.0 0) (fields_autoplaced))
+  (label "ESP32_GPIO21_SDA" (at 95.0 64.0 0) (fields_autoplaced))
 
   (wire (pts (xy 75.0 70.0) (xy 120.0 70.0)) (stroke (width 0) (type default)))
-  (label "SCL1_GPIO3_PIN5" (at 95.0 69.0 0) (fields_autoplaced))
+  (label "ESP32_GPIO22_SCL" (at 95.0 69.0 0) (fields_autoplaced))
 
-  ;; Bit-Banging Bus: TTP229 to Raspberry Pi 5
+  ;; Keypad Shift Register to ESP32 GPIO 18 & GPIO 19
   (wire (pts (xy 75.0 135.0) (xy 120.0 135.0)) (stroke (width 0) (type default)))
-  (label "TTP_DATA_GPIO4_PIN7" (at 95.0 134.0 0) (fields_autoplaced))
+  (label "ESP32_GPIO19_DATA" (at 95.0 134.0 0) (fields_autoplaced))
 
   (wire (pts (xy 75.0 140.0) (xy 120.0 140.0)) (stroke (width 0) (type default)))
-  (label "TTP_SCL_GPIO17_PIN11" (at 95.0 139.0 0) (fields_autoplaced))
+  (label "ESP32_GPIO18_CLK" (at 95.0 139.0 0) (fields_autoplaced))
 
-  ;; Transistor Driver Trigger: Raspberry Pi 5 to Base Resistor
+  ;; Buzzer Trigger from ESP32 GPIO 23
   (wire (pts (xy 155.0 100.0) (xy 175.0 100.0)) (stroke (width 0) (type default)))
-  (label "BUZ_TRIGGER_GPIO23_PIN16" (at 165.0 98.0 0) (fields_autoplaced))
+  (label "ESP32_GPIO23_BUZZER" (at 165.0 98.0 0) (fields_autoplaced))
 
   (wire (pts (xy 185.0 100.0) (xy 200.0 100.0)) (stroke (width 0) (type default)))
-
-  ;; Collector to Buzzer Cathode
   (wire (pts (xy 205.0 95.0) (xy 215.0 85.0)) (stroke (width 0) (type default)))
   (label "BUZ_DRIVE_LOW" (at 210.0 90.0 0) (fields_autoplaced))
 
-  ;; =========================================================
-  ;; POWER RAILS & COMMON GROUND
-  ;; =========================================================
-  (label "+3V3_PIN1"   (at 75.0 60.0 0)   (fields_autoplaced))
-  (label "+3V3_PIN17"  (at 75.0 130.0 0)  (fields_autoplaced))
-  (label "+5V_PIN2"    (at 215.0 65.0 0)  (fields_autoplaced))
-  (label "GND_PIN6"    (at 75.0 75.0 0)   (fields_autoplaced))
-  (label "GND_PIN9"    (at 75.0 145.0 0)  (fields_autoplaced))
-  (label "GND_PIN20"   (at 205.0 110.0 0) (fields_autoplaced))
+  ;; Power Rails
+  (label "+3V3_REGULATED" (at 75.0 60.0 0)   (fields_autoplaced))
+  (label "+3V3_REGULATED" (at 75.0 130.0 0)  (fields_autoplaced))
+  (label "+5V_USB_VIN"    (at 215.0 65.0 0)  (fields_autoplaced))
+  (label "GND"            (at 75.0 75.0 0)   (fields_autoplaced))
+  (label "GND"            (at 75.0 145.0 0)  (fields_autoplaced))
+  (label "GND"            (at 205.0 110.0 0) (fields_autoplaced))
 )
