@@ -5,17 +5,17 @@
   (paper "A4")
 
   (title_block
-    (title "Project Veronica — Tier 1 ESP32 Podium Interface")
+    (title "Project Veronica — Tier 1 ESP32 Podium Interface (Direct Wiring)")
     (date "2026-10-12")
-    (rev "v3.0")
+    (rev "v3.1")
     (company "Team Arch — Independent Maker Prototype")
     (comment 1 "Application ID: VK26-AU-HCI-0072")
     (comment 2 "Track: Tangible, Haptic & Multi-Modal Interfaces")
-    (comment 3 "Decoupled Desk Pod with ESP-NOW Wireless Telemetry")
+    (comment 3 "Direct GPIO Drive Architecture (No External Transistor Buffer)")
   )
 
   ;; =========================================================
-  ;; MODULE 1: ESP32-WROOM-32D / DEVKIT V1 CONTROLLER
+  ;; MODULE 1: ESP32-WROOM-32D CONTROLLER
   ;; =========================================================
   (symbol (lib_id "RF_Module:ESP32-WROOM-32D") (at 140.0 95.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
@@ -23,12 +23,10 @@
     (property "Reference" "U1" (at 140.0 65.0 0))
     (property "Value" "ESP32_DevKit_V1" (at 140.0 68.0 0))
     (property "Footprint" "Module:ESP32-WROOM-32D" (at 140.0 60.0 0))
-    (property "Datasheet" "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32d_datasheet_en.pdf" (at 140.0 55.0 0))
-    (property "Description" "Dual-Core Tensilica LX6 @ 240MHz, 520KB SRAM, 2.4GHz Wi-Fi/ESP-NOW" (at 140.0 50.0 0))
   )
 
   ;; =========================================================
-  ;; MODULE 2: PN532 NFC BREAKOUT BOARD (I2C INTERFACE)
+  ;; MODULE 2: PN532 NFC MODULE (I2C)
   ;; =========================================================
   (symbol (lib_id "Sensor_RFID:PN532_Breakout") (at 60.0 70.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
@@ -36,28 +34,64 @@
     (property "Reference" "U2" (at 60.0 55.0 0))
     (property "Value" "PN532_NFC_I2C" (at 60.0 58.0 0))
     (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 50.0 0))
-    (property "Description" "NXP PN532 13.56MHz Contactless Reader (I2C: GPIO 21 SDA, GPIO 22 SCL)" (at 60.0 45.0 0))
   )
 
   ;; =========================================================
-  ;; MODULE 3: TTP229 CAPACITIVE TOUCH 16-KEY MATRIX
+  ;; MODULE 3: TTP229 CAPACITIVE TOUCH KEYPAD
   ;; =========================================================
   (symbol (lib_id "Sensor_Touch:TTP229_Module") (at 60.0 140.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "d7e20982-7709-431f-998b-c990262c1145")
     (property "Reference" "U3" (at 60.0 120.0 0))
-    (property "Value" "TTP229_16Key_Capacitive" (at 60.0 123.0 0))
+    (property "Value" "TTP229_16Key" (at 60.0 123.0 0))
     (property "Footprint" "Module:TTP229_Keypad" (at 60.0 115.0 0))
-    (property "Description" "16-Channel Touch Controller (Clock: GPIO 18, SDO: GPIO 19)" (at 60.0 110.0 0))
   )
 
   ;; =========================================================
-  ;; MODULE 4: ACOUSTIC TRANSDUCER & DRIVER (BC547 + BUZZER)
+  ;; MODULE 4: DIRECT PIEZO BUZZER (NO TRANSISTOR)
   ;; =========================================================
-  (symbol (lib_id "Device:Buzzer") (at 215.0 80.0 0) (unit 1)
+  (symbol (lib_id "Device:Buzzer") (at 215.0 95.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "e8e30982-8809-441f-aa8b-c990262c2233")
-    (property "Reference" "BZ1" (at 215.0 70.0 0))
+    (property "Reference" "BZ1" (at 215.0 80.0 0))
+    (property "Value" "Buzzer_Piezo_Direct" (at 215.0 83.0 0))
+    (property "Description" "Direct PWM driven piezo element between GPIO 23 and Common Ground" (at 215.0 75.0 0))
+  )
+
+  ;; =========================================================
+  ;; DIRECT SIGNAL CONNECTIONS
+  ;; =========================================================
+  ;; I2C Bus to ESP32
+  (wire (pts (xy 75.0 65.0) (xy 120.0 65.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO21_SDA" (at 95.0 64.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 70.0) (xy 120.0 70.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO22_SCL" (at 95.0 69.0 0) (fields_autoplaced))
+
+  ;; Keypad to ESP32
+  (wire (pts (xy 75.0 135.0) (xy 120.0 135.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO19_DATA" (at 95.0 134.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 140.0) (xy 120.0 140.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO18_CLK" (at 95.0 139.0 0) (fields_autoplaced))
+
+  ;; Buzzer Direct Connection to GPIO 23
+  (wire (pts (xy 160.0 95.0) (xy 205.0 95.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO23_BUZZER_POS" (at 180.0 94.0 0) (fields_autoplaced))
+
+  ;; =========================================================
+  ;; POWER AND EXPLICIT COMMON GROUND TRACES
+  ;; =========================================================
+  (label "+3V3" (at 75.0 60.0 0)   (fields_autoplaced))
+  (label "+3V3" (at 75.0 130.0 0)  (fields_autoplaced))
+  (label "+3V3" (at 140.0 60.0 0)  (fields_autoplaced))
+
+  ;; Explicit Common Ground Net across all nodes
+  (label "COMMON_GND" (at 75.0 75.0 0)   (fields_autoplaced))
+  (label "COMMON_GND" (at 75.0 145.0 0)  (fields_autoplaced))
+  (label "COMMON_GND" (at 140.0 130.0 0) (fields_autoplaced))
+  (label "COMMON_GND" (at 215.0 105.0 0) (fields_autoplaced))
+)
     (property "Value" "Buzzer_5V_Active" (at 215.0 73.0 0))
     (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 65.0 0))
   )
