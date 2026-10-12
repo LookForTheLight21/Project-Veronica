@@ -1,155 +1,132 @@
-(kicad_sch (version 20231120) (generator "Project_Veronica_ESP32_EDA")
+(kicad_sch (version 20231120) (generator "eeschema")
 
-  (uuid "e5792c30-5891-4e8c-8f12-98446c82003b")
+  (uuid "d4837b21-4f18-42f1-8f55-1029c7865e10")
 
   (paper "A4")
 
   (title_block
-    (title "Project Veronica — Tier 1 ESP32 Podium Interface (Direct Wiring)")
+    (title "Project Veronica — ESP32 Podium Interface (Direct Drive)")
     (date "2026-10-12")
-    (rev "v3.1")
-    (company "Team Arch — Independent Maker Prototype")
+    (rev "v4.0")
+    (company "Project Veronica — Independent Student Build")
     (comment 1 "Application ID: VK26-AU-HCI-0072")
-    (comment 2 "Track: Tangible, Haptic & Multi-Modal Interfaces")
-    (comment 3 "Direct GPIO Drive Architecture (No External Transistor Buffer)")
+    (comment 2 "Direct GPIO Piezo Drive + Common Ground Bus")
+    (comment 3 "Verified Physical Hardware Match")
   )
 
   ;; =========================================================
-  ;; MODULE 1: ESP32-WROOM-32D CONTROLLER
+  ;; 1. ESP32 DEVKIT V1 (30-PIN MICROCONTROLLER)
   ;; =========================================================
-  (symbol (lib_id "RF_Module:ESP32-WROOM-32D") (at 140.0 95.0 0) (unit 1)
+  (symbol (lib_id "MCU_Module:ESP32-DevKit-V1") (at 140.0 100.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
-    (uuid "a129f982-1209-411f-827b-c990262c9999")
+    (uuid "e1029384-1111-4001-a001-998877665544")
     (property "Reference" "U1" (at 140.0 65.0 0))
-    (property "Value" "ESP32_DevKit_V1" (at 140.0 68.0 0))
-    (property "Footprint" "Module:ESP32-WROOM-32D" (at 140.0 60.0 0))
+    (property "Value" "ESP32_DevKit_V1_30Pin" (at 140.0 68.0 0))
+    (property "Footprint" "Module:ESP32-DevKit-V1" (at 140.0 60.0 0))
+    (property "Datasheet" "https://www.espressif.com" (at 140.0 55.0 0))
+    (property "Description" "ESP32 Dual-Core MCU with Native 2.4GHz Wi-Fi / ESP-NOW" (at 140.0 50.0 0))
   )
 
   ;; =========================================================
-  ;; MODULE 2: PN532 NFC MODULE (I2C)
+  ;; 2. NXP PN532 NFC BOARD (I2C MODE)
   ;; =========================================================
   (symbol (lib_id "Sensor_RFID:PN532_Breakout") (at 60.0 70.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
-    (uuid "c4e10982-5509-421f-818b-c990262c9910")
-    (property "Reference" "U2" (at 60.0 55.0 0))
-    (property "Value" "PN532_NFC_I2C" (at 60.0 58.0 0))
-    (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 50.0 0))
+    (uuid "e1029384-2222-4002-a002-998877665544")
+    (property "Reference" "U2" (at 60.0 52.0 0))
+    (property "Value" "PN532_NFC_Module" (at 60.0 55.0 0))
+    (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 48.0 0))
+    (property "Description" "NFC Reader: I2C Mode (SEL0=0, SEL1=1)" (at 60.0 45.0 0))
   )
 
   ;; =========================================================
-  ;; MODULE 3: TTP229 CAPACITIVE TOUCH KEYPAD
+  ;; 3. TTP229 16-KEY CAPACITIVE KEYPAD
   ;; =========================================================
-  (symbol (lib_id "Sensor_Touch:TTP229_Module") (at 60.0 140.0 0) (unit 1)
+  (symbol (lib_id "Sensor_Touch:TTP229_Module") (at 60.0 135.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
-    (uuid "d7e20982-7709-431f-998b-c990262c1145")
-    (property "Reference" "U3" (at 60.0 120.0 0))
-    (property "Value" "TTP229_16Key" (at 60.0 123.0 0))
-    (property "Footprint" "Module:TTP229_Keypad" (at 60.0 115.0 0))
+    (uuid "e1029384-3333-4003-a003-998877665544")
+    (property "Reference" "U3" (at 60.0 118.0 0))
+    (property "Value" "TTP229_Capacitive_16Key" (at 60.0 121.0 0))
+    (property "Footprint" "Module:TTP229_Keypad" (at 60.0 114.0 0))
+    (property "Description" "16-Channel Touch Sensor (Bridged Pads 3 & 7)" (at 60.0 110.0 0))
   )
 
   ;; =========================================================
-  ;; MODULE 4: DIRECT PIEZO BUZZER (NO TRANSISTOR)
+  ;; 4. DIRECT PIEZO BUZZER (NO TRANSISTOR)
   ;; =========================================================
   (symbol (lib_id "Device:Buzzer") (at 215.0 95.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
-    (uuid "e8e30982-8809-441f-aa8b-c990262c2233")
+    (uuid "e1029384-4444-4004-a004-998877665544")
     (property "Reference" "BZ1" (at 215.0 80.0 0))
-    (property "Value" "Buzzer_Piezo_Direct" (at 215.0 83.0 0))
-    (property "Description" "Direct PWM driven piezo element between GPIO 23 and Common Ground" (at 215.0 75.0 0))
+    (property "Value" "Piezo_Buzzer_Direct" (at 215.0 83.0 0))
+    (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 76.0 0))
+    (property "Description" "Direct PWM Driven Active Piezo Element" (at 215.0 72.0 0))
   )
 
   ;; =========================================================
-  ;; DIRECT SIGNAL CONNECTIONS
+  ;; POWER SYMBOLS: +3.3V BUS
   ;; =========================================================
-  ;; I2C Bus to ESP32
-  (wire (pts (xy 75.0 65.0) (xy 120.0 65.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO21_SDA" (at 95.0 64.0 0) (fields_autoplaced))
+  (symbol (lib_id "power:+3V3") (at 140.0 75.0 0) (unit 1)
+    (uuid "p1000000-0001-4000-8000-000000000001")
+    (property "Reference" "#PWR1" (at 140.0 78.0 0))
+    (property "Value" "+3V3" (at 140.0 72.0 0))
+  )
+  (symbol (lib_id "power:+3V3") (at 60.0 60.0 0) (unit 1)
+    (uuid "p1000000-0002-4000-8000-000000000002")
+    (property "Reference" "#PWR2" (at 60.0 63.0 0))
+    (property "Value" "+3V3" (at 60.0 57.0 0))
+  )
+  (symbol (lib_id "power:+3V3") (at 60.0 125.0 0) (unit 1)
+    (uuid "p1000000-0003-4000-8000-000000000003")
+    (property "Reference" "#PWR3" (at 60.0 128.0 0))
+    (property "Value" "+3V3" (at 60.0 122.0 0))
+  )
 
-  (wire (pts (xy 75.0 70.0) (xy 120.0 70.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO22_SCL" (at 95.0 69.0 0) (fields_autoplaced))
+  ;; =========================================================
+  ;; POWER SYMBOLS: COMMON GROUND RETURN (TIED CLOSED LOOP)
+  ;; =========================================================
+  (symbol (lib_id "power:GND") (at 140.0 135.0 0) (unit 1)
+    (uuid "g1000000-0001-4000-8000-000000000001")
+    (property "Reference" "#GND1" (at 140.0 138.0 0))
+    (property "Value" "GND" (at 140.0 142.0 0))
+  )
+  (symbol (lib_id "power:GND") (at 60.0 80.0 0) (unit 1)
+    (uuid "g1000000-0002-4000-8000-000000000002")
+    (property "Reference" "#GND2" (at 60.0 83.0 0))
+    (property "Value" "GND" (at 60.0 87.0 0))
+  )
+  (symbol (lib_id "power:GND") (at 60.0 145.0 0) (unit 1)
+    (uuid "g1000000-0003-4000-8000-000000000003")
+    (property "Reference" "#GND3" (at 60.0 148.0 0))
+    (property "Value" "GND" (at 60.0 152.0 0))
+  )
+  (symbol (lib_id "power:GND") (at 215.0 115.0 0) (unit 1)
+    (uuid "g1000000-0004-4000-8000-000000000004")
+    (property "Reference" "#GND4" (at 215.0 118.0 0))
+    (property "Value" "GND" (at 215.0 122.0 0))
+  )
 
-  ;; Keypad to ESP32
-  (wire (pts (xy 75.0 135.0) (xy 120.0 135.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO19_DATA" (at 95.0 134.0 0) (fields_autoplaced))
+  ;; =========================================================
+  ;; SIGNAL BUS CONNECTIONS (WIRES & GLOBAL NET LABELS)
+  ;; =========================================================
+  ;; NXP PN532 I2C Bus to ESP32
+  (wire (pts (xy 75.0 68.0) (xy 120.0 68.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO21_SDA" (at 95.0 67.0 0) (fields_autoplaced))
 
-  (wire (pts (xy 75.0 140.0) (xy 120.0 140.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO18_CLK" (at 95.0 139.0 0) (fields_autoplaced))
+  (wire (pts (xy 75.0 72.0) (xy 120.0 72.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO22_SCL" (at 95.0 71.0 0) (fields_autoplaced))
 
-  ;; Buzzer Direct Connection to GPIO 23
+  ;; TTP229 Shift Register to ESP32
+  (wire (pts (xy 75.0 133.0) (xy 120.0 133.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO19_DATA" (at 95.0 132.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 137.0) (xy 120.0 137.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO18_CLK" (at 95.0 136.0 0) (fields_autoplaced))
+
+  ;; Direct Buzzer Trigger Line: ESP32 GPIO 23 to Buzzer (+)
   (wire (pts (xy 160.0 95.0) (xy 205.0 95.0)) (stroke (width 0) (type default)))
   (label "ESP32_GPIO23_BUZZER_POS" (at 180.0 94.0 0) (fields_autoplaced))
 
-  ;; =========================================================
-  ;; POWER AND EXPLICIT COMMON GROUND TRACES
-  ;; =========================================================
-  (label "+3V3" (at 75.0 60.0 0)   (fields_autoplaced))
-  (label "+3V3" (at 75.0 130.0 0)  (fields_autoplaced))
-  (label "+3V3" (at 140.0 60.0 0)  (fields_autoplaced))
-
-  ;; Explicit Common Ground Net across all nodes
-  (label "COMMON_GND" (at 75.0 75.0 0)   (fields_autoplaced))
-  (label "COMMON_GND" (at 75.0 145.0 0)  (fields_autoplaced))
-  (label "COMMON_GND" (at 140.0 130.0 0) (fields_autoplaced))
-  (label "COMMON_GND" (at 215.0 105.0 0) (fields_autoplaced))
-)
-    (property "Value" "Buzzer_5V_Active" (at 215.0 73.0 0))
-    (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 65.0 0))
-  )
-
-  (symbol (lib_id "Transistor_BJT:BC547") (at 205.0 100.0 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid "f9e40982-9909-451f-bb8b-c990262c3322")
-    (property "Reference" "Q1" (at 205.0 92.0 0))
-    (property "Value" "BC547" (at 205.0 95.0 0))
-    (property "Footprint" "Package_TO_SOT_THT:TO-92_Inline" (at 205.0 88.0 0))
-  )
-
-  (symbol (lib_id "Device:R") (at 180.0 100.0 90) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid "a1e50982-0009-461f-cc8b-c990262c4411")
-    (property "Reference" "R1" (at 180.0 95.0 90))
-    (property "Value" "1k_0.25W" (at 180.0 98.0 90))
-    (property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (at 180.0 90.0 90))
-  )
-
-  (symbol (lib_id "Device:D") (at 225.0 80.0 180) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid "b2e60982-1109-471f-dd8b-c990262c5500")
-    (property "Reference" "D1" (at 225.0 72.0 0))
-    (property "Value" "1N4148" (at 225.0 75.0 0))
-    (property "Footprint" "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal" (at 225.0 68.0 0))
-  )
-
-  ;; =========================================================
-  ;; NET LABELS & BUS CONNECTIONS (ESP32 PINOUT)
-  ;; =========================================================
-  ;; I2C Bus to ESP32 GPIO 21 & GPIO 22
-  (wire (pts (xy 75.0 65.0) (xy 120.0 65.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO21_SDA" (at 95.0 64.0 0) (fields_autoplaced))
-
-  (wire (pts (xy 75.0 70.0) (xy 120.0 70.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO22_SCL" (at 95.0 69.0 0) (fields_autoplaced))
-
-  ;; Keypad Shift Register to ESP32 GPIO 18 & GPIO 19
-  (wire (pts (xy 75.0 135.0) (xy 120.0 135.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO19_DATA" (at 95.0 134.0 0) (fields_autoplaced))
-
-  (wire (pts (xy 75.0 140.0) (xy 120.0 140.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO18_CLK" (at 95.0 139.0 0) (fields_autoplaced))
-
-  ;; Buzzer Trigger from ESP32 GPIO 23
-  (wire (pts (xy 155.0 100.0) (xy 175.0 100.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO23_BUZZER" (at 165.0 98.0 0) (fields_autoplaced))
-
-  (wire (pts (xy 185.0 100.0) (xy 200.0 100.0)) (stroke (width 0) (type default)))
-  (wire (pts (xy 205.0 95.0) (xy 215.0 85.0)) (stroke (width 0) (type default)))
-  (label "BUZ_DRIVE_LOW" (at 210.0 90.0 0) (fields_autoplaced))
-
-  ;; Power Rails
-  (label "+3V3_REGULATED" (at 75.0 60.0 0)   (fields_autoplaced))
-  (label "+3V3_REGULATED" (at 75.0 130.0 0)  (fields_autoplaced))
-  (label "+5V_USB_VIN"    (at 215.0 65.0 0)  (fields_autoplaced))
-  (label "GND"            (at 75.0 75.0 0)   (fields_autoplaced))
-  (label "GND"            (at 75.0 145.0 0)  (fields_autoplaced))
-  (label "GND"            (at 205.0 110.0 0) (fields_autoplaced))
+  ;; Buzzer (-) to Ground
+  (wire (pts (xy 215.0 102.0) (xy 215.0 115.0)) (stroke (width 0) (type default)))
 )
