@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1150 720" width="100%" height="100%" style="background:#0b1120; font-family:'Segoe UI',system-ui,sans-serif;">
+  <!-- Title Header -->
+  <text x="40" y="42" font-size="20" font-weight="bold" fill="#38bdf8" letter-spacing="1">PROJECT VERONICA — ESP32 DIRECT HARDWARE SCHEMATIC</text>
+  <text x="40" y="65" font-size="12" fill="#94a3b8">Tier 1: Podium Interface Pod | Direct GPIO Drive (No Transistors) | Shared Ground Return Loop</text>
+  <line x1="40" y1="80" x2="1110" y2="80" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- ================= COMMON SYSTEM GROUND BUS ================= -->
+  <rect x="50" y="620" width="1050" height="45" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+  <text x="440" y="648" font-size="14" font-weight="bold" fill="#38bdf8" letter-spacing="1">COMMON SYSTEM GROUND BUS (0V GND)</text>
+
+  <!-- ================= 3.3V POWER DISTRIBUTION RAIL ================= -->
+  <rect x="50" y="105" width="700" height="30" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="65" y="125" font-size="12" font-weight="bold" fill="#f59e0b">+3.3V REGULATED DC BUS (FROM ESP32 LDO)</text>
+
+  <!-- ================= ESP32 DEVKIT V1 BLOCK ================= -->
+  <rect x="420" y="170" width="310" height="410" rx="14" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+  <rect x="435" y="185" width="280" height="32" rx="6" fill="#1e3a8a" opacity="0.6"/>
+  <text x="480" y="207" font-size="14" font-weight="bold" fill="#e0f2fe">ESP32 DEVKIT V1 (30-PIN)</text>
+
+  <!-- ESP32 Power Pins -->
+  <circle cx="440" cy="245" r="5" fill="#f59e0b"/>
+  <text x="455" y="250" font-size="12" fill="#cbd5e1">Pin 30: 3V3 (Power Out)</text>
+  <line x1="440" y1="245" x2="440" y2="135" stroke="#f59e0b" stroke-width="2"/>
+
+  <!-- ESP32 I2C Pins -->
+  <circle cx="440" cy="295" r="5" fill="#38bdf8"/>
+  <text x="455" y="300" font-size="12" fill="#cbd5e1">Pin 20: GPIO 21 (I2C SDA)</text>
+
+  <circle cx="440" cy="340" r="5" fill="#38bdf8"/>
+  <text x="455" y="345" font-size="12" fill="#cbd5e1">Pin 17: GPIO 22 (I2C SCL)</text>
+
+  <!-- ESP32 Keypad Pins -->
+  <circle cx="440" cy="395" r="5" fill="#a855f7"/>
+  <text x="455" y="400" font-size="12" fill="#cbd5e1">Pin 22: GPIO 18 (Keypad SCL)</text>
+
+  <circle cx="440" cy="440" r="5" fill="#a855f7"/>
+  <text x="455" y="445" font-size="12" fill="#cbd5e1">Pin 21: GPIO 19 (Keypad SDO)</text>
+
+  <!-- ESP32 Buzzer Direct Pin -->
+  <circle cx="710" cy="320" r="5" fill="#10b981"/>
+  <text x="590" y="325" font-size="12" fill="#cbd5e1">Pin 16: GPIO 23 (+)</text>
+
+  <!-- ESP32 GND Pin -->
+  <circle cx="575" cy="565" r="5" fill="#64748b"/>
+  <text x="550" y="550" font-size="12" fill="#94a3b8">Pin 14: GND</text>
+  <line x1="575" y1="570" x2="575" y2="620" stroke="#64748b" stroke-width="3"/>
+
+  <!-- ================= MODULE 1: NXP PN532 NFC ================= -->
+  <rect x="60" y="170" width="260" height="175" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="80" y="198" font-size="13" font-weight="bold" fill="#38bdf8">PN532 NFC READER (I2C)</text>
+  <text x="80" y="225" font-size="11" fill="#cbd5e1">VCC  ── 3.3V Power</text>
+  <text x="80" y="250" font-size="11" fill="#cbd5e1">GND  ── System Ground</text>
+  <text x="80" y="275" font-size="11" fill="#cbd5e1">SDA  ── GPIO 21</text>
+  <text x="80" y="300" font-size="11" fill="#cbd5e1">SCL  ── GPIO 22</text>
+  <text x="80" y="325" font-size="10" fill="#facc15">DIP: SEL0=0, SEL1=1</text>
+
+  <!-- PN532 Wiring Lines -->
+  <line x1="180" y1="170" x2="180" y2="135" stroke="#f59e0b" stroke-width="2"/>
+  <path d="M 320 275 L 380 275 L 380 295 L 435 295" stroke="#38bdf8" stroke-width="2" fill="none"/>
+  <path d="M 320 300 L 370 300 L 370 340 L 435 340" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4" fill="none"/>
+  <line x1="190" y1="345" x2="190" y2="620" stroke="#64748b" stroke-width="2.5"/>
+
+  <!-- ================= MODULE 2: TTP229 CAPACITIVE KEYPAD ================= -->
+  <rect x="60" y="380" width="260" height="185" rx="10" fill="#1e293b" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="80" y="408" font-size="13" font-weight="bold" fill="#c084fc">TTP229 16-KEY MATRIX</text>
+  <text x="80" y="435" font-size="11" fill="#cbd5e1">VCC  ── 3.3V Power</text>
+  <text x="80" y="460" font-size="11" fill="#cbd5e1">GND  ── System Ground</text>
+  <text x="80" y="485" font-size="11" fill="#cbd5e1">SCL  ── GPIO 18 (Clock)</text>
+  <text x="80" y="510" font-size="11" fill="#cbd5e1">SDO  ── GPIO 19 (Data)</text>
+  <text x="80" y="535" font-size="10" fill="#facc15">P1 Pads 3 &amp; 7 Bridged</text>
+
+  <!-- TTP229 Wiring Lines -->
+  <path d="M 120 380 L 120 135" stroke="#f59e0b" stroke-width="2" fill="none"/>
+  <path d="M 320 485 L 380 485 L 380 395 L 435 395" stroke="#a855f7" stroke-width="2" fill="none"/>
+  <path d="M 320 510 L 390 510 L 390 440 L 435 440" stroke="#a855f7" stroke-width="2" stroke-dasharray="4" fill="none"/>
+  <line x1="220" y1="565" x2="220" y2="620" stroke="#64748b" stroke-width="2.5"/>
+
+  <!-- ================= MODULE 3: DIRECT PIEZO BUZZER ================= -->
+  <rect x="830" y="240" width="260" height="230" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="1.8"/>
+  <text x="850" y="270" font-size="13" font-weight="bold" fill="#34d399">ACTIVE PIEZO BUZZER (DIRECT)</text>
+
+  <circle cx="960" cy="340" r="28" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+  <text x="940" y="345" font-size="12" font-weight="bold" fill="#ffffff">BUZZER</text>
+
+  <text x="850" y="405" font-size="11" fill="#cbd5e1">(+) Positive ── Direct to GPIO 23</text>
+  <text x="850" y="430" font-size="11" fill="#cbd5e1">(-) Negative ── Direct to Ground</text>
+  <text x="850" y="455" font-size="10" fill="#34d399">Zero Transistors / Zero Resistors</text>
+
+  <!-- Buzzer Wiring Lines -->
+  <line x1="715" y1="320" x2="932" y2="320" stroke="#10b981" stroke-width="2.5"/>
+  <line x1="960" y1="368" x2="960" y2="620" stroke="#64748b" stroke-width="2.5"/>
+
+  <!-- Ground Connection Dots on the Bus -->
+  <circle cx="190" cy="620" r="5" fill="#38bdf8"/>
+  <circle cx="220" cy="620" r="5" fill="#38bdf8"/>
+  <circle cx="575" cy="620" r="5" fill="#38bdf8"/>
+  <circle cx="960" cy="620" r="5" fill="#38bdf8"/>
+</svg>
