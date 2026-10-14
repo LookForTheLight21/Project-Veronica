@@ -1,5 +1,5 @@
 // ========================================================
-// Project Veronica: Tier 1 ESP32 Lectern Desk Pod (v4.0 Final)
+// Project Veronica: Tier 1 ESP32 Lectern Desk Pod 
 // Application ID: VK26-AU-HCI-0072
 // Features: 15-deg Ergonomic Wedge, LCD2004 Bezel, TTP229 Matrix,
 //           Closed-Bottom Hotel CR80 Keycard Dock & Hidden PN532 Bay
