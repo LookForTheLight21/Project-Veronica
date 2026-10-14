@@ -1,0 +1,9 @@
+Subsystem / Component,Exact Part Number / Specification,Qty,Sourcing Channel (India),Lead Time,Unit Cost (INR),Total Cost (INR)
+"Edge Compute Unit (Tier 2)","Raspberry Pi 5 (8GB LPDDR4X) + Official Active Cooler",1,"Domestic (Robu.in / Silverline)","2-3 Days",8200,8200
+"Optical Capture Sensor","Kreo Owl 4K Pro Webcam (Sony IMX UVC, 3840x2160 @ 30fps)",1,"Domestic (Kreo / Amazon India)","2-3 Days",3800,3800
+"Podium Microcontroller (Tier 1)","ESP32-WROOM-32D DevKit V1 (30-Pin, 2.4GHz ESP-NOW)",1,"Local Electronics Market","1 Day",420,420
+"Contactless Auth & Cards","NXP PN532 NFC/RFID V3 Module (I2C) + 5x Mifare 13.56MHz Cards",1,"Local / Domestic (Robu.in)","1-2 Days",380,380
+"Tactile Matrix & Display","TTP229 16-Key Capacitive Touch Pad + LCD2004 I2C (20x4)",1,"Local / Domestic","1-2 Days",410,410
+"Power, UPS & Acoustic","Official 27W USB-C PD PSU (5.1V 5A) + 18650 Li-Ion UPS + 5V Piezo Buzzer",1,"Local / Domestic","2 Days",990,990
+"Mechanical Enclosures","3D Printed PETG/ASA Podium Wedge & Ceiling Hub + M2.5/M3/M4 Hardware",2,"Local 3D Print Service","2 Days",550,550
+"TOTAL PROTOTYPE BOM","100% Domestically Sourced Off-The-Shelf & 3D Printed Build",8,"All Components Verified in India","Max 3 Days",,14750
