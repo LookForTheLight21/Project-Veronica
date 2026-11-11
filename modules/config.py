@@ -31,9 +31,9 @@ WIFI_PASSWORD = "veronica_access"
 # ==============================================================================
 # 3. TELEGRAM BOT
 # ==============================================================================
-BOT_TOKEN     = "8365210789:AAFbiu9hyMDwTkvLNq7vOnGLDI7g9WT-BEg"
-CHAT_ID       = "1356709538"
-ALLOWED_USERS = ["1356709538"]
+BOT_TOKEN     = "put yours"
+CHAT_ID       = "enter the id detail"
+ALLOWED_USERS = ["enter the detail"]
 
 # ==============================================================================
 # 4. GOOGLE DRIVE (Dynamic token path at project root)
