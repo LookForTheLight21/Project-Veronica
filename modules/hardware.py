@@ -21,18 +21,21 @@ class BuzzerController:
     def __init__(self, pod_server=None):
         self.pod_server = pod_server
 
-    def beep(self, times=1, duration=0.15, gap=0.08):
+    def beep(self, times=1, duration=0.15, gap=0.08, freq=None):
         # Convert seconds to ms for microcontroller
         duration_ms = int(duration * 1000)
         gap_ms = int(gap * 1000)
+        import config
+        actual_freq = int(freq or getattr(config, "BUZZER_FREQ", 2000))
         if self.pod_server:
             self.pod_server.send_to_pod({
                 "cmd": "beep",
                 "times": times,
                 "duration": duration_ms,
-                "gap": gap_ms
+                "gap": gap_ms,
+                "freq": actual_freq
             })
-        print(f"🔊 [Acoustic Tone]: {times} beep(s)")
+        print(f"🔊 [Acoustic Tone]: {times} beep(s) @ {actual_freq}Hz")
 
 
 class PodReceiverServer:

@@ -1,0 +1,132 @@
+(kicad_sch (version 20231120) (generator "eeschema")
+
+  (uuid "d4837b21-4f18-42f1-8f55-1029c7865e10")
+
+  (paper "A4")
+
+  (title_block
+    (title "Project Veronica — ESP32 Podium Interface (Direct Drive)")
+    (date "2026-10-12")
+    (rev "v4.0")
+    (company "Project Veronica — Independent Student Build")
+    (comment 1 "Application ID: VK26-AU-HCI-0072")
+    (comment 2 "Direct GPIO Piezo Drive + Common Ground Bus")
+    (comment 3 "Verified Physical Hardware Match")
+  )
+
+  ;; =========================================================
+  ;; 1. ESP32 DEVKIT V1 (30-PIN MICROCONTROLLER)
+  ;; =========================================================
+  (symbol (lib_id "MCU_Module:ESP32-DevKit-V1") (at 140.0 100.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "e1029384-1111-4001-a001-998877665544")
+    (property "Reference" "U1" (at 140.0 65.0 0))
+    (property "Value" "ESP32_DevKit_V1_30Pin" (at 140.0 68.0 0))
+    (property "Footprint" "Module:ESP32-DevKit-V1" (at 140.0 60.0 0))
+    (property "Datasheet" "https://www.espressif.com" (at 140.0 55.0 0))
+    (property "Description" "ESP32 Dual-Core MCU with Native 2.4GHz Wi-Fi / ESP-NOW" (at 140.0 50.0 0))
+  )
+
+  ;; =========================================================
+  ;; 2. NXP PN532 NFC BOARD (I2C MODE)
+  ;; =========================================================
+  (symbol (lib_id "Sensor_RFID:PN532_Breakout") (at 60.0 70.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "e1029384-2222-4002-a002-998877665544")
+    (property "Reference" "U2" (at 60.0 52.0 0))
+    (property "Value" "PN532_NFC_Module" (at 60.0 55.0 0))
+    (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 48.0 0))
+    (property "Description" "NFC Reader: I2C Mode (SEL0=0, SEL1=1)" (at 60.0 45.0 0))
+  )
+
+  ;; =========================================================
+  ;; 3. TTP229 16-KEY CAPACITIVE KEYPAD
+  ;; =========================================================
+  (symbol (lib_id "Sensor_Touch:TTP229_Module") (at 60.0 135.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "e1029384-3333-4003-a003-998877665544")
+    (property "Reference" "U3" (at 60.0 118.0 0))
+    (property "Value" "TTP229_Capacitive_16Key" (at 60.0 121.0 0))
+    (property "Footprint" "Module:TTP229_Keypad" (at 60.0 114.0 0))
+    (property "Description" "16-Channel Touch Sensor (Bridged Pads 3 & 7)" (at 60.0 110.0 0))
+  )
+
+  ;; =========================================================
+  ;; 4. DIRECT PIEZO BUZZER (NO TRANSISTOR)
+  ;; =========================================================
+  (symbol (lib_id "Device:Buzzer") (at 215.0 95.0 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "e1029384-4444-4004-a004-998877665544")
+    (property "Reference" "BZ1" (at 215.0 80.0 0))
+    (property "Value" "Piezo_Buzzer_Direct" (at 215.0 83.0 0))
+    (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 76.0 0))
+    (property "Description" "Direct PWM Driven Active Piezo Element" (at 215.0 72.0 0))
+  )
+
+  ;; =========================================================
+  ;; POWER SYMBOLS: +3.3V BUS
+  ;; =========================================================
+  (symbol (lib_id "power:+3V3") (at 140.0 75.0 0) (unit 1)
+    (uuid "p1000000-0001-4000-8000-000000000001")
+    (property "Reference" "#PWR1" (at 140.0 78.0 0))
+    (property "Value" "+3V3" (at 140.0 72.0 0))
+  )
+  (symbol (lib_id "power:+3V3") (at 60.0 60.0 0) (unit 1)
+    (uuid "p1000000-0002-4000-8000-000000000002")
+    (property "Reference" "#PWR2" (at 60.0 63.0 0))
+    (property "Value" "+3V3" (at 60.0 57.0 0))
+  )
+  (symbol (lib_id "power:+3V3") (at 60.0 125.0 0) (unit 1)
+    (uuid "p1000000-0003-4000-8000-000000000003")
+    (property "Reference" "#PWR3" (at 60.0 128.0 0))
+    (property "Value" "+3V3" (at 60.0 122.0 0))
+  )
+
+  ;; =========================================================
+  ;; POWER SYMBOLS: COMMON GROUND RETURN (TIED CLOSED LOOP)
+  ;; =========================================================
+  (symbol (lib_id "power:GND") (at 140.0 135.0 0) (unit 1)
+    (uuid "g1000000-0001-4000-8000-000000000001")
+    (property "Reference" "#GND1" (at 140.0 138.0 0))
+    (property "Value" "GND" (at 140.0 142.0 0))
+  )
+  (symbol (lib_id "power:GND") (at 60.0 80.0 0) (unit 1)
+    (uuid "g1000000-0002-4000-8000-000000000002")
+    (property "Reference" "#GND2" (at 60.0 83.0 0))
+    (property "Value" "GND" (at 60.0 87.0 0))
+  )
+  (symbol (lib_id "power:GND") (at 60.0 145.0 0) (unit 1)
+    (uuid "g1000000-0003-4000-8000-000000000003")
+    (property "Reference" "#GND3" (at 60.0 148.0 0))
+    (property "Value" "GND" (at 60.0 152.0 0))
+  )
+  (symbol (lib_id "power:GND") (at 215.0 115.0 0) (unit 1)
+    (uuid "g1000000-0004-4000-8000-000000000004")
+    (property "Reference" "#GND4" (at 215.0 118.0 0))
+    (property "Value" "GND" (at 215.0 122.0 0))
+  )
+
+  ;; =========================================================
+  ;; SIGNAL BUS CONNECTIONS (WIRES & GLOBAL NET LABELS)
+  ;; =========================================================
+  ;; NXP PN532 I2C Bus to ESP32
+  (wire (pts (xy 75.0 68.0) (xy 120.0 68.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO21_SDA" (at 95.0 67.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 72.0) (xy 120.0 72.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO22_SCL" (at 95.0 71.0 0) (fields_autoplaced))
+
+  ;; TTP229 Shift Register to ESP32
+  (wire (pts (xy 75.0 133.0) (xy 120.0 133.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO19_DATA" (at 95.0 132.0 0) (fields_autoplaced))
+
+  (wire (pts (xy 75.0 137.0) (xy 120.0 137.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO18_CLK" (at 95.0 136.0 0) (fields_autoplaced))
+
+  ;; Direct Buzzer Trigger Line: ESP32 GPIO 23 to Buzzer (+)
+  (wire (pts (xy 160.0 95.0) (xy 205.0 95.0)) (stroke (width 0) (type default)))
+  (label "ESP32_GPIO23_BUZZER_POS" (at 180.0 94.0 0) (fields_autoplaced))
+
+  ;; Buzzer (-) to Ground
+  (wire (pts (xy 215.0 102.0) (xy 215.0 115.0)) (stroke (width 0) (type default)))
+)

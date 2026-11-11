@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Veronica — Classroom Projector Live View</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem('veronica_theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
+    <style>
+        :root {
+            --bg-void: #030712;
+            --surface-glass: rgba(15, 23, 42, 0.75);
+            --surface-border: rgba(255, 255, 255, 0.1);
+            --accent-cyan: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.35);
+            --accent-green: #4ade80;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        /* ☀️ DAY LIGHT MODE */
+        [data-theme="light"] {
+            --bg-void: #f4f6fa;
+            --surface-glass: rgba(255, 255, 255, 0.92);
+            --surface-border: rgba(0, 0, 0, 0.08);
+            --accent-cyan: #ff6b00; /* Signature High-Gloss Orange */
+            --accent-glow: rgba(255, 107, 0, 0.35);
+            --accent-green: #10b981;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+        }
+        [data-theme="light"] body {
+            background-color: #f4f6fa;
+        }
+        [data-theme="light"] .ambient-blur {
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.08) 0%, transparent 70%);
+        }
+        [data-theme="light"] .hud-badge {
+            box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.1), 0 0 15px -5px rgba(255, 107, 0, 0.25);
+            color: #0f172a;
+        }
+        [data-theme="light"] .tool-btn, [data-theme="light"] .back-link {
+            color: #0f172a;
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="light"] .bottom-hud {
+            box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.15);
+            color: #0f172a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-void);
+            color: var(--text-primary);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Ambient Glow behind projector stage */
+        .ambient-blur {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 70vh;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Top HUD Bar */
+        .projector-nav {
+            position: fixed;
+            top: 20px;
+            left: 24px;
+            right: 24px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .hud-badge {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface-glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--surface-border);
+            padding: 10px 20px;
+            border-radius: 9999px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8), 0 0 20px -5px var(--accent-glow);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hud-badge:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 14px var(--accent-green);
+            animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.25); }
+        }
+
+        .hud-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+        }
+
+        .hud-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.12);
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .hud-controls {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .tool-btn {
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--surface-border);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+
+        .tool-btn:hover {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-1px);
+        }
+
+        .tool-btn.active {
+            background: var(--accent-cyan);
+            color: #030712;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Stage Canvas / Board Display Area */
+        .stage-viewport {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            padding: 80px 24px 80px 24px;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .stage-viewport:active {
+            cursor: grabbing;
+        }
+
+        .board-container {
+            position: relative;
+            max-width: 96%;
+            max-height: 88vh;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.1);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+            background: #000;
+        }
+
+        .board-img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 86vh;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+
+        /* Filter variations */
+        .filter-invert {
+            filter: invert(1) hue-rotate(180deg) contrast(1.15) !important;
+        }
+
+        .filter-boost {
+            filter: contrast(1.4) brightness(1.1) saturate(1.2) !important;
+        }
+
+        .filter-invert.filter-boost {
+            filter: invert(1) hue-rotate(180deg) contrast(1.5) brightness(1.15) !important;
+        }
+
+        /* Bottom Floating Bar */
+        .bottom-hud {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--surface-glass);
+            backdrop-filter: blur(28px);
+            border: 1px solid var(--surface-border);
+            padding: 8px 18px;
+            border-radius: 9999px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+        }
+
+        .zoom-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+            outline: none;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.06);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-blur"></div>
+
+    <!-- Top HUD -->
+    <nav class="projector-nav">
+        <div class="hud-badge">
+            <div class="pulse-dot"></div>
+            <div>
+                <span class="hud-title" id="disp-subj">Physics II</span>
+                <span style="color:var(--text-secondary); margin: 0 6px;">·</span>
+                <span id="disp-page" style="font-weight: 500; font-size: 13px; color: var(--text-secondary);">Board Derivation [Page 3/5]</span>
+            </div>
+            <span class="hud-subtitle" id="disp-time">11:05 AM</span>
+        </div>
+
+        <div class="hud-controls">
+            <button class="tool-btn" id="theme-btn" onclick="toggleTheme()" style="color:#ff6b00; border-color:rgba(255,107,0,0.4); background:rgba(255,107,0,0.1);">
+                <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day Light Mode</span>
+            </button>
+            <button class="tool-btn" id="btn-contrast" onclick="toggleContrast()">
+                <span>⚡ High Contrast</span>
+            </button>
+            <button class="tool-btn" id="btn-invert" onclick="toggleInvert()">
+                <span>🌓 Invert Mode</span>
+            </button>
+            <button class="tool-btn" onclick="toggleFullscreen()">
+                <span>⛶ Fullscreen</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Projection Stage -->
+    <main class="stage-viewport" id="viewport">
+        <div class="board-container" id="board-container">
+            <img src="sample_board.svg" alt="Live Chalkboard Capture" class="board-img" id="board-img">
+        </div>
+    </main>
+
+    <!-- Bottom HUD Controls -->
+    <footer class="bottom-hud">
+        <a href="index.html" class="back-link">
+            <span>← Dashboard</span>
+        </a>
+        <div style="width: 1px; height: 18px; background: rgba(255,255,255,0.1);"></div>
+        <div class="zoom-slider-wrap">
+            <span>Zoom</span>
+            <input type="range" min="100" max="250" value="100" class="zoom-slider" id="zoom-slider" oninput="applyZoom(this.value)">
+            <span id="zoom-val" style="font-family:'JetBrains Mono', monospace; width:44px; color:var(--text-primary);">100%</span>
+        </div>
+        <div style="width: 1px; height: 18px; background: rgba(255,255,255,0.1);"></div>
+        <button class="tool-btn" style="padding: 6px 12px; font-size: 12px;" onclick="resetView()">
+            <span>↺ Reset</span>
+        </button>
+    </footer>
+
+    <script>
+        let currentZoom = 100;
+        let isContrast = false;
+        let isInvert = false;
+
+        function applyZoom(val) {
+            currentZoom = val;
+            document.getElementById('zoom-val').innerText = val + '%';
+            document.getElementById('board-container').style.transform = `scale(${val / 100})`;
+        }
+
+        function resetView() {
+            document.getElementById('zoom-slider').value = 100;
+            applyZoom(100);
+        }
+
+        function toggleContrast() {
+            isContrast = !isContrast;
+            document.getElementById('btn-contrast').classList.toggle('active', isContrast);
+            updateFilters();
+        }
+
+        function toggleInvert() {
+            isInvert = !isInvert;
+            document.getElementById('btn-invert').classList.toggle('active', isInvert);
+            updateFilters();
+        }
+
+        function updateFilters() {
+            const img = document.getElementById('board-img');
+            img.className = 'board-img' + 
+                (isInvert ? ' filter-invert' : '') + 
+                (isContrast ? ' filter-boost' : '');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        // Live Telemetry Sync (Connects when running against Veronica backend)
+        function pollVeronicaTelemetry() {
+            fetch('/api/latest_asset')
+            .then(res => res.json())
+            .then(data => {
+                if (data.subject) document.getElementById('disp-subj').innerText = data.subject;
+                if (data.session_pages) {
+                    document.getElementById('disp-page').innerText = `Board Derivation [Page ${data.session_pages}]`;
+                }
+                if (data.latest_photo_url) {
+                    const img = document.getElementById('board-img');
+                    if (!img.src.includes(data.latest_photo_url)) {
+                        img.src = data.latest_photo_url + '?t=' + Date.now();
+                    }
+                }
+            })
+            .catch(() => {});
+        }
+
+        setInterval(pollVeronicaTelemetry, 2500);
+
+        // Update clock in corner
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('disp-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ☀️ THEME ENGINE
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('veronica_theme', 'dark');
+                updateThemeButton(false);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('veronica_theme', 'light');
+                updateThemeButton(true);
+            }
+        }
+
+        function updateThemeButton(isLight) {
+            const icon = document.getElementById('theme-btn-icon');
+            const text = document.getElementById('theme-btn-text');
+            if (icon && text) {
+                icon.innerText = isLight ? '🌙' : '☀️';
+                text.innerText = isLight ? 'Night' : 'Day';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLight = localStorage.getItem('veronica_theme') === 'light';
+            updateThemeButton(isLight);
+        });
+    </script>
+</body>
+</html>

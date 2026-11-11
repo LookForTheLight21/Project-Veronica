@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="chalkGlow" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1c2826" />
+      <stop offset="100%" stop-color="#0f1715" />
+    </radialGradient>
+    <filter id="chalkTexture">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+
+  <!-- Blackboard Slate -->
+  <rect width="1920" height="1080" fill="url(#chalkGlow)"/>
+  
+  <!-- Subtle Grid Lines (faint chalk) -->
+  <g stroke="rgba(255,255,255,0.03)" stroke-width="1">
+    <line x1="0" y1="180" x2="1920" y2="180" />
+    <line x1="0" y1="360" x2="1920" y2="360" />
+    <line x1="0" y1="540" x2="1920" y2="540" />
+    <line x1="0" y1="720" x2="1920" y2="720" />
+    <line x1="0" y1="900" x2="1920" y2="900" />
+    <line x1="480" y1="0" x2="480" y2="1080" />
+    <line x1="960" y1="0" x2="960" y2="1080" />
+    <line x1="1440" y1="0" x2="1440" y2="1080" />
+  </g>
+
+  <!-- Chalk Dust Stains -->
+  <ellipse cx="600" cy="400" rx="350" ry="180" fill="rgba(255,255,255,0.015)" filter="blur(40px)"/>
+  <ellipse cx="1400" cy="700" rx="450" ry="220" fill="rgba(255,255,255,0.02)" filter="blur(50px)"/>
+
+  <!-- Lecture Header in Chalk Yellow -->
+  <text x="80" y="100" font-family="'Courier New', monospace" font-size="34" font-weight="bold" fill="#fde68a" letter-spacing="2">
+    PHYSICS II: MAXWELL'S EQUATIONS &amp; ELECTROMAGNETIC WAVES
+  </text>
+  <text x="80" y="140" font-family="'Courier New', monospace" font-size="20" fill="#94a3b8">
+    Lecture 14 — Derivation of Wave Equation in Free Space (Page 3 of 5)
+  </text>
+
+  <!-- Chalk Derivations (White Chalk with slight jitter) -->
+  <g font-family="'Comic Sans MS', 'Chalkboard', 'Bradley Hand', 'Segoe Script', cursive, monospace" fill="#f8fafc" opacity="0.92">
+    
+    <!-- Step 1: Differential Forms -->
+    <text x="80" y="240" font-size="28" fill="#67e8f9">1. Fundamental Laws in Vacuum (ρ = 0, J = 0):</text>
+    
+    <text x="120" y="300" font-size="32">∇ · E = 0</text>
+    <text x="500" y="300" font-size="24" fill="#94a3b8">... (Gauss's Law)</text>
+
+    <text x="120" y="370" font-size="32">∇ · B = 0</text>
+    <text x="500" y="370" font-size="24" fill="#94a3b8">... (No Magnetic Monopoles)</text>
+
+    <text x="120" y="440" font-size="32">∇ × E = - ∂B / ∂t</text>
+    <text x="500" y="440" font-size="24" fill="#94a3b8">... (Faraday's Induction)</text>
+
+    <text x="120" y="510" font-size="32">∇ × B = μ₀ ε₀ (∂E / ∂t)</text>
+    <text x="500" y="510" font-size="24" fill="#94a3b8">... (Ampère-Maxwell Law)</text>
+
+    <!-- Step 2: Curl of Curl Vector Identity -->
+    <text x="80" y="610" font-size="28" fill="#67e8f9">2. Vector Identity for Curl of Curl:</text>
+    <text x="120" y="670" font-size="32">∇ × (∇ × E) = ∇(∇ · E) - ∇²E</text>
+
+    <!-- Boxed Result -->
+    <rect x="80" y="740" width="820" height="240" fill="none" stroke="#fef08a" stroke-width="4" stroke-dasharray="8,6" rx="8"/>
+    <text x="110" y="800" font-size="26" fill="#fde68a">Since ∇ · E = 0:</text>
+    <text x="110" y="860" font-size="38" font-weight="bold" fill="#ffffff">∇²E - μ₀ ε₀ (∂²E / ∂t²) = 0</text>
+    <text x="110" y="930" font-size="28" fill="#a7f3d0">➔ Wave propagation velocity: c = 1 / √(μ₀ ε₀) ≈ 3 × 10⁸ m/s</text>
+
+    <!-- Right Side: Wave Diagram -->
+    <text x="1050" y="240" font-size="28" fill="#67e8f9">3. Orthogonal Wave Oscillations (E ⊥ B ⊥ k):</text>
+    
+    <!-- Coordinate Axis in chalk -->
+    <line x1="1100" y1="520" x2="1800" y2="520" stroke="#ffffff" stroke-width="3" />
+    <polygon points="1810,520 1795,510 1795,530" fill="#ffffff" />
+    <text x="1820" y="530" font-size="26">z (Propagation direction)</text>
+
+    <line x1="1100" y1="520" x2="1100" y2="280" stroke="#38bdf8" stroke-width="3" />
+    <polygon points="1100,270 1090,285 1110,285" fill="#38bdf8" />
+    <text x="1060" y="270" font-size="26" fill="#38bdf8">E (x-axis)</text>
+
+    <line x1="1100" y1="520" x2="960" y2="650" stroke="#f472b6" stroke-width="3" />
+    <polygon points="950,660 955,645 970,655" fill="#f472b6" />
+    <text x="920" y="680" font-size="26" fill="#f472b6">B (y-axis)</text>
+
+    <!-- Transverse E-wave curve -->
+    <path d="M 1100,520 Q 1180,360 1260,520 T 1420,520 T 1580,520 T 1740,520" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    
+    <!-- Transverse B-wave curve -->
+    <path d="M 1100,520 Q 1160,570 1260,520 T 1420,520 T 1580,520 T 1740,520" fill="none" stroke="#f472b6" stroke-width="4" stroke-dasharray="6,4"/>
+
+    <!-- Annotations -->
+    <text x="1220" y="380" font-size="22" fill="#38bdf8">Electric Field E(z,t)</text>
+    <text x="1220" y="600" font-size="22" fill="#f472b6">Magnetic Field B(z,t)</text>
+
+    <!-- Teacher Timestamp & Chalk Signature -->
+    <text x="1500" y="990" font-size="20" fill="#94a3b8">Prof. Sharma · Dept of Applied Physics</text>
+    <text x="1500" y="1020" font-size="18" fill="#64748b">Snapped by Veronica Overhead Hub (Kreo 4K)</text>
+  </g>
+</svg>

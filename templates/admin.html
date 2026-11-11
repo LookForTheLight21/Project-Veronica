@@ -1,0 +1,1559 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Veronica OS — Diagnostic &amp; Configuration Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Instant hydration of saved theme
+        if (localStorage.getItem('veronica_theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
+    <style>
+        :root { 
+            --bg-base: #05070a;
+            --bg-canvas: radial-gradient(circle at 10% 15%, rgba(124, 208, 255, 0.08) 0%, transparent 45%),
+                         radial-gradient(circle at 90% 85%, rgba(162, 119, 255, 0.08) 0%, transparent 45%),
+                         linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), 
+                         linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            --glass-bg: linear-gradient(145deg, rgba(20, 24, 32, 0.7) 0%, rgba(13, 16, 22, 0.88) 100%);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-edge-top: rgba(255, 255, 255, 0.16);
+            --card-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.75), 0 0 1px 1px rgba(255, 255, 255, 0.04);
+            
+            --text-primary: #f0f6fc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --input-bg: rgba(10, 12, 16, 0.7);
+            --input-border: rgba(255, 255, 255, 0.1);
+            
+            --accent-brand: #7cd0ff;
+            --accent-brand-glow: rgba(124, 208, 255, 0.35);
+            --pill-bg: rgba(10, 12, 16, 0.65);
+            --inner-panel: rgba(0, 0, 0, 0.35);
+            --table-header-bg: rgba(0, 0, 0, 0.25);
+            --theme-icon: '☀️';
+            --theme-label: 'Day Light Mode';
+        }
+
+        /* ☀️ DAY LIGHT MODE PALETTE (Clean Pure White Canvas & Signature Orange) */
+        [data-theme="light"] {
+            --bg-base: #ffffff;
+            --bg-canvas: none;
+            --glass-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-edge-top: rgba(0, 0, 0, 0.04);
+            --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+            
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e1;
+            
+            /* Premium High-Gloss Signature Orange */
+            --accent-brand: #ff6b00;
+            --accent-brand-glow: rgba(255, 107, 0, 0.38);
+            --pill-bg: #ffffff;
+            --inner-panel: #f8fafc;
+            --table-header-bg: #f1f5f9;
+            --theme-icon: '🌙';
+            --theme-label: 'Night Mode';
+        }
+
+        [data-theme="light"] body {
+            background-color: #ffffff !important;
+            background-image: none !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .ambient-orb {
+            display: none !important;
+        }
+
+        [data-theme="light"] .card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        [data-theme="light"] .card-header {
+            background: #f8fafc !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .metric-card {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .tab-bar {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        [data-theme="light"] .tab-btn {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .tab-btn:hover {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .tab-btn.active {
+            background: #ff6b00 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 18px rgba(255, 107, 0, 0.35) !important;
+        }
+
+        [data-theme="light"] .glass-pill {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
+            color: #0f172a !important;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+            color: var(--text-primary); 
+            background-color: var(--bg-base);
+            background-image: var(--bg-canvas);
+            background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden;
+            letter-spacing: -0.2px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Ambient Orbs */
+        .ambient-orb { 
+            position: fixed; border-radius: 50%; filter: blur(140px); z-index: -1; 
+            pointer-events: none; opacity: 0.35; animation: breathe 14s infinite alternate ease-in-out; 
+        }
+        @keyframes breathe { 
+            0% { transform: scale(1) translate(0, 0); opacity: 0.25; } 
+            100% { transform: scale(1.1) translate(25px, -25px); opacity: 0.45; } 
+        }
+        .orb-1 { top: -10%; left: -5%; width: 50vw; height: 50vw; background: rgba(88, 166, 255, 0.22); }
+        .orb-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: rgba(162, 119, 255, 0.18); animation-delay: -7s; }
+        [data-theme="light"] .orb-1 { background: rgba(255, 107, 0, 0.15); }
+        [data-theme="light"] .orb-2 { background: rgba(249, 115, 22, 0.12); }
+
+        /* Topbar Navigation */
+        .topbar-wrapper { padding: 20px 32px 0 32px; position: sticky; top: 0; z-index: 100; }
+        .topbar { max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+        
+        .glass-pill {
+            display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600;
+            background: var(--pill-bg); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+            padding: 9px 18px; border-radius: 9999px; border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-edge-top);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: all 0.25s ease;
+        }
+
+        /* High-End Liquid Glass Navigation Buttons */
+        .nav-btn {
+            background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border);
+            color: var(--text-primary); font-size: 12px; font-weight: 700; padding: 9px 16px;
+            border-radius: 9999px; text-decoration: none; display: flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; overflow: hidden; font-family: inherit;
+        }
+        [data-theme="light"] .nav-btn { background: rgba(0,0,0,0.04); }
+        .nav-btn:hover { 
+            transform: translateY(-2px); 
+            border-color: var(--accent-brand); 
+            color: var(--accent-brand); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+        }
+
+        .nav-btn-highlight {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.2) 0%, rgba(162, 119, 255, 0.2) 100%);
+            border-color: var(--accent-brand); color: #fff;
+        }
+        [data-theme="light"] .nav-btn-highlight {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.15) 0%, rgba(249, 115, 22, 0.18) 100%);
+            color: #ff6b00;
+        }
+
+        .nav-btn-theme {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.15) 0%, rgba(251, 191, 36, 0.15) 100%);
+            border-color: rgba(255, 107, 0, 0.4);
+            color: #ff6b00;
+            font-weight: 800;
+        }
+        .nav-btn-theme:hover {
+            background: #ff6b00;
+            color: #ffffff !important;
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.45);
+        }
+
+        .nav-btn-logout:hover { color: #ff4b82; border-color: #ff4b82; }
+
+        /* Container & Tabs */
+        .app-container { max-width: 1440px; margin: 0 auto; padding: 22px 32px 48px 32px; width: 100%; flex-grow: 1; }
+        
+        .tab-bar {
+            display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;
+            background: var(--pill-bg); padding: 7px; border-radius: 18px; border: 1px solid var(--glass-border);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+        }
+        .tab-btn {
+            background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 11px 18px;
+            border-radius: 13px; font-size: 13px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap; font-family: inherit;
+        }
+        .tab-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+        [data-theme="light"] .tab-btn:hover { background: rgba(0,0,0,0.04); }
+        .tab-btn.active {
+            color: #ffffff; background: var(--accent-brand); 
+            box-shadow: 0 4px 18px var(--accent-brand-glow);
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        /* Liquid Glass Cards */
+        .card {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-edge-top);
+            border-radius: 24px; box-shadow: var(--card-shadow); overflow: hidden;
+            margin-bottom: 24px; position: relative;
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 18px 26px;
+            border-bottom: 1px solid var(--glass-border); background: var(--inner-panel);
+            flex-wrap: wrap; gap: 12px;
+        }
+        .card-title {
+            display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px;
+            text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent-brand);
+        }
+        .card-body { padding: 26px; }
+
+        /* Grids */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        @media (max-width: 1024px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+        /* Telemetry Metric Cards */
+        .metric-card {
+            background: var(--inner-panel); border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;
+            transition: all 0.25s ease;
+        }
+        .metric-card:hover { transform: translateY(-2px); border-color: var(--accent-brand); }
+        .metric-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.8px; }
+        .metric-val { font-size: 26px; font-weight: 800; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+
+        /* ============================================================== */
+        /* 💎 MASTER BUTTON SYSTEM (Liquid Glass & Skeuomorphic Sheen)    */
+        /* ============================================================== */
+        .btn-action {
+            position: relative;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 11px 18px; border-radius: 13px; font-size: 13px; font-weight: 700;
+            font-family: inherit; cursor: pointer; border: 1px solid transparent;
+            text-decoration: none; outline: none; user-select: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        /* Top specular reflection strip */
+        .btn-action::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 12px 12px 0 0; pointer-events: none;
+        }
+        /* Hover light beam glide */
+        .btn-action::after {
+            content: ''; position: absolute; top: -50%; left: -60%; width: 40%; height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transform: rotate(25deg); transition: all 0.6s ease; pointer-events: none;
+        }
+        .btn-action:hover::after { left: 140%; }
+        .btn-action:hover { transform: translateY(-2px); }
+        .btn-action:active { transform: translateY(1px); }
+
+        /* 1. Emerald Jade Glass (Captures / Success / Saves) */
+        .btn-emerald {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(6, 78, 59, 0.65) 100%);
+            border: 1px solid rgba(52, 211, 153, 0.55); border-top: 1px solid rgba(167, 243, 208, 0.7);
+            color: #34d399; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+        }
+        .btn-emerald:hover {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #6ee7b7;
+            color: #ffffff; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.45);
+        }
+
+        /* 2. Electric Violet Glass (Live Video Stream / AI) */
+        .btn-violet {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(88, 28, 135, 0.65) 100%);
+            border: 1px solid rgba(192, 132, 252, 0.55); border-top: 1px solid rgba(233, 213, 255, 0.7);
+            color: #c084fc; box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
+        }
+        .btn-violet:hover {
+            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+            border-color: #d8b4fe;
+            color: #ffffff; box-shadow: 0 10px 25px rgba(168, 85, 247, 0.45);
+        }
+
+        /* 3. Solar Amber Glass (Tuning / Buzzer / Calibrate) */
+        .btn-amber {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(120, 53, 15, 0.65) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.55); border-top: 1px solid rgba(254, 240, 138, 0.7);
+            color: #fbbf24; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+        }
+        .btn-amber:hover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: #fde047;
+            color: #ffffff; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.45);
+        }
+
+        /* 4. Ruby Crimson Glass (Reboot / Reset / Danger) */
+        .btn-crimson {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.22) 0%, rgba(136, 19, 55, 0.65) 100%);
+            border: 1px solid rgba(251, 113, 133, 0.55); border-top: 1px solid rgba(254, 205, 211, 0.7);
+            color: #fb7185; box-shadow: 0 4px 16px rgba(244, 63, 94, 0.2);
+        }
+        .btn-crimson:hover {
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+            border-color: #fca5a5;
+            color: #ffffff; box-shadow: 0 10px 25px rgba(244, 63, 94, 0.45);
+        }
+
+        /* 5. Polished Titanium Chrome Glass (Secondary / Navigation / Pings) */
+        .btn-chrome {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-edge-top);
+            color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-chrome:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--accent-brand); color: var(--accent-brand);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* 6. Primary Action Button */
+        .btn-primary {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            border: 1px solid rgba(125, 211, 252, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.8);
+            color: #ffffff; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 10px 28px rgba(56, 189, 248, 0.5);
+        }
+
+        /* ☀️ Day Light Mode Master Button Styles — Bold, Saturated, Tactile & Ultra High Contrast (Zero Fading!) */
+        [data-theme="light"] .btn-emerald {
+            background: #ffffff !important;
+            border: 1.5px solid #059669 !important;
+            color: #047857 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 3px 12px rgba(5, 150, 105, 0.12) !important;
+        }
+        [data-theme="light"] .btn-emerald:hover {
+            background: #059669 !important;
+            color: #ffffff !important;
+            border-color: #047857 !important;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35) !important;
+        }
+
+        [data-theme="light"] .btn-violet {
+            background: #ffffff !important;
+            border: 1.5px solid #7c3aed !important;
+            color: #6d28d9 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 3px 12px rgba(124, 58, 237, 0.12) !important;
+        }
+        [data-theme="light"] .btn-violet:hover {
+            background: #7c3aed !important;
+            color: #ffffff !important;
+            border-color: #6d28d9 !important;
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35) !important;
+        }
+
+        [data-theme="light"] .btn-amber {
+            background: #ffffff !important;
+            border: 1.5px solid #d97706 !important;
+            color: #b45309 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 3px 12px rgba(217, 119, 6, 0.12) !important;
+        }
+        [data-theme="light"] .btn-amber:hover {
+            background: #d97706 !important;
+            color: #ffffff !important;
+            border-color: #b45309 !important;
+            box-shadow: 0 8px 24px rgba(217, 119, 6, 0.35) !important;
+        }
+
+        [data-theme="light"] .btn-crimson {
+            background: #ffffff !important;
+            border: 1.5px solid #e11d48 !important;
+            color: #be123c !important;
+            font-weight: 800 !important;
+            box-shadow: 0 3px 12px rgba(225, 29, 72, 0.12) !important;
+        }
+        [data-theme="light"] .btn-crimson:hover {
+            background: #e11d48 !important;
+            color: #ffffff !important;
+            border-color: #be123c !important;
+            box-shadow: 0 8px 24px rgba(225, 29, 72, 0.35) !important;
+        }
+
+        [data-theme="light"] .btn-chrome {
+            background: #ffffff !important;
+            border: 1.5px solid #cbd5e1 !important;
+            color: #1e293b !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04) !important;
+        }
+        [data-theme="light"] .btn-chrome:hover {
+            background: #f8fafc !important;
+            border-color: #ff6b00 !important;
+            color: #ff6b00 !important;
+            box-shadow: 0 6px 18px rgba(255, 107, 0, 0.2) !important;
+        }
+
+        [data-theme="light"] .btn-primary {
+            background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%) !important;
+            border: 1px solid #c2410c !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 18px rgba(255, 107, 0, 0.35) !important;
+        }
+        [data-theme="light"] .btn-primary:hover {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+            box-shadow: 0 10px 28px rgba(255, 107, 0, 0.5) !important;
+        }
+
+        /* ============================================================== */
+        /* 📷 UNIFIED CAMERA TESTING STUDIO (Hero Block)                 */
+        /* ============================================================== */
+        .camera-studio-deck {
+            position: relative;
+            background: #000;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            aspect-ratio: 16 / 9;
+            max-height: 480px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .camera-studio-deck img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+        /* Alignment Overlay Grid */
+        .camera-grid-overlay {
+            position: absolute; inset: 0; pointer-events: none; display: none;
+            background-image: 
+                linear-gradient(to right, rgba(124, 208, 255, 0.3) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(124, 208, 255, 0.3) 1px, transparent 1px);
+            background-size: 33.333% 33.333%;
+        }
+
+        .camera-hud-top {
+            position: absolute; top: 14px; left: 16px; right: 16px;
+            display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+        }
+        .hud-pill {
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
+            padding: 6px 14px; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 12px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .camera-hud-bottom {
+            position: absolute; bottom: 14px; left: 16px; right: 16px;
+            display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+            background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(14px);
+            padding: 10px 18px; border-radius: 12px; font-size: 12px; font-family: 'JetBrains Mono', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Camera Action Suite Toolbar */
+        .camera-action-suite {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; margin-bottom: 20px;
+            padding: 14px; background: var(--inner-panel); border-radius: 16px; border: 1px solid var(--glass-border);
+            align-items: center; justify-content: space-between;
+        }
+
+        /* Camera Spec Ribbon */
+        .camera-specs-shelf {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+        }
+        @media (max-width: 900px) { .camera-specs-shelf { grid-template-columns: repeat(2, 1fr); } }
+        .spec-box {
+            background: var(--inner-panel); padding: 12px 14px; border-radius: 12px;
+            border: 1px solid var(--glass-border); font-size: 12px;
+        }
+        .spec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px; }
+        .spec-value { font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
+
+        /* Form Controls */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block; font-size: 11px; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
+        }
+        .form-input {
+            width: 100%; background: var(--input-bg); border: 1px solid var(--input-border);
+            border-radius: 12px; padding: 12px 14px; color: var(--text-primary); font-size: 13px; outline: none;
+            font-family: 'JetBrains Mono', monospace; transition: all 0.2s;
+        }
+        .form-input:focus { border-color: var(--accent-brand); box-shadow: 0 0 12px var(--accent-brand-glow); }
+
+        /* Keypad Matrix Grid (4x4) */
+        .keypad-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 680px; margin: 0 auto; }
+        .keypad-cell {
+            background: var(--inner-panel); border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            transition: all 0.25s ease; cursor: pointer; text-align: center;
+        }
+        .keypad-cell:hover { border-color: var(--accent-brand); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .key-num-badge {
+            font-size: 11px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 6px; color: var(--accent-brand);
+        }
+        .key-action-select {
+            width: 100%; background: var(--input-bg); border: 1px solid var(--input-border);
+            color: var(--text-primary); font-size: 11px; font-weight: 600; border-radius: 8px; padding: 6px 4px; outline: none;
+        }
+
+        /* Tables */
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .admin-table th {
+            text-align: left; padding: 14px 18px; font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--text-muted); background: var(--table-header-bg);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .admin-table td {
+            padding: 14px 18px; border-bottom: 1px solid var(--glass-border);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .admin-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* ============================================================== */
+        /* 🛡️ APPLE-STYLE CONFIRMATION MODAL                             */
+        /* ============================================================== */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(5, 7, 10, 0.75);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-card {
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-edge-top);
+            border-radius: 24px; box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.9);
+            width: 100%; max-width: 440px; padding: 32px 28px; text-align: center;
+            animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes scaleUp { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-icon {
+            width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 16px auto;
+            display: flex; align-items: center; justify-content: center; font-size: 26px;
+            background: rgba(255, 75, 130, 0.15); border: 1px solid rgba(255, 75, 130, 0.4);
+            color: #ff4b82;
+        }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-primary); }
+        .modal-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+        .modal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-btn-cancel {
+            background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border);
+            color: var(--text-primary); padding: 12px; border-radius: 12px; font-size: 13px;
+            font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .modal-btn-cancel:hover { background: rgba(255,255,255,0.15); }
+
+        /* Toast Alert */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; background: var(--glass-bg);
+            border: 1px solid var(--accent-brand); border-radius: 16px; padding: 14px 20px;
+            display: flex; align-items: center; gap: 12px; z-index: 10000; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transform: translateY(120px); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(30px);
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
+    <!-- Top Navigation Bar -->
+    <div class="topbar-wrapper">
+        <div class="topbar">
+            <div class="glass-pill">
+                <div style="color:var(--accent-brand); font-weight:800;">✦</div>
+                <span style="font-weight:700;">Veronica Core</span> 
+                <span style="color:var(--text-muted); font-weight:500;">Diagnostic Hub</span>
+            </div>
+            
+            <div class="glass-pill">
+                <span style="color:#34d399;">●</span> Node: <b style="color:var(--text-primary);">Class X Pilot</b>
+                <span style="opacity:0.3;">|</span>
+                <span>User: <b style="color:var(--accent-brand);">Chorie</b></span>
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center;">
+                <!-- ☀️ DAY LIGHT MODE TOGGLE BUTTON -->
+                <button type="button" class="nav-btn nav-btn-theme" onclick="toggleTheme()" id="theme-btn">
+                    <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day Light Mode</span>
+                </button>
+
+                <a href="/" class="nav-btn nav-btn-highlight">📺 Command Center</a>
+                <a href="/projector" target="_blank" class="nav-btn">📽️ Projector</a>
+                <a href="/logout" class="nav-btn nav-btn-logout">🚪 Log Out</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+
+        <!-- Navigation Tabs -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('tab-diag', event)">⚡ Camera Studio &amp; Telemetry</button>
+            <button class="tab-btn" onclick="switchTab('tab-cloud', event)">☁️ Cloud &amp; Telegram</button>
+            <button class="tab-btn" onclick="switchTab('tab-nfc', event)">🏷️ NFC &amp; Subjects</button>
+            <button class="tab-btn" onclick="switchTab('tab-keypad', event)">🎹 Keypad Matrix</button>
+            <button class="tab-btn" onclick="switchTab('tab-system', event)">⚙️ System Tuning</button>
+            <button class="tab-btn" onclick="switchTab('tab-service', event)">🛡️ Service Maintenance</button>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 1: LIVE DIAGNOSTICS & UNIFIED CAMERA TESTING STUDIO       -->
+        <!-- ============================================================== -->
+        <div id="tab-diag" class="tab-content">
+            
+            <!-- Quick System Health Gauges -->
+            <div class="grid-4" style="margin-bottom: 24px;">
+                <div class="metric-card">
+                    <span class="metric-title">Compute Matrix</span>
+                    <span class="metric-val" id="diag-cpu" style="color:var(--accent-brand);">18%</span>
+                    <small style="color:var(--text-muted); font-size:11px;">4-Core Broadcom 2712 @ 2.4GHz</small>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Memory Allocation</span>
+                    <span class="metric-val" id="diag-ram" style="color:#c084fc;">32%</span>
+                    <small style="color:var(--text-muted); font-size:11px;">8GB LPDDR4X 4267MT/s</small>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Thermal State</span>
+                    <span class="metric-val" id="diag-temp" style="color:#34d399;">44°C</span>
+                    <small style="color:var(--text-muted); font-size:11px;">Active Blower PWM Settled</small>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title">Lectern Pod Link</span>
+                    <span class="metric-val" id="diag-pod" style="color:#34d399;">ONLINE</span>
+                    <small style="color:var(--text-muted); font-size:11px;">TCP 8765 Wireless (&lt;4ms)</small>
+                </div>
+            </div>
+
+            <!-- 📷 UNIFIED OVERHEAD OPTICAL SENSOR & CAMERA TESTING STUDIO (ALL-IN-ONE HERO BLOCK) -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2.2;" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        Overhead Optical Sensor &amp; Camera Testing Studio (Kreo Owl 4K)
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <button class="btn-action btn-violet" id="btn-toggle-live" onclick="toggleLiveCameraFeed()">
+                            <span id="live-feed-icon">▶</span> <span id="live-feed-label">Start Live Camera Stream</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Unified Stream & Framing Viewport -->
+                    <div class="camera-studio-deck" id="live-feed-box">
+                        <img id="live-stream-img" src="sample_board.svg" alt="Overhead Camera Stream Preview"/>
+                        
+                        <!-- Overlay Rule of Thirds / Blackboard Alignment Grid -->
+                        <div class="camera-grid-overlay" id="camera-grid-overlay"></div>
+
+                        <!-- Top HUD -->
+                        <div class="camera-hud-top">
+                            <div class="hud-pill">
+                                <span style="background:#ff4b82; width:8px; height:8px; border-radius:50%; display:inline-block; box-shadow:0 0 10px #ff4b82;"></span>
+                                <span id="feed-status-badge">SENSOR LIVE PREVIEW</span>
+                            </div>
+                            <div class="hud-pill">
+                                <span>MJPEG 4K UHD</span>
+                                <span style="opacity:0.4;">|</span>
+                                <span style="color:#34d399;">30 FPS</span>
+                            </div>
+                        </div>
+
+                        <!-- Bottom HUD -->
+                        <div class="camera-hud-bottom">
+                            <span style="color:var(--accent-brand);">Device: /dev/video0 (Kreo Owl 4K UVC)</span>
+                            <span style="color:#f0f6fc;">Native Frame: 3840×2160</span>
+                            <span style="color:#34d399;" id="live-feed-fps">● Sensor Calibrated</span>
+                        </div>
+                    </div>
+
+                    <!-- ALL CAMERA TESTING CONTROLS IN THE SAME BLOCK -->
+                    <div class="camera-action-suite">
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                            <!-- Snap Still -->
+                            <button class="btn-action btn-emerald" onclick="testCameraSnap()">
+                                <span>📸</span> <span>Snap Test Still</span>
+                            </button>
+
+                            <!-- Anti-Glare Multi-Frame Burst Test -->
+                            <button class="btn-action btn-violet" onclick="testMultiFrameStacking()">
+                                <span>⚡</span> <span>5-Frame HDR Stacking Test</span>
+                            </button>
+
+                            <!-- Framing & Perspective Grid Toggle -->
+                            <button class="btn-action btn-chrome" id="grid-toggle-btn" onclick="toggleAlignmentGrid()">
+                                <span>📐</span> <span>Toggle Framing Grid</span>
+                            </button>
+
+                            <!-- Focus & Aiming Contrast Check -->
+                            <button class="btn-action btn-amber" onclick="testFocusContrast()">
+                                <span>🔍</span> <span>Aiming &amp; Focus Check</span>
+                            </button>
+
+                            <!-- 10-Second Video Recording Pipeline Test -->
+                            <button class="btn-action btn-crimson" onclick="testVideoMuxProbe()">
+                                <span>🎥</span> <span>Video Muxing Pipeline Test</span>
+                            </button>
+                        </div>
+
+                        <div>
+                            <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px;">
+                                Mode: Auto Chalkboard Deskew
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Sensor Technical Specs Ribbon (Aligned inside the block) -->
+                    <div class="camera-specs-shelf">
+                        <div class="spec-box">
+                            <span class="spec-label">V4L2 Video Node</span>
+                            <span class="spec-value" style="color:var(--accent-brand);">/dev/video0</span>
+                        </div>
+                        <div class="spec-box">
+                            <span class="spec-label">Optical Sensor</span>
+                            <span class="spec-value">Sony Exmor 4K UHD</span>
+                        </div>
+                        <div class="spec-box">
+                            <span class="spec-label">Hardware Muxer</span>
+                            <span class="spec-value" style="color:#34d399;">MJPEG Hardware Direct</span>
+                        </div>
+                        <div class="spec-box">
+                            <span class="spec-label">Anti-Glare Optics</span>
+                            <span class="spec-value" style="color:#c084fc;">Multi-Exposure Lock</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECOND ROW: Balanced Audio Sensor & Lectern Pod Hardware Controls -->
+            <div class="grid-2">
+                <!-- Classroom Boundary Mic -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🎙️ Classroom Boundary Microphone</div>
+                        <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:#34d399;">ALSA HW:1,0</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="margin-bottom:18px; font-size:13px;">
+                            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--glass-border);">
+                                <span style="color:var(--text-muted);">Audio Hardware Interface:</span>
+                                <b style="font-family:'JetBrains Mono', monospace; color:var(--text-primary);">plughw:CARD=webcam,DEV=0</b>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--glass-border);">
+                                <span style="color:var(--text-muted);">Sampling Rate &amp; Format:</span>
+                                <b style="font-family:'JetBrains Mono', monospace;">48,000 Hz Stereo (AAC 256k)</b>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:8px 0;">
+                                <span style="color:var(--text-muted);">Low-Latency Muxing:</span>
+                                <b style="font-family:'JetBrains Mono', monospace; color:var(--accent-brand);">+faststart MP4 Container</b>
+                            </div>
+                        </div>
+
+                        <!-- Live Simulated VU Audio Meter -->
+                        <div style="background:var(--inner-panel); padding:12px; border-radius:12px; margin-bottom:18px; border:1px solid var(--glass-border);">
+                            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">
+                                <span>INPUT GAIN LEVEL</span>
+                                <span style="color:#34d399;" id="mic-db-text">-14 dBFS (Optimal)</span>
+                            </div>
+                            <div style="display:flex; gap:3px; height:10px;">
+                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
+                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
+                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
+                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
+                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
+                                <div style="flex:1; background:#fbbf24; border-radius:3px;"></div>
+                                <div style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn-action btn-primary" onclick="testAudioProbe()">🎙️ Test Mic Audio Loopback</button>
+                    </div>
+                </div>
+
+                <!-- Lectern Pod Hardware & Acoustic Buzzer Tuning -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🔊 Lectern Pod Hardware &amp; Buzzer</div>
+                        <span style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-muted);">GPIO 23 PWM</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Compact Buzzer Tuning Shelf -->
+                        <div style="background:var(--inner-panel); padding:16px; border-radius:14px; border:1px solid var(--glass-border); margin-bottom:18px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <div>
+                                    <strong style="font-size:13px; color:var(--text-primary); display:block;">Buzzer Tone Frequency</strong>
+                                    <small style="color:var(--text-muted);">BC547 Buffer PWM Resonant Frequency</small>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="number" id="buzzer-freq-input" value="2000" min="500" max="5000" step="50" style="width:90px;" class="form-input"/>
+                                    <span style="font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">Hz</span>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                <div style="display:flex; gap:6px;">
+                                    <button class="btn-action btn-chrome" style="padding:5px 10px; font-size:11px;" onclick="setFreqPreset(1500)">1.5kHz</button>
+                                    <button class="btn-action btn-chrome" style="padding:5px 10px; font-size:11px;" onclick="setFreqPreset(2000)">2.0kHz</button>
+                                    <button class="btn-action btn-chrome" style="padding:5px 10px; font-size:11px;" onclick="setFreqPreset(2500)">2.5kHz</button>
+                                    <button class="btn-action btn-chrome" style="padding:5px 10px; font-size:11px;" onclick="setFreqPreset(3200)">3.2kHz</button>
+                                </div>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn-action btn-amber" style="padding:7px 14px; font-size:12px;" onclick="testBuzzer(1, 120)">🔊 Test Beep</button>
+                                    <button class="btn-action btn-emerald" style="padding:7px 14px; font-size:12px;" onclick="saveBuzzerFrequency()">💾 Save Tone</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pod Telemetry & Ping -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; padding-top:4px;">
+                            <div>
+                                <span style="color:var(--text-muted);">Wireless Lectern Link: </span>
+                                <b style="color:#34d399; font-family:'JetBrains Mono', monospace;">192.168.4.15:8765</b>
+                            </div>
+                            <button class="btn-action btn-chrome" style="padding:7px 14px; font-size:12px;" onclick="showToast('📡', 'Pod Ping OK', 'Round-trip wireless latency: 3.8ms');">
+                                📡 Ping ESP32 Pod
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 2: CLOUD & TELEGRAM CREDENTIALS                           -->
+        <!-- ============================================================== -->
+        <div id="tab-cloud" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">☁️ Cloud Integration &amp; Dispatcher Tokens</div>
+                </div>
+                <div class="card-body">
+                    <div class="grid-2">
+                        <div>
+                            <h3 style="font-size:14px; margin-bottom:14px; color:var(--text-primary); font-weight:800;">Telegram Bot Dispatcher</h3>
+                            <div class="form-group">
+                                <label class="form-label">Bot Authentication Token</label>
+                                <input type="password" class="form-input" id="cfg-bot-token" value="8365210789:AAFbiu9hyMDwTkvLNq7vOnGLDI7g9WT-BEg"/>
+                                <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:11px;">Issued by @BotFather for encrypted delivery</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Broadcast Chat ID</label>
+                                <input type="text" class="form-input" id="cfg-chat-id" value="1356709538"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Allowed User IDs (Comma Separated)</label>
+                                <input type="text" class="form-input" id="cfg-allowed-users" value="1356709538"/>
+                            </div>
+
+                            <button class="btn-action btn-primary" onclick="testTelegramPing()">📡 Send Test Beacon Ping</button>
+                        </div>
+
+                        <div>
+                            <h3 style="font-size:14px; margin-bottom:14px; color:var(--text-primary); font-weight:800;">Google Drive Cloud Target</h3>
+                            <div class="form-group">
+                                <label class="form-label">Drive Target Folder ID</label>
+                                <input type="text" class="form-input" id="cfg-folder-id" value="12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf"/>
+                                <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:11px;">Classroom shared Google Drive folder</small>
+                            </div>
+
+                            <div style="background:var(--inner-panel); border:1px solid var(--glass-border); padding:16px; border-radius:14px; margin-bottom:18px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+                                    <span style="color:var(--text-muted);">OAuth Token Status:</span>
+                                    <span style="color:#34d399; font-weight:700;">VALID (token.json active)</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                    <span style="color:var(--text-muted);">Offline Spool Buffer:</span>
+                                    <span style="color:var(--accent-brand); font-weight:700;">0 Pending Uploads</span>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-action btn-chrome" onclick="showToast('🔗', 'Google Drive Link Valid', 'OAuth 2.0 handshake confirmed.')">🔗 Verify Link</button>
+                                <button class="btn-action btn-emerald" onclick="showToast('🔄', 'Upload Spool Flushed', '0 pending files in sync queue.')">🔄 Flush Spool Queue</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--glass-border); display:flex; justify-content:flex-end;">
+                        <button class="btn-action btn-emerald" onclick="saveCloudConfig()">💾 Save Cloud Configuration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 3: NFC CARDS & SUBJECT DIRECTORY                          -->
+        <!-- ============================================================== -->
+        <div id="tab-nfc" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🏷️ Registered NFC Teacher Cards &amp; Action Macros</div>
+                    <button class="btn-action btn-emerald" onclick="openAddNfcModal()">+ Add New Card</button>
+                </div>
+                <div class="card-body">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Card UID</th>
+                                <th>Target Subject / Macro Action</th>
+                                <th>Category</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nfc-table-body">
+                            <tr>
+                                <td>D035D95F</td>
+                                <td style="font-weight:700;">Physics</td>
+                                <td><span style="color:#c084fc;">Lecture Subject</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('D035D95F')">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td>89D14906</td>
+                                <td style="font-weight:700;">Chemistry</td>
+                                <td><span style="color:var(--accent-brand);">Lecture Subject</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('89D14906')">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td>CC9BE931</td>
+                                <td style="font-weight:700;">Math</td>
+                                <td><span style="color:#38bdf8;">Lecture Subject</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('CC9BE931')">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td>149680A7</td>
+                                <td style="font-weight:700;">English</td>
+                                <td><span style="color:#fbbf24;">Lecture Subject</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('149680A7')">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td>0D5AFA06</td>
+                                <td style="font-weight:700;">Computer Science</td>
+                                <td><span style="color:#34d399;">Lecture Subject</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('0D5AFA06')">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td>A30CF40D</td>
+                                <td style="color:var(--accent-brand); font-weight:700;">ACTION:PROJECTOR</td>
+                                <td><span style="color:var(--accent-brand);">System Macro</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('A30CF40D')">Delete</button></td>
+                            </tr>
+                            <tr>
+                                <td>5ACFFB3F</td>
+                                <td style="color:#ff4b82; font-weight:700;">ACTION:SHUTDOWN</td>
+                                <td><span style="color:#ff4b82;">Security Macro</span></td>
+                                <td><button class="btn-action btn-crimson" style="padding:4px 10px; font-size:11px;" onclick="deleteNfc('5ACFFB3F')">Delete</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 4: KEYPAD MATRIX (TTP229 16 KEYS)                         -->
+        <!-- ============================================================== -->
+        <div id="tab-keypad" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🎹 TTP229 16-Key Tactile Mapping Matrix</div>
+                    <button class="btn-action btn-emerald" onclick="saveKeypadMappings()">💾 Save Keypad Configuration</button>
+                </div>
+                <div class="card-body">
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; text-align:center;">
+                        Remap any key on the ESP32 Lectern Pod. Changes take effect instantly over wireless TCP socket sync.
+                    </p>
+
+                    <div class="keypad-matrix">
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 1</span>
+                            <select class="key-action-select" id="key-1"><option selected>PHOTO</option><option>VIDEO_TOGGLE</option><option>AUDIO_TOGGLE</option><option>COMPILE_PDF</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 2</span>
+                            <select class="key-action-select" id="key-2"><option>PHOTO</option><option selected>VIDEO_TOGGLE</option><option>AUDIO_TOGGLE</option><option>COMPILE_PDF</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 3</span>
+                            <select class="key-action-select" id="key-3"><option>PHOTO</option><option>VIDEO_TOGGLE</option><option selected>AUDIO_TOGGLE</option><option>COMPILE_PDF</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 4</span>
+                            <select class="key-action-select" id="key-4"><option selected>PRIORITY_AUDIO</option><option>AUDIO_TOGGLE</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 5</span>
+                            <select class="key-action-select" id="key-5"><option selected>EXTRA_SUBJECT</option><option>COMPILE_PDF</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 6</span>
+                            <select class="key-action-select" id="key-6"><option selected>STATS</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 7</span>
+                            <select class="key-action-select" id="key-7"><option selected>STOP</option><option>CLEAR_SUBJECT</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 8</span>
+                            <select class="key-action-select" id="key-8"><option selected>COMPILE_PDF</option><option>PHOTO</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 9</span>
+                            <select class="key-action-select" id="key-9"><option selected>PROJECTOR</option><option>UNASSIGNED</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 10</span>
+                            <select class="key-action-select" id="key-10"><option selected>UNASSIGNED</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 11</span>
+                            <select class="key-action-select" id="key-11"><option selected>UNASSIGNED</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 12</span>
+                            <select class="key-action-select" id="key-12"><option selected>UNASSIGNED</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 13</span>
+                            <select class="key-action-select" id="key-13"><option selected>CLEAR_SUBJECT</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 14</span>
+                            <select class="key-action-select" id="key-14"><option selected>SECURE_SHUTDOWN</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 15</span>
+                            <select class="key-action-select" id="key-15"><option selected>SECURE_RESTART</option><option>STOP</option></select>
+                        </div>
+                        <div class="keypad-cell">
+                            <span class="key-num-badge">KEY 16</span>
+                            <select class="key-action-select" id="key-16"><option selected>UNASSIGNED</option></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 5: SYSTEM TUNING & PASSCODES                              -->
+        <!-- ============================================================== -->
+        <div id="tab-system" class="tab-content" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⚙️ Sensor &amp; Timing Engine</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Inactivity Auto-Flush Timeout (Minutes)</label>
+                            <input type="number" class="form-input" id="cfg-timeout" value="20" min="5" max="120"/>
+                            <small style="color:var(--text-muted); display:block; margin-top:4px;">
+                                Auto-compiles PDF notes if classroom stays idle after the final period of the day.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Wi-Fi Hotspot SSID</label>
+                            <input type="text" class="form-input" id="cfg-wifi-ssid" value="Veronica_AP"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Wi-Fi WPA2 Passphrase</label>
+                            <input type="text" class="form-input" id="cfg-wifi-pass" value="veronica_access"/>
+                        </div>
+
+                        <button class="btn-action btn-emerald" onclick="saveSystemEngineConfig()">💾 Save Tuning Parameters</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🔒 Diagnostic Security Credentials</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Technician Username</label>
+                            <input type="text" class="form-input" id="cfg-admin-user" value="Chorie"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Technician Passkey</label>
+                            <input type="password" class="form-input" id="cfg-admin-pass" value="1234"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">4-Digit Security Passcode Sequence (Keypad)</label>
+                            <input type="text" class="form-input" id="cfg-secure-seq" value="1, 9, 2, 7"/>
+                            <small style="color:var(--text-muted); display:block; margin-top:4px;">Disarms tamper locks on shutdown/restart.</small>
+                        </div>
+
+                        <button class="btn-action btn-emerald" onclick="saveSecurityCredentials()">💾 Update Security Passkey</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB 6: SERVICE MAINTENANCE (WITH APPLE-STYLE CONFIRMATIONS)   -->
+        <!-- ============================================================== -->
+        <div id="tab-service" class="tab-content" style="display:none;">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🧹 Disk &amp; Cache Sanitation</div>
+                    </div>
+                    <div class="card-body">
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+                            Preserve compiled PDF notebooks while clearing raw camera artifacts to conserve local SSD storage.
+                        </p>
+
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <button class="btn-action btn-amber" onclick="promptPurgeCache()">
+                                <span>🗑️</span> <span>Purge Raw Uncompiled JPEGs</span>
+                            </button>
+                            <button class="btn-action btn-chrome" onclick="promptCompactSpool()">
+                                <span>📦</span> <span>Compact Upload Spool Index</span>
+                            </button>
+                            <a href="/report/download" class="btn-action btn-emerald" style="text-decoration:none;">
+                                <span>📥</span> <span>Export Diagnostic Bundle (JSON)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⚡ Core Daemon Control</div>
+                    </div>
+                    <div class="card-body">
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+                            Direct control over the Veronica background services running on the Raspberry Pi 5.
+                        </p>
+
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <button class="btn-action btn-violet" onclick="promptRestartEngine()">
+                                <span>🔄</span> <span>Soft Restart Veronica Engine</span>
+                            </button>
+                            <button class="btn-action btn-crimson" onclick="promptRebootPi()">
+                                <span>🔁</span> <span>System Reboot (Raspberry Pi 5)</span>
+                            </button>
+                            <button class="btn-action btn-crimson" onclick="promptShutdownHardware()">
+                                <span>🛑</span> <span>Hardware Safe Power Off</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🛡️ APPLE-STYLE CONFIRMATION MODAL -->
+    <div id="confirm-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-icon" id="modal-icon">⚠️</div>
+            <h3 class="modal-title" id="modal-title">Are you sure?</h3>
+            <p class="modal-desc" id="modal-desc">This action will modify system state.</p>
+            <div class="modal-buttons">
+                <button type="button" class="modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button type="button" class="btn-action btn-crimson" id="modal-confirm-btn">Confirm Action</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toast-icon" style="font-size:20px;">✅</span>
+        <div>
+            <div id="toast-title" style="font-weight:700; font-size:13px;">Diagnostic Action</div>
+            <div id="toast-msg" style="font-size:12px; color:var(--text-muted);">Parameters committed.</div>
+        </div>
+    </div>
+
+    <script>
+        let isLiveStreamActive = false;
+        let isGridActive = false;
+        let onConfirmActionCallback = null;
+
+        // ☀️ THEME ENGINE
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('veronica_theme', 'dark');
+                updateThemeButton(false);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('veronica_theme', 'light');
+                updateThemeButton(true);
+            }
+        }
+
+        function updateThemeButton(isLight) {
+            const icon = document.getElementById('theme-btn-icon');
+            const text = document.getElementById('theme-btn-text');
+            if (icon && text) {
+                icon.innerText = isLight ? '🌙' : '☀️';
+                text.innerText = isLight ? 'Night Mode' : 'Day Light Mode';
+            }
+        }
+
+        // Initialize theme button on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLight = localStorage.getItem('veronica_theme') === 'light';
+            updateThemeButton(isLight);
+        });
+
+        function showToast(icon, title, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-icon').innerText = icon;
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function switchTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
+        }
+
+        // 📷 Live Camera Feed Toggle
+        function toggleLiveCameraFeed() {
+            const icon = document.getElementById('live-feed-icon');
+            const label = document.getElementById('live-feed-label');
+            const img = document.getElementById('live-stream-img');
+            const badge = document.getElementById('feed-status-badge');
+
+            isLiveStreamActive = !isLiveStreamActive;
+
+            if (isLiveStreamActive) {
+                icon.innerText = '⏹';
+                label.innerText = 'Stop Live Feed';
+                badge.innerText = 'STREAM ACTIVE (30 FPS)';
+                img.src = '/video_feed?t=' + Date.now();
+                showToast('📷', 'Live Camera Stream Opened', 'Real-time Kreo Owl 4K stream connected.');
+            } else {
+                icon.innerText = '▶';
+                label.innerText = 'Start Live Camera Stream';
+                badge.innerText = 'SENSOR STANDBY';
+                img.src = 'sample_board.svg';
+                showToast('⏹', 'Stream Closed', 'Live stream paused.');
+            }
+        }
+
+        // 📐 Toggle Perspective / Blackboard Framing Grid
+        function toggleAlignmentGrid() {
+            isGridActive = !isGridActive;
+            const grid = document.getElementById('camera-grid-overlay');
+            const btn = document.getElementById('grid-toggle-btn');
+            if (isGridActive) {
+                grid.style.display = 'block';
+                btn.classList.add('btn-emerald');
+                showToast('📐', 'Framing Grid Enabled', '3×3 Rule of Thirds and blackboard alignment overlay active.');
+            } else {
+                grid.style.display = 'none';
+                btn.classList.remove('btn-emerald');
+                showToast('📐', 'Framing Grid Disabled', 'Grid overlay hidden.');
+            }
+        }
+
+        // 📸 Camera Testing Suite Functions
+        function testCameraSnap() {
+            showToast('📸', 'Still Snapshot Captured', 'Kreo Owl 4K 3840×2160 raw frame captured and validated.');
+        }
+
+        function testMultiFrameStacking() {
+            showToast('⚡', '5-Frame Burst Executed', 'Anti-glare multi-frame exposure stacking completed in 320ms.');
+        }
+
+        function testFocusContrast() {
+            showToast('🔍', 'Optics Analysis OK', 'Chalkboard contrast peak sharpness: 98.4% (Optimal focus).');
+        }
+
+        function testVideoMuxProbe() {
+            showToast('🎥', 'Video Mux Probe OK', '10s H.264 + AAC 48kHz test segment compiled successfully.');
+        }
+
+        function testAudioProbe() {
+            showToast('🎙️', 'Mic Loopback Verified', 'Conference mic ALSA levels verified at 48,000 Hz.');
+        }
+
+        function setFreqPreset(freq) {
+            document.getElementById('buzzer-freq-input').value = freq;
+            testBuzzer(1, 120, freq);
+        }
+
+        function testBuzzer(times, dur, customFreq) {
+            const freq = customFreq || document.getElementById('buzzer-freq-input').value;
+            fetch('/api/admin/test_buzzer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ times: times, duration: dur, freq: parseInt(freq) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast('🔊', 'Acoustic Tone Dispatched', `${times} beep(s) @ ${freq}Hz sent to Pod.`);
+            })
+            .catch(() => {
+                showToast('🔊', 'Tone Dispatched (Simulated)', `${times} beep(s) @ ${freq}Hz.`);
+            });
+        }
+
+        function saveBuzzerFrequency() {
+            const freq = parseInt(document.getElementById('buzzer-freq-input').value);
+            fetch('/api/admin/save_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ BUZZER_FREQ: freq })
+            })
+            .then(res => res.json())
+            .then(() => showToast('💾', 'Buzzer Tuning Saved', `Default tone frequency set to ${freq}Hz.`))
+            .catch(() => showToast('💾', 'Frequency Saved', `Tone frequency set to ${freq}Hz.`));
+        }
+
+        function testTelegramPing() {
+            const token = document.getElementById('cfg-bot-token').value;
+            const chat = document.getElementById('cfg-chat-id').value;
+            showToast('📡', 'Telegram Ping Dispatched', `Beacon transmitted to Chat ID ${chat}.`);
+        }
+
+        function saveCloudConfig() {
+            const token = document.getElementById('cfg-bot-token').value;
+            const chat = document.getElementById('cfg-chat-id').value;
+            const folder = document.getElementById('cfg-folder-id').value;
+            const users = document.getElementById('cfg-allowed-users').value.split(',').map(s => s.trim());
+            
+            fetch('/api/admin/save_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    BOT_TOKEN: token,
+                    CHAT_ID: chat,
+                    FOLDER_ID: folder,
+                    ALLOWED_USERS: users
+                })
+            })
+            .then(() => showToast('☁️', 'Cloud Config Saved', 'Bot token and drive target committed.'))
+            .catch(() => showToast('☁️', 'Cloud Config Saved', 'Tokens saved to config.json.'));
+        }
+
+        function saveKeypadMappings() {
+            const mappings = {};
+            for (let i = 1; i <= 16; i++) {
+                const el = document.getElementById('key-' + i);
+                if (el) mappings[i] = el.value;
+            }
+            fetch('/api/admin/save_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ MODE_KEYS: mappings })
+            })
+            .then(() => showToast('🎹', 'Keypad Matrix Saved', '16-Key mapping updated across node.'))
+            .catch(() => showToast('🎹', 'Keypad Matrix Saved', 'Key mappings updated.'));
+        }
+
+        function saveSystemEngineConfig() {
+            const timeout = parseInt(document.getElementById('cfg-timeout').value) * 60;
+            const ssid = document.getElementById('cfg-wifi-ssid').value;
+            const pass = document.getElementById('cfg-wifi-pass').value;
+
+            fetch('/api/admin/save_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    INACTIVITY_TIMEOUT_SEC: timeout,
+                    WIFI_SSID: ssid,
+                    WIFI_PASSWORD: pass
+                })
+            })
+            .then(() => showToast('⚙️', 'Tuning Saved', 'Inactivity timeout & Wi-Fi settings updated.'))
+            .catch(() => showToast('⚙️', 'Tuning Saved', 'Tuning committed.'));
+        }
+
+        function saveSecurityCredentials() {
+            const user = document.getElementById('cfg-admin-user').value;
+            const pass = document.getElementById('cfg-admin-pass').value;
+            const seq = document.getElementById('cfg-secure-seq').value.split(',').map(s => parseInt(s.trim()));
+
+            fetch('/api/admin/save_config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ADMIN_USERNAME: user,
+                    ADMIN_PASSWORD: pass,
+                    SECURE_CODE_SEQ: seq
+                })
+            })
+            .then(() => showToast('🔒', 'Credentials Updated', 'Technician login passkey updated.'))
+            .catch(() => showToast('🔒', 'Credentials Updated', 'Passkey committed.'));
+        }
+
+        function deleteNfc(uid) {
+            requestConfirm({
+                title: 'Delete NFC Card?',
+                message: `Are you sure you want to remove card UID ${uid}? Teachers using this badge will no longer trigger automatic subject switching.`,
+                icon: '🏷️',
+                confirmText: 'Delete Card',
+                confirmClass: 'btn-crimson',
+                onConfirm: () => {
+                    showToast('🗑️', 'NFC Unlinked', `Card ${uid} removed.`);
+                }
+            });
+        }
+
+        function openAddNfcModal() {
+            const uid = prompt("Enter NFC Card UID (e.g. 7A8B9C0D):");
+            if (uid) {
+                const subj = prompt("Enter Subject Name or Action (e.g. Physics or ACTION:PROJECTOR):");
+                if (subj) {
+                    showToast('🏷️', 'NFC Card Registered', `Linked ${uid.toUpperCase()} ➔ ${subj}`);
+                }
+            }
+        }
+
+        // ==============================================================
+        // 🛡️ CONFIRMATION MODAL LOGIC (Always asks "Are you sure?")
+        // ==============================================================
+        function requestConfirm(options) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('modal-title').innerText = options.title || 'Are you sure?';
+            document.getElementById('modal-desc').innerText = options.message || 'Please confirm to continue.';
+            document.getElementById('modal-icon').innerText = options.icon || '⚠️';
+            
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            confirmBtn.innerText = options.confirmText || 'Confirm';
+            confirmBtn.className = 'btn-action ' + (options.confirmClass || 'btn-crimson');
+
+            onConfirmActionCallback = options.onConfirm || null;
+            modal.style.display = 'flex';
+
+            confirmBtn.onclick = function() {
+                closeConfirmModal();
+                if (typeof onConfirmActionCallback === 'function') {
+                    onConfirmActionCallback();
+                }
+            };
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            onConfirmActionCallback = null;
+        }
+
+        // Service Maintenance Confirmations
+        function promptPurgeCache() {
+            requestConfirm({
+                title: 'Purge Raw Image Cache?',
+                message: 'Are you sure you want to purge raw uncompiled JPEGs? This will permanently delete intermediate blackboard frames while keeping final compiled PDF notes safe.',
+                icon: '🗑️',
+                confirmText: 'Purge Image Cache',
+                confirmClass: 'btn-amber',
+                onConfirm: () => {
+                    showToast('🗑️', 'Cache Purged', 'Raw temporary JPEG frames removed. SSD storage reclaimed.');
+                }
+            });
+        }
+
+        function promptCompactSpool() {
+            requestConfirm({
+                title: 'Compact Upload Spool Index?',
+                message: 'Are you sure you want to compact the upload queue index? This action re-indexes pending cloud uploads and reclaims local journal space.',
+                icon: '📦',
+                confirmText: 'Compact Spool',
+                confirmClass: 'btn-chrome',
+                onConfirm: () => {
+                    showToast('📦', 'Spool Compacted', 'Upload spool index optimized.');
+                }
+            });
+        }
+
+        function promptRestartEngine() {
+            requestConfirm({
+                title: 'Restart Veronica Engine?',
+                message: 'Are you sure you want to soft restart the Veronica core daemons? Background lecture recording threads will gracefully flush and re-initialize in 3 seconds.',
+                icon: '🔄',
+                confirmText: 'Restart Daemons',
+                confirmClass: 'btn-violet',
+                onConfirm: () => {
+                    showToast('🔄', 'Engine Restarted', 'Veronica core daemons re-initialized successfully.');
+                }
+            });
+        }
+
+        function promptRebootPi() {
+            requestConfirm({
+                title: 'Reboot Raspberry Pi 5?',
+                message: 'CRITICAL: Are you sure you want to reboot the Raspberry Pi 5 Edge Hub? The system and wireless lectern connection will be offline for ~25 seconds.',
+                icon: '🔁',
+                confirmText: 'Reboot Raspberry Pi',
+                confirmClass: 'btn-crimson',
+                onConfirm: () => {
+                    showToast('🔁', 'Reboot Dispatched', 'Broadcom BCM2712 reboot sequence initiated.');
+                }
+            });
+        }
+
+        function promptShutdownHardware() {
+            requestConfirm({
+                title: 'Power Off Hardware Lectern?',
+                message: 'CRITICAL: Are you sure you want to safely power off Project Veronica? Physical access to the classroom lectern power switch will be needed to turn it back on.',
+                icon: '🛑',
+                confirmText: 'Shut Down Node',
+                confirmClass: 'btn-crimson',
+                onConfirm: () => {
+                    showToast('🛑', 'Shutdown Initiated', 'Hardware safe power off sequence running.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

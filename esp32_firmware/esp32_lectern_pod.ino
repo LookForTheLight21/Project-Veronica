@@ -56,10 +56,10 @@ unsigned long last_nfc_time = 0;
 // ==============================================================================
 // 4. ACOUSTIC BUZZER CONTROL (PASSIVE PWM TONE GENERATION)
 // ==============================================================================
-void beep(int times = 1, int duration_ms = 100, int gap_ms = 80) {
+void beep(int times = 1, int duration_ms = 100, int gap_ms = 80, int freq = BUZZER_FREQ) {
   for (int i = 0; i < times; i++) {
-    // Generate 2000Hz square wave for passive buzzer
-    tone(BUZZER_PIN, BUZZER_FREQ, duration_ms);
+    // Generate square wave for passive buzzer at target frequency
+    tone(BUZZER_PIN, freq > 0 ? freq : BUZZER_FREQ, duration_ms);
     delay(duration_ms);
     noTone(BUZZER_PIN);
     if (i < times - 1) {
@@ -186,6 +186,7 @@ void checkIncomingCommands() {
         int times = 1;
         int duration = 100;
         int gap = 80;
+        int freq = BUZZER_FREQ;
         
         int idx = line.indexOf("\"times\":");
         if (idx > 0) times = line.substring(idx + 8).toInt();
@@ -193,8 +194,10 @@ void checkIncomingCommands() {
         if (idx > 0) duration = line.substring(idx + 11).toInt();
         idx = line.indexOf("\"gap\":");
         if (idx > 0) gap = line.substring(idx + 6).toInt();
+        idx = line.indexOf("\"freq\":");
+        if (idx > 0) freq = line.substring(idx + 7).toInt();
 
-        beep(times, duration, gap);
+        beep(times, duration, gap, freq);
       }
     }
   }

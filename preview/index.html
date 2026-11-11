@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Veronica Command Center</title>
+    <script>
+        if (localStorage.getItem('veronica_theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root { 
+            --bg-dark: #05070a;
+            --glass-bg: linear-gradient(145deg, rgba(20, 24, 32, 0.5) 0%, rgba(13, 16, 22, 0.7) 100%);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-edge-top: rgba(255, 255, 255, 0.15);
+            --glass-edge-left: rgba(255, 255, 255, 0.05);
+            --neon-cyan: #7cd0ff;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+
+        /* ☀️ DAY LIGHT MODE PALETTE (Pure Clean White Canvas & High-Gloss Saturated Accents) */
+        [data-theme="light"] {
+            --bg-dark: #ffffff;
+            --glass-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-edge-top: rgba(0, 0, 0, 0.03);
+            --glass-edge-left: rgba(0, 0, 0, 0.02);
+            --neon-cyan: #ff6b00; /* Signature High-Gloss Orange */
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+        [data-theme="light"] body {
+            background-color: #ffffff !important;
+            background-image: none !important;
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .ambient-orb { 
+            display: none !important; 
+        }
+        [data-theme="light"] .card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+        }
+        [data-theme="light"] .card-header {
+            background: #f8fafc !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        [data-theme="light"] .card-title {
+            color: #ff6b00 !important;
+        }
+        [data-theme="light"] .glass-pill {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .clock-display {
+            color: #0f172a !important;
+            text-shadow: none !important;
+        }
+        [data-theme="light"] .date-display {
+            color: #ff6b00 !important;
+        }
+        [data-theme="light"] .uplink-btn {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .uplink-btn:hover {
+            background: #ffffff !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+        }
+        [data-theme="light"] .cal-day {
+            color: #64748b;
+        }
+        [data-theme="light"] .cal-day:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #0f172a;
+        }
+        [data-theme="light"] .cal-today {
+            background: #ff6b00;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 107, 0, 0.4);
+        }
+        [data-theme="light"] .subj-btn {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        [data-theme="light"] .subj-active {
+            background: #ff6b00 !important;
+            color: #ffffff !important;
+            border-color: #ff6b00 !important;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.35) !important;
+        }
+        [data-theme="light"] .sys-tag {
+            background: #f0fdf4 !important;
+            border: 1px solid #bbf7d0 !important;
+            color: #16a34a !important;
+        }
+        [data-theme="light"] .sys-tag-warn {
+            background: #fefce8 !important;
+            border: 1px solid #fef08a !important;
+            color: #ca8a04 !important;
+        }
+        [data-theme="light"] .kv-row.dashed, [data-theme="light"] .sys-row {
+            border-bottom: 1px dashed #e2e8f0 !important;
+        }
+        [data-theme="light"] .progress-track {
+            background: #e2e8f0 !important;
+            box-shadow: none !important;
+        }
+        [data-theme="light"] .progress-fill {
+            background: linear-gradient(90deg, #ff6b00, #ea580c) !important;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.35) !important;
+        }
+        [data-theme="light"] .deck-preview {
+            border-color: #e2e8f0 !important;
+        }
+
+        /* ☀️ Tactical Action Buttons in Day Mode — Bold, Tactile, Zero Fading */
+        [data-theme="light"] .action-btn {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-top: 1px solid #ffffff !important;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .action-btn .btn-text {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+        [data-theme="light"] .action-btn:hover {
+            transform: translateY(-4px) !important;
+        }
+
+        [data-theme="light"] .btn-photo { border-color: rgba(124, 58, 237, 0.3) !important; }
+        [data-theme="light"] .btn-photo .btn-icon-svg { stroke: #7c3aed !important; }
+        [data-theme="light"] .btn-photo:hover {
+            background: #faf5ff !important;
+            border-color: #7c3aed !important;
+            box-shadow: 0 12px 28px rgba(124, 58, 237, 0.22) !important;
+        }
+        [data-theme="light"] .btn-photo:hover .btn-text { color: #7c3aed !important; }
+        [data-theme="light"] .btn-photo:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.4)) !important; }
+
+        [data-theme="light"] .btn-notes { border-color: rgba(5, 150, 105, 0.3) !important; }
+        [data-theme="light"] .btn-notes .btn-icon-svg { stroke: #059669 !important; }
+        [data-theme="light"] .btn-notes:hover {
+            background: #f0fdf4 !important;
+            border-color: #059669 !important;
+            box-shadow: 0 12px 28px rgba(5, 150, 105, 0.22) !important;
+        }
+        [data-theme="light"] .btn-notes:hover .btn-text { color: #059669 !important; }
+        [data-theme="light"] .btn-notes:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(5, 150, 105, 0.4)) !important; }
+
+        [data-theme="light"] .btn-video { border-color: rgba(225, 29, 72, 0.3) !important; }
+        [data-theme="light"] .btn-video .btn-icon-svg { stroke: #e11d48 !important; }
+        [data-theme="light"] .btn-video:hover {
+            background: #fff1f2 !important;
+            border-color: #e11d48 !important;
+            box-shadow: 0 12px 28px rgba(225, 29, 72, 0.22) !important;
+        }
+        [data-theme="light"] .btn-video:hover .btn-text { color: #e11d48 !important; }
+        [data-theme="light"] .btn-video:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(225, 29, 72, 0.4)) !important; }
+
+        [data-theme="light"] .btn-audio { border-color: rgba(217, 119, 6, 0.3) !important; }
+        [data-theme="light"] .btn-audio .btn-icon-svg { stroke: #d97706 !important; }
+        [data-theme="light"] .btn-audio:hover {
+            background: #fffbeb !important;
+            border-color: #d97706 !important;
+            box-shadow: 0 12px 28px rgba(217, 119, 6, 0.22) !important;
+        }
+        [data-theme="light"] .btn-audio:hover .btn-text { color: #d97706 !important; }
+        [data-theme="light"] .btn-audio:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(217, 119, 6, 0.4)) !important; }
+
+        [data-theme="light"] .btn-projector { border-color: rgba(8, 145, 178, 0.3) !important; }
+        [data-theme="light"] .btn-projector .btn-icon-svg { stroke: #0891b2 !important; }
+        [data-theme="light"] .btn-projector:hover {
+            background: #ecfeff !important;
+            border-color: #0891b2 !important;
+            box-shadow: 0 12px 28px rgba(8, 145, 178, 0.22) !important;
+        }
+        [data-theme="light"] .btn-projector:hover .btn-text { color: #0891b2 !important; }
+        [data-theme="light"] .btn-projector:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(8, 145, 178, 0.4)) !important; }
+
+        [data-theme="light"] .btn-stop { border-color: rgba(71, 85, 105, 0.3) !important; }
+        [data-theme="light"] .btn-stop .btn-icon-svg { stroke: #334155 !important; }
+        [data-theme="light"] .btn-stop:hover {
+            background: #f1f5f9 !important;
+            border-color: #334155 !important;
+            box-shadow: 0 12px 28px rgba(51, 65, 85, 0.18) !important;
+        }
+        [data-theme="light"] .btn-stop:hover .btn-text { color: #0f172a !important; }
+        [data-theme="light"] .btn-stop:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(51, 65, 85, 0.3)) !important; }
+
+        [data-theme="light"] .btn-stats { border-color: rgba(37, 99, 235, 0.3) !important; }
+        [data-theme="light"] .btn-stats .btn-icon-svg { stroke: #2563eb !important; }
+        [data-theme="light"] .btn-stats:hover {
+            background: #eff6ff !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22) !important;
+        }
+        [data-theme="light"] .btn-stats:hover .btn-text { color: #2563eb !important; }
+        [data-theme="light"] .btn-stats:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.4)) !important; }
+
+        [data-theme="light"] .btn-reboot { border-color: rgba(220, 38, 38, 0.3) !important; }
+        [data-theme="light"] .btn-reboot .btn-icon-svg { stroke: #dc2626 !important; }
+        [data-theme="light"] .btn-reboot:hover {
+            background: #fef2f2 !important;
+            border-color: #dc2626 !important;
+            box-shadow: 0 12px 28px rgba(220, 38, 38, 0.25) !important;
+        }
+        [data-theme="light"] .btn-reboot:hover .btn-text { color: #dc2626 !important; }
+        [data-theme="light"] .btn-reboot:hover .btn-icon-svg { filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.4)) !important; }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main); 
+            background-color: var(--bg-dark);
+            background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 50px 50px;
+            min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+            letter-spacing: -0.2px;
+        }
+        
+        /* 🌌 AMBIENT ORBS */
+        .ambient-orb { 
+            position: fixed; border-radius: 50%; filter: blur(140px); z-index: -1; 
+            pointer-events: none; opacity: 0.45; animation: breathe 15s infinite alternate ease-in-out; 
+        }
+        @keyframes breathe { 
+            0% { transform: scale(1); opacity: 0.3; } 
+            100% { transform: scale(1.1) translate(30px, -30px); opacity: 0.5; } 
+        }
+        .orb-1 { top: -10%; left: -5%; width: 50vw; height: 50vw; background: rgba(88, 166, 255, 0.2); }
+        .orb-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: rgba(162, 119, 255, 0.15); animation-delay: -7s; }
+        .orb-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: rgba(0, 242, 254, 0.1); }
+
+        @keyframes pulse-red { 0% { box-shadow: 0 0 10px #ff4b82; } 50% { box-shadow: 0 0 25px #ff4b82; } 100% { box-shadow: 0 0 10px #ff4b82; } }
+        @keyframes pulse-yellow { 0% { box-shadow: 0 0 10px #f1fa8c; } 50% { box-shadow: 0 0 25px #f1fa8c; } 100% { box-shadow: 0 0 10px #f1fa8c; } }
+
+        /* 🔴 GIANT RECORDING OVERLAY */
+        .recording-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(5, 7, 10, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        .recording-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .overlay-label { font-size: 28px; font-weight: 700; letter-spacing: 6px; margin-bottom: 10px; text-transform: uppercase; animation: pulse-opacity 2s infinite; }
+        @keyframes pulse-opacity { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        
+        .timer-text {
+            font-size: 160px; font-weight: 700; font-variant-numeric: tabular-nums;
+            letter-spacing: -4px; margin-bottom: 50px; line-height: 1;
+        }
+        
+        .terminate-btn {
+            background: transparent; border: 3px solid; border-radius: 20px;
+            font-size: 24px; font-weight: 700; padding: 25px 60px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .terminate-btn:hover { transform: scale(1.05); color: #fff !important; }
+        
+        /* 🔝 TOP NAVIGATION */
+        .topbar-wrapper { padding: 24px 32px 0 32px; position: sticky; top: 0; z-index: 100; }
+        .topbar { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .glass-pill {
+            display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600;
+            background: rgba(10, 12, 16, 0.6); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+            padding: 10px 20px; border-radius: 30px; border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-edge-top);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+        .status-dot { width: 10px; height: 10px; background-color: #3fb950; border-radius: 50%; box-shadow: 0 0 12px #3fb950; }
+
+        /* 📐 3-COLUMN LAYOUT */
+        .container { max-width: 1400px; margin: 0 auto; padding: 32px; width: 100%; flex-grow: 1; display: grid; grid-template-columns: 310px 1fr 320px; gap: 28px; align-items: start; }
+        @media (max-width: 1100px) { .container { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 800px) { .container { grid-template-columns: 1fr; padding: 20px; } .topbar { flex-direction: column; align-items: stretch; } }
+        .column-stack { display: flex; flex-direction: column; gap: 28px; }
+
+        /* 🎴 CARDS */
+        .card {
+            background: var(--glass-bg); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-edge-top); border-left: 1px solid var(--glass-edge-left);
+            border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6); overflow: hidden;
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(0,0,0,0.2); }
+        .card-title { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--neon-cyan); }
+        .card-body { padding: 24px; }
+
+        /* ⏰ CLOCK & CALENDAR */
+        .clock-display { font-size: 36px; font-weight: 700; letter-spacing: -1px; margin-bottom: 4px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+        .date-display { font-size: 13px; color: var(--neon-cyan); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
+        
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 12px; font-weight: 500; }
+        .cal-header { color: var(--text-muted); font-size: 10px; font-weight: 700; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 4px; }
+        .cal-day { padding: 6px 0; border-radius: 6px; color: var(--text-muted); transition: all 0.2s; }
+        .cal-day:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .cal-today { background: var(--neon-cyan); color: #000; font-weight: 700; box-shadow: 0 0 10px var(--neon-cyan); }
+        .cal-today:hover { background: #fff; color: #000; }
+
+        /* 🔗 UPLINK GRID (QUICK LINKS) */
+        .uplink-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .uplink-btn {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-decoration: none; color: var(--text-main); font-size: 12px; font-weight: 600;
+        }
+        .uplink-icon { width: 24px; height: 24px; stroke: var(--text-muted); fill: none; stroke-width: 2; transition: all 0.3s; }
+        
+        .uplink-yt:hover { border-color: #ff0000; box-shadow: 0 10px 20px rgba(255,0,0,0.2); background: rgba(50,10,10,0.6); transform: translateY(-3px); }
+        .uplink-yt:hover .uplink-icon { stroke: #ff0000; }
+        
+        .uplink-google:hover { border-color: #4285f4; box-shadow: 0 10px 20px rgba(66,133,244,0.2); background: rgba(10,25,50,0.6); transform: translateY(-3px); }
+        .uplink-google:hover .uplink-icon { stroke: #4285f4; }
+        
+        .uplink-gemini:hover { border-color: #a277ff; box-shadow: 0 10px 20px rgba(162,119,255,0.2); background: rgba(30,15,50,0.6); transform: translateY(-3px); }
+        .uplink-gemini:hover .uplink-icon { stroke: #a277ff; }
+        
+        .uplink-chrome:hover { border-color: #3fb950; box-shadow: 0 10px 20px rgba(63,185,80,0.2); background: rgba(10,40,15,0.6); transform: translateY(-3px); }
+        .uplink-chrome:hover .uplink-icon { stroke: #3fb950; }
+
+        .uplink-projector:hover { border-color: #00f2fe; box-shadow: 0 10px 20px rgba(0,242,254,0.3); background: rgba(0,40,60,0.6); transform: translateY(-3px); }
+        .uplink-projector:hover .uplink-icon { stroke: #00f2fe; }
+
+        /* 🏷️ SUBJECT SELECTOR WITH COLOR HOVERS */
+        .subject-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .subj-btn {
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+            padding: 14px 8px; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        
+        .subj-physics:hover { border-color: #a277ff; color: #a277ff; box-shadow: 0 8px 15px rgba(162,119,255,0.2); transform: translateY(-3px); background: rgba(162,119,255,0.1); }
+        .subj-chemistry:hover { border-color: #7cd0ff; color: #7cd0ff; box-shadow: 0 8px 15px rgba(124,208,255,0.2); transform: translateY(-3px); background: rgba(124,208,255,0.1); }
+        .subj-math:hover { border-color: #58a6ff; color: #58a6ff; box-shadow: 0 8px 15px rgba(88,166,255,0.2); transform: translateY(-3px); background: rgba(88,166,255,0.1); }
+        .subj-english:hover { border-color: #ff9e64; color: #ff9e64; box-shadow: 0 8px 15px rgba(255,158,100,0.2); transform: translateY(-3px); background: rgba(255,158,100,0.1); }
+        .subj-comp:hover { border-color: #9ece6a; color: #9ece6a; box-shadow: 0 8px 15px rgba(158,206,106,0.2); transform: translateY(-3px); background: rgba(158,206,106,0.1); }
+        .subj-clear:hover { border-color: #ff5555; color: #ff5555; box-shadow: 0 8px 15px rgba(255,85,85,0.2); transform: translateY(-3px); background: rgba(255,85,85,0.1); }
+        
+        .subj-active { background: rgba(255,255,255,0.1) !important; color: #fff !important; border-color: #fff !important; box-shadow: 0 0 15px rgba(255,255,255,0.2) !important; }
+
+        /* 🎮 TACTICAL ACTION BUTTONS (Exact Match with Original Video + High Polish) */
+        .actions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .action-btn {
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            border: 1px solid var(--glass-border); 
+            border-top: 1px solid var(--glass-edge-top); 
+            border-radius: 16px; 
+            padding: 22px 18px; 
+            color: var(--text-main); 
+            cursor: pointer;
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; 
+            gap: 16px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-btn:active { transform: translateY(0) scale(0.98); }
+        
+        .btn-icon-svg { 
+            width: 26px; height: 26px; 
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; 
+        }
+        .btn-text { 
+            font-size: 13.5px; font-weight: 600; text-align: left; line-height: 1.35; 
+            transition: color 0.3s ease; 
+        }
+        
+        /* 📸 Photo Button - Purple Theme */
+        .btn-photo { border-color: rgba(162, 119, 255, 0.25); }
+        .btn-photo .btn-icon-svg { stroke: #a277ff; }
+        .btn-photo:hover { 
+            border-color: #a277ff; 
+            box-shadow: 0 12px 28px rgba(162, 119, 255, 0.35), 0 0 15px rgba(162, 119, 255, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(45, 30, 65, 0.85); 
+        }
+        .btn-photo:hover .btn-icon-svg { stroke: #a277ff; filter: drop-shadow(0 0 8px #a277ff); }
+        .btn-photo:hover .btn-text { color: #a277ff; }
+        
+        /* 📚 Compile PDF Notes - Emerald Mint Theme */
+        .btn-notes { border-color: rgba(52, 211, 153, 0.25); }
+        .btn-notes .btn-icon-svg { stroke: #34d399; }
+        .btn-notes:hover { 
+            border-color: #34d399; 
+            box-shadow: 0 12px 28px rgba(52, 211, 153, 0.35), 0 0 15px rgba(52, 211, 153, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(15, 50, 35, 0.85); 
+        }
+        .btn-notes:hover .btn-icon-svg { stroke: #34d399; filter: drop-shadow(0 0 8px #34d399); }
+        .btn-notes:hover .btn-text { color: #34d399; }
+
+        /* 🎥 Video Button - Hot Pink Theme */
+        .btn-video { border-color: rgba(255, 75, 130, 0.25); }
+        .btn-video .btn-icon-svg { stroke: #ff4b82; }
+        .btn-video:hover { 
+            border-color: #ff4b82; 
+            box-shadow: 0 12px 28px rgba(255, 75, 130, 0.35), 0 0 15px rgba(255, 75, 130, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(65, 20, 40, 0.85); 
+        }
+        .btn-video:hover .btn-icon-svg { stroke: #ff4b82; filter: drop-shadow(0 0 8px #ff4b82); }
+        .btn-video:hover .btn-text { color: #ff4b82; }
+        
+        /* 🎙️ Audio Button - Yellow Gold Theme */
+        .btn-audio { border-color: rgba(241, 250, 140, 0.25); }
+        .btn-audio .btn-icon-svg { stroke: #f1fa8c; }
+        .btn-audio:hover { 
+            border-color: #f1fa8c; 
+            box-shadow: 0 12px 28px rgba(241, 250, 140, 0.3), 0 0 15px rgba(241, 250, 140, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(55, 50, 20, 0.85); 
+        }
+        .btn-audio:hover .btn-icon-svg { stroke: #f1fa8c; filter: drop-shadow(0 0 8px #f1fa8c); }
+        .btn-audio:hover .btn-text { color: #f1fa8c; }
+
+        /* 📽️ Project on Wall - Neon Ice Cyan Theme */
+        .btn-projector { border-color: rgba(0, 242, 254, 0.25); }
+        .btn-projector .btn-icon-svg { stroke: #00f2fe; }
+        .btn-projector:hover { 
+            border-color: #00f2fe; 
+            box-shadow: 0 12px 28px rgba(0, 242, 254, 0.35), 0 0 15px rgba(0, 242, 254, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(10, 45, 60, 0.85); 
+        }
+        .btn-projector:hover .btn-icon-svg { stroke: #00f2fe; filter: drop-shadow(0 0 8px #00f2fe); }
+        .btn-projector:hover .btn-text { color: #00f2fe; }
+
+        /* ⏹ Stop Button - Pure White Theme */
+        .btn-stop { border-color: rgba(255, 255, 255, 0.2); }
+        .btn-stop .btn-icon-svg { stroke: #ffffff; }
+        .btn-stop:hover { 
+            border-color: #ffffff; 
+            box-shadow: 0 12px 28px rgba(255, 255, 255, 0.25), 0 0 15px rgba(255, 255, 255, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(50, 55, 65, 0.85); 
+        }
+        .btn-stop:hover .btn-icon-svg { stroke: #ffffff; filter: drop-shadow(0 0 8px #ffffff); }
+        .btn-stop:hover .btn-text { color: #ffffff; }
+        
+        /* 📊 Stats Button - Cyan Theme */
+        .btn-stats { border-color: rgba(139, 233, 253, 0.25); }
+        .btn-stats .btn-icon-svg { stroke: #8be9fd; }
+        .btn-stats:hover { 
+            border-color: #8be9fd; 
+            box-shadow: 0 12px 28px rgba(139, 233, 253, 0.3), 0 0 15px rgba(139, 233, 253, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(20, 45, 60, 0.85); 
+        }
+        .btn-stats:hover .btn-icon-svg { stroke: #8be9fd; filter: drop-shadow(0 0 8px #8be9fd); }
+        .btn-stats:hover .btn-text { color: #8be9fd; }
+        
+        /* 🔁 Reboot Button - Danger Red Theme */
+        .btn-reboot { border-color: rgba(255, 85, 85, 0.3); }
+        .btn-reboot .btn-icon-svg { stroke: #ff5555; }
+        .btn-reboot:hover { 
+            border-color: #ff5555; 
+            box-shadow: 0 12px 28px rgba(255, 85, 85, 0.35), 0 0 15px rgba(255, 85, 85, 0.2); 
+            transform: translateY(-4px); 
+            background: rgba(65, 20, 20, 0.85); 
+        }
+        .btn-reboot:hover .btn-icon-svg { filter: drop-shadow(0 0 8px #ff5555); }
+        .btn-reboot:hover .btn-text { color: #ff5555; }
+
+        /* 🖥️ SYSTEM OVERSEER */
+        .sys-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); font-size: 13px; }
+        .sys-row:last-child { border-bottom: none; }
+        .sys-label { color: var(--text-muted); display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .sys-tag { display: flex; align-items: center; gap: 6px; font-family: monospace; font-size: 11px; background: rgba(63, 185, 80, 0.1); color: #3fb950; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(63, 185, 80, 0.3); letter-spacing: 0.5px; }
+        .sys-tag-warn { background: rgba(241, 250, 140, 0.1); color: #f1fa8c; border: 1px solid rgba(241, 250, 140, 0.3); }
+        .sys-icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* 💾 KEY-VALUE ROWS & STORAGE */
+        .kv-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 13px; }
+        .kv-row.dashed { border-bottom: 1px dashed rgba(255,255,255,0.06); }
+        .kv-row:last-child { border-bottom: none; }
+        .kv-label { color: var(--text-muted); font-weight: 500; }
+        .kv-value { font-weight: 600; font-family: monospace; font-size: 12px; }
+
+        .progress-track { width: 100%; height: 6px; background: rgba(0, 0, 0, 0.6); border-radius: 10px; overflow: hidden; margin: 16px 0 10px 0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+        .progress-fill { height: 100%; width: 24%; background: linear-gradient(90deg, #00f2fe, var(--neon-cyan)); border-radius: 10px; box-shadow: 0 0 15px rgba(124, 208, 255, 0.6); }
+        
+        .title-icon { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* Board Derivation Thumbnail Deck */
+        .deck-preview {
+            border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+            position: relative; aspect-ratio: 16/9; background: #000; margin-top: 14px;
+        }
+        .deck-preview img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .deck-preview:hover img { transform: scale(1.03); }
+        .deck-badge {
+            position: absolute; bottom: 8px; left: 10px; right: 10px;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+            padding: 6px 10px; border-radius: 8px; font-size: 11px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* 🔔 FLOATING TOAST NOTIFICATION (Sleek non-intrusive alert) */
+        .toast-banner {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid #ff4b82; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 75, 130, 0.3);
+            border-radius: 9999px; padding: 14px 28px; display: flex; align-items: center; gap: 12px;
+            font-size: 13px; font-weight: 700; color: #fff; z-index: 10000;
+            opacity: 0; pointer-events: none; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast-banner.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1; pointer-events: all;
+        }
+        [data-theme="light"] .toast-banner {
+            background: #ffffff; color: #0f172a; border-color: #ea580c;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15), 0 0 20px rgba(234, 88, 12, 0.25);
+        }
+
+        .tactical-card-wrap { position: relative; }
+
+        /* 📱 20-MINUTE IDLE SCREEN SAVER (SLIDE TO OPEN) */
+        .idle-screensaver {
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(4, 7, 12, 0.82); backdrop-filter: blur(55px) saturate(220%);
+            -webkit-backdrop-filter: blur(55px) saturate(220%);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 50px 30px; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        [data-theme="light"] .idle-screensaver { background: rgba(245, 247, 252, 0.88); }
+        .idle-screensaver.active { opacity: 1; pointer-events: all; }
+
+        .screensaver-top { display: flex; gap: 12px; align-items: center; }
+        .screensaver-center { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .screensaver-clock {
+            font-size: 100px; font-weight: 800; font-variant-numeric: tabular-nums;
+            letter-spacing: -3px; color: var(--text-main); line-height: 1; margin-bottom: 12px;
+            text-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+        [data-theme="light"] .screensaver-clock { color: #0f172a; text-shadow: 0 10px 30px rgba(255, 107, 0, 0.15); }
+        .screensaver-date {
+            font-size: 18px; font-weight: 600; color: var(--neon-cyan); letter-spacing: 0.5px; margin-bottom: 16px;
+        }
+        [data-theme="light"] .screensaver-date { color: #ff6b00; }
+        .screensaver-pill {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 18px; border-radius: 9999px; font-size: 12px; font-weight: 600; color: var(--text-muted);
+        }
+        [data-theme="light"] .screensaver-pill { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.08); color: #475569; }
+
+        /* Slide to Unlock Slider Track */
+        .slide-track {
+            width: 380px; max-width: 90vw; height: 64px;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 9999px; position: relative; display: flex; align-items: center;
+            padding: 6px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+            overflow: hidden; user-select: none;
+        }
+        [data-theme="light"] .slide-track {
+            background: rgba(255, 255, 255, 0.9); border-color: rgba(0, 0, 0, 0.12);
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+        }
+        .slide-shimmer-text {
+            width: 100%; text-align: center; font-size: 12px; font-weight: 700;
+            letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255, 255, 255, 0.45);
+            background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0.2) 100%);
+            background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shimmerText 2.5s infinite linear; pointer-events: none; padding-left: 45px;
+        }
+        [data-theme="light"] .slide-shimmer-text {
+            background: linear-gradient(90deg, rgba(15,23,42,0.3) 0%, #ff6b00 50%, rgba(15,23,42,0.3) 100%);
+            background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        @keyframes shimmerText { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .slide-thumb {
+            position: absolute; left: 6px; width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(124, 208, 255, 0.95) 0%, rgba(56, 189, 248, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.8); display: flex; align-items: center; justify-content: center;
+            color: #030712; font-size: 18px; font-weight: 800; box-shadow: 0 4px 18px rgba(56, 189, 248, 0.5);
+            cursor: grab; transition: transform 0.1s ease; touch-action: none;
+        }
+        [data-theme="light"] .slide-thumb {
+            background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%); color: #ffffff;
+            box-shadow: 0 4px 18px rgba(255, 107, 0, 0.45);
+        }
+        .slide-thumb:active { cursor: grabbing; transform: scale(1.05); }
+
+        /* PiP Stream Card inside Recording Overlay */
+        .pip-feed-box {
+            width: 440px; max-width: 85vw; aspect-ratio: 16/9; border-radius: 18px;
+            overflow: hidden; border: 2px solid #ff4b82; box-shadow: 0 20px 50px rgba(255, 75, 130, 0.35);
+            position: relative; margin-bottom: 24px; background: #000;
+        }
+        .pip-feed-box img { width: 100%; height: 100%; object-fit: contain; }
+        .pip-hud {
+            position: absolute; bottom: 8px; left: 10px; right: 10px;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            padding: 6px 12px; border-radius: 8px; font-size: 11px;
+            font-family: 'JetBrains Mono', monospace; display: flex; justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔴 GIANT OVERLAY (ACTIVATES ON VIDEO / AUDIO RECORDING) -->
+    <div class="recording-overlay" id="rec-overlay">
+        <div class="overlay-label" id="rec-label">🔴 LIVE VIDEO RECORDING</div>
+        <div style="font-size:14px; font-weight:700; color:var(--text-muted); margin-bottom:14px; text-transform:uppercase; letter-spacing:1px;">
+            Subject: <span style="color:#fff;" id="rec-subj-pill">Physics</span> · Resolution: 3840×2160 @ 30 FPS
+        </div>
+        
+        <!-- Live Picture-in-Picture View Deck -->
+        <div class="pip-feed-box">
+            <img src="sample_board.svg" alt="Live Camera Preview Deck" id="rec-pip-img"/>
+            <div class="pip-hud">
+                <span style="color:#ff4b82; font-weight:700;">● STREAMING TO STORAGE &amp; CLOUD</span>
+                <span style="color:#34d399;">Kreo Owl 4K /dev/video0</span>
+            </div>
+        </div>
+
+        <div class="timer-text" id="rec-timer">00:00</div>
+        <button class="terminate-btn" id="rec-btn" onclick="postAction('stop')">⏹ TERMINATE RECORDING &amp; ARCHIVE</button>
+    </div>
+
+    <!-- 📱 20-MINUTE IDLE SCREEN SAVER (OLED / IPHONE BLUR WITH SLIDE TO OPEN) -->
+    <div class="idle-screensaver" id="idle-screensaver">
+        <div class="screensaver-top">
+            <div class="screensaver-pill">✦ Project Veronica OS · Active Node: Class X</div>
+            <div class="screensaver-pill" style="color:#34d399;">● 5.8GHz Mesh Online · 192.168.4.15</div>
+        </div>
+
+        <div class="screensaver-center">
+            <div class="screensaver-clock" id="screensaver-clock">11:05</div>
+            <div class="screensaver-date" id="screensaver-date">Wednesday, November 11</div>
+            <div class="screensaver-pill" id="screensaver-subj-status" style="margin-top:10px;">
+                🔒 Console Standby · Inactivity Timer: 20m
+            </div>
+        </div>
+
+        <!-- SLIDE TO OPEN INTERACTIVE WIDGET -->
+        <div class="slide-track" id="slide-track">
+            <div class="slide-shimmer-text">Slide to unlock classroom console ➔</div>
+            <div class="slide-thumb" id="slide-thumb">
+                <span>➔</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌌 AMBIENT BACKGROUND GLOWS -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    
+    <!-- 🔝 TOP NAVIGATION -->
+    <div class="topbar-wrapper">
+        <div class="topbar">
+            <div class="glass-pill">
+                <div style="color:var(--neon-cyan); font-weight:800;">✦</div> Veronica Core 
+                <span style="color:var(--text-muted);font-weight:400;margin-left:6px;" id="disp-hostname">veronica-hub.local</span>
+            </div>
+            
+            <!-- 📶 NETWORK ONLINE STATUS INDICATOR -->
+            <div class="glass-pill" style="gap:8px;">
+                <span class="status-dot" style="background:#3fb950; box-shadow:0 0 10px #3fb950;"></span>
+                <span style="font-weight:700;">📶 5.8GHz Mesh Online</span>
+                <span style="color:var(--text-muted); font-size:11px; font-family:'JetBrains Mono',monospace;">(192.168.4.15 | 2ms)</span>
+            </div>
+
+            <div class="glass-pill">
+                <div class="status-dot" id="main-status-dot"></div> 
+                <span id="main-status-text">System Idle</span>
+            </div>
+
+            <!-- 📱 TEST 20M SLEEP BUTTON (FOR JUDGES & DEMOS) -->
+            <button type="button" class="glass-pill" onclick="triggerIdleScreenSaver()" style="cursor:pointer; font-family:inherit; color:#c084fc; border-color:rgba(192, 132, 252, 0.4); background:rgba(192, 132, 252, 0.1);">
+                <span>📱</span> <span>Test 20m Sleep</span>
+            </button>
+
+            <!-- ☀️ THEME TOGGLE BUTTON -->
+            <button type="button" class="glass-pill" onclick="toggleTheme()" id="theme-btn" style="cursor:pointer; font-family:inherit; color:#ff6b00; border-color:rgba(255, 107, 0, 0.4); background:rgba(255, 107, 0, 0.1);">
+                <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day Light Mode</span>
+            </button>
+
+            <a href="/login" class="glass-pill" style="text-decoration:none; color:var(--neon-cyan); border-color:rgba(124, 208, 255, 0.4); cursor:pointer;">
+                <span>⚙️</span> Diagnostic Console
+            </a>
+        </div>
+    </div>
+
+    <!-- 📐 3-COLUMN CONTROL MATRIX -->
+    <div class="container">
+        
+        <!-- LEFT COLUMN: Clock, Calendar & Uplink -->
+        <div class="column-stack">
+            <div class="card">
+                <div class="card-body">
+                    <div class="clock-display" id="clock">00:00:00</div>
+                    <div class="date-display" id="date">Loading Temporal Data...</div>
+                    <div class="cal-grid" id="calendar"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="title-icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> 
+                        Uplink Grid
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="uplink-grid">
+                        <a href="/login" class="uplink-btn" style="grid-column: 1 / -1; border-color: rgba(124, 208, 255, 0.4); background: linear-gradient(135deg, rgba(88, 166, 255, 0.15) 0%, rgba(162, 119, 255, 0.15) 100%); flex-direction: row; justify-content: center; padding: 14px; gap: 10px; margin-bottom: 2px;">
+                            <svg class="uplink-icon" style="stroke: var(--neon-cyan); width: 20px; height: 20px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <span style="color: #fff; font-weight: 700; font-size: 13px;">⚙️ Diagnostic &amp; Configuration Hub</span>
+                        </a>
+                        <a href="projector.html" class="uplink-btn uplink-projector">
+                            <svg class="uplink-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            Projector View
+                        </a>
+                        <a href="report.html" class="uplink-btn uplink-gemini">
+                            <svg class="uplink-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            Admin Ledger
+                        </a>
+                        <a href="https://www.youtube.com" target="_blank" class="uplink-btn uplink-yt">
+                            <svg class="uplink-icon" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                            YouTube
+                        </a>
+                        <a href="https://gemini.google.com" target="_blank" class="uplink-btn uplink-google">
+                            <svg class="uplink-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            Gemini AI
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER COLUMN: Subject Context & Tactical Controls -->
+        <div class="column-stack">
+            <!-- Subject Selector -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="title-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg> 
+                        Subject Context
+                    </div>
+                    <span style="font-size:11px; color:var(--text-muted); font-family:monospace;">TIER-1 POD</span>
+                </div>
+                <div class="card-body">
+                    <div class="subject-grid">
+                        <button class="subj-btn subj-physics subj-active" id="btn-subj-physics" onclick="setSubject('Physics')">Physics</button>
+                        <button class="subj-btn subj-chemistry" id="btn-subj-chem" onclick="setSubject('Chemistry')">Chemistry</button>
+                        <button class="subj-btn subj-math" id="btn-subj-math" onclick="setSubject('Math')">Math</button>
+                        <button class="subj-btn subj-english" id="btn-subj-eng" onclick="setSubject('English')">English</button>
+                        <button class="subj-btn subj-comp" id="btn-subj-comp" onclick="setSubject('Computer Science')">Comp Sci</button>
+                        <button class="subj-btn subj-clear" onclick="setSubject('clear')">Clear Context</button>
+                    </div>
+                    <div style="margin-top: 16px; font-size: 13px; color: var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
+                        <span>Current Focus: <b style="color:#fff;" id="active-subj-label">Physics</b></span>
+                        <span>Session Notes: <b style="color:var(--neon-cyan); font-family:monospace;" id="session-count-label">3 Board Page(s)</b></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tactical Controls -->
+            <div class="card tactical-card-wrap">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="title-icon"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg> 
+                        Tactical Controls
+                    </div>
+                    <span id="lock-state-badge" style="font-size:11px; font-weight:700; color:#34d399; font-family:'JetBrains Mono',monospace; padding:3px 9px; border-radius:6px; background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3);">🟢 ACTIVE: PHYSICS</span>
+                </div>
+                <div class="card-body">
+                    <div class="actions-grid">
+                        <!-- 1. Engage Optical Sensor (Purple) -->
+                        <button class="action-btn btn-photo" onclick="postAction('photo')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            <span class="btn-text">Engage<br>Optical Sensor</span>
+                        </button>
+
+                        <!-- 2. End Class & Compile PDF Notes (Emerald) -->
+                        <button class="action-btn btn-notes" onclick="postAction('compile_pdf')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            <span class="btn-text">End Class &amp;<br>Compile PDF Notes</span>
+                        </button>
+
+                        <!-- 3. Initialize Video Feed (Hot Pink) -->
+                        <button class="action-btn btn-video" onclick="postAction('video')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                            <span class="btn-text">Initialize<br>Video Feed</span>
+                        </button>
+
+                        <!-- 4. Initialize Audio Feed (Golden Yellow) -->
+                        <button class="action-btn btn-audio" onclick="postAction('audio')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                            <span class="btn-text">Initialize<br>Audio Feed</span>
+                        </button>
+
+                        <!-- 5. Project on Wall (Neon Ice Cyan) -->
+                        <a href="projector.html" class="action-btn btn-projector">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            <span class="btn-text">Project on Wall<br>(Back-Row View)</span>
+                        </a>
+
+                        <!-- 6. Terminate Active Feed (Pure White) -->
+                        <button class="action-btn btn-stop" onclick="postAction('stop')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                            <span class="btn-text">Terminate<br>Active Feed</span>
+                        </button>
+
+                        <!-- 7. Transmit Sys Report (Sky Cyan) -->
+                        <button class="action-btn btn-stats" onclick="postAction('stats')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            <span class="btn-text">Transmit<br>Sys Report</span>
+                        </button>
+
+                        <!-- 8. Execute System Reboot (Danger Red) -->
+                        <button class="action-btn btn-reboot" onclick="postAction('reboot')">
+                            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <span class="btn-text">Execute<br>System Reboot</span>
+                        </button>
+                    </div>
+
+                    <!-- Latest Chalkboard Snapshot Deck -->
+                    <div style="margin-top: 22px;">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">
+                            <span>LATEST CHALKBOARD SNAPSHOT</span>
+                            <a href="projector.html" style="color:var(--neon-cyan); text-decoration:none;">Open Projector →</a>
+                        </div>
+                        <div class="deck-preview">
+                            <img src="sample_board.svg" alt="Latest board snapshot" id="board-preview-img">
+                            <div class="deck-badge">
+                                <span id="deck-caption">Physics_photo_1105_03.jpg</span>
+                                <span style="color:var(--neon-cyan); font-family:monospace;">Kreo Owl 4K Pro</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: System Overseer & Assets -->
+        <div class="column-stack">
+            <!-- System Overseer -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="title-icon"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> 
+                        System Overseer
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="sys-row">
+                        <span class="sys-label"><svg class="title-icon"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Core Compute</span>
+                        <span class="sys-tag" id="tag-cpu"><svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> STABLE [18%]</span>
+                    </div>
+                    <div class="sys-row">
+                        <span class="sys-label"><svg class="title-icon"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> Memory Matrix</span>
+                        <span class="sys-tag" id="tag-ram"><svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> NOMINAL [32%]</span>
+                    </div>
+                    <div class="sys-row">
+                        <span class="sys-label"><svg class="title-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Hardware Subsystems</span>
+                        <span class="sys-tag"><svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> ONLINE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Drive -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="title-icon"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg> 
+                        Storage Drive
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500;">
+                        <span style="color:var(--text-muted)">Volume Used</span>
+                        <span style="font-family:monospace;" id="val-storage-pct">24%</span>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill" id="val-storage-fill"></div></div>
+                    <div style="color:var(--text-muted); font-size:12px; margin-top:10px; display:flex; justify-content: space-between;">
+                        <span>Free: 14.2 GB</span>
+                        <span>Total: 32 GB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset Ledger -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="title-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> 
+                        Asset Ledger
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="kv-row dashed"><span class="kv-label">Latest Visual</span><span class="kv-value" id="val-last-photo">Physics_photo_1105_03.jpg</span></div>
+                    <div class="kv-row dashed"><span class="kv-label">Compiled Notes</span><span class="kv-value" style="color:var(--neon-cyan);" id="val-last-pdf">Physics_Notes_1111.pdf</span></div>
+                    <div class="kv-row dashed"><span class="kv-label">Latest Feed</span><span class="kv-value" id="val-last-video">Physics_video_1111.mp4</span></div>
+                    <div class="kv-row"><span class="kv-label">Drive Sync</span><span class="kv-value" style="color:#3fb950;">Buffer Clear</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ⏰ JS CALENDAR & CLOCK
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', {hour12: false});
+            document.getElementById('date').innerText = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        const cal = document.getElementById('calendar');
+        let d = new Date(); d.setDate(1);
+        let startDay = d.getDay();
+        let daysInMonth = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+        let calHtml = '';
+        const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+        days.forEach(day => calHtml += `<div class="cal-header">${day}</div>`);
+        for(let i=0; i<startDay; i++) calHtml += `<div></div>`;
+        for(let i=1; i<=daysInMonth; i++) {
+            let today = (i === new Date().getDate()) ? 'cal-today' : '';
+            calHtml += `<div class="cal-day ${today}">${i}</div>`;
+        }
+        cal.innerHTML = calHtml;
+
+        // 🎮 SIMULATED ACTIONS & TELEMETRY
+        let currentSubject = null; // Starts LOCKED until teacher selects subject or taps NFC card
+        let sessionCount = 0;
+        let isRecording = false;
+        let isVideo = false;
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        const overlay = document.getElementById('rec-overlay');
+        const timerEl = document.getElementById('rec-timer');
+        const labelEl = document.getElementById('rec-label');
+        const btnEl = document.getElementById('rec-btn');
+        const statusDot = document.getElementById('main-status-dot');
+        const statusText = document.getElementById('main-status-text');
+        const lockBadge = document.getElementById('lock-state-badge');
+
+        function showToast(msg, isWarn = false) {
+            let toast = document.getElementById('toast-banner');
+            let toastText = document.getElementById('toast-text');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-banner';
+                toast.className = 'toast-banner';
+                toast.innerHTML = `<span id="toast-icon">🔒</span> <span id="toast-text"></span>`;
+                document.body.appendChild(toast);
+                toastText = document.getElementById('toast-text');
+            }
+            const toastIcon = document.getElementById('toast-icon');
+            if (toastIcon) toastIcon.innerText = isWarn ? '⚠️' : '✦';
+            if (toastText) toastText.innerText = msg;
+            toast.classList.add('active');
+            if (window._toastTimeout) clearTimeout(window._toastTimeout);
+            window._toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function setSubject(subj) {
+            document.querySelectorAll('.subj-btn').forEach(b => b.classList.remove('subj-active'));
+            
+            if (subj === 'clear' || !subj) {
+                currentSubject = null;
+                document.getElementById('active-subj-label').innerText = 'None (Console Locked)';
+                if (lockBadge) {
+                    lockBadge.innerText = '🔒 LOCKED (TAP SUBJECT)';
+                    lockBadge.style.color = '#ff4b82';
+                    lockBadge.style.background = 'rgba(255, 75, 130, 0.12)';
+                    lockBadge.style.borderColor = 'rgba(255, 75, 130, 0.35)';
+                }
+                showToast('🔒 Lectern Console Locked — Tap an academic subject to unlock controls.', true);
+                fetch('/cmd/subj_clear', { method: 'POST' }).catch(() => {});
+                return;
+            }
+
+            currentSubject = subj;
+            const btnMap = {
+                'Physics': 'btn-subj-physics',
+                'Chemistry': 'btn-subj-chem',
+                'Math': 'btn-subj-math',
+                'English': 'btn-subj-eng',
+                'Computer Science': 'btn-subj-comp'
+            };
+            if (btnMap[subj]) document.getElementById(btnMap[subj]).classList.add('subj-active');
+            
+            document.getElementById('active-subj-label').innerText = currentSubject;
+            document.getElementById('rec-subj-pill').innerText = currentSubject;
+            if (lockBadge) {
+                lockBadge.innerText = '🟢 ACTIVE: ' + currentSubject.toUpperCase();
+                lockBadge.style.color = '#34d399';
+                lockBadge.style.background = 'rgba(52, 211, 153, 0.12)';
+                lockBadge.style.borderColor = 'rgba(52, 211, 153, 0.35)';
+            }
+            showToast('🟢 Session Context Engaged: ' + currentSubject);
+
+            fetch('/cmd/subj_' + subj.toLowerCase(), { method: 'POST' }).catch(() => {});
+        }
+
+        function postAction(action) {
+            // Anti-Tamper Check: Require subject selection before engaging hardware
+            if (!currentSubject && action !== 'stop') {
+                showToast('🔒 Lectern Console Locked! Please select a subject above to activate hardware.', true);
+                return;
+            }
+
+            if (action === 'photo') {
+                sessionCount++;
+                document.getElementById('session-count-label').innerText = `${sessionCount} Board Page(s)`;
+                document.getElementById('deck-caption').innerText = `${currentSubject}_photo_1105_0${sessionCount}.jpg`;
+                document.getElementById('val-last-photo').innerText = `${currentSubject}_photo_1105_0${sessionCount}.jpg`;
+                showToast(`📸 Captured high-res board snapshot #${sessionCount}`);
+                fetch('/cmd/photo', { method: 'POST' }).catch(() => {});
+            }
+            else if (action === 'compile_pdf') {
+                alert(`📚 Successfully compiled ${sessionCount} chalkboard pages into [${currentSubject}_LectureNotes_1111.pdf]!\nDispatched to Telegram & Google Drive.`);
+                sessionCount = 0;
+                document.getElementById('session-count-label').innerText = `0 Board Page(s)`;
+                document.getElementById('val-last-pdf').innerText = `${currentSubject}_LectureNotes_1111.pdf`;
+                fetch('/cmd/compile_pdf', { method: 'POST' }).catch(() => {});
+            }
+            else if (action === 'video') {
+                isRecording = true;
+                isVideo = true;
+                startOverlayTimer('video');
+                fetch('/cmd/video', { method: 'POST' }).catch(() => {});
+            }
+            else if (action === 'audio') {
+                isRecording = true;
+                isVideo = false;
+                startOverlayTimer('audio');
+                fetch('/cmd/audio', { method: 'POST' }).catch(() => {});
+            }
+            else if (action === 'stop') {
+                stopOverlayTimer();
+                fetch('/cmd/stop', { method: 'POST' }).catch(() => {});
+            }
+            else if (action === 'stats') {
+                alert("📊 System Status: Compute Stable [18%], RAM Nominal [32%], Pod Link Online (192.168.4.15).");
+            }
+            else if (action === 'reboot') {
+                if (confirm("Execute command: REBOOT SYSTEM?")) {
+                    alert("🔁 Reboot signal dispatched to Veronica Core.");
+                }
+            }
+        }
+
+        function startOverlayTimer(mode) {
+            overlay.classList.add('active');
+            timerSeconds = 0;
+            timerEl.innerText = "00:00:00";
+            
+            if (mode === 'video') {
+                timerEl.style.color = '#ff4b82';
+                timerEl.style.textShadow = '0 0 40px rgba(255, 75, 130, 0.5)';
+                labelEl.innerHTML = '<span style="color:#ff4b82;">●</span> LIVE VIDEO RECORDING (3840×2160 @ 30 FPS)';
+                btnEl.style.borderColor = '#ff4b82';
+                btnEl.style.color = '#ff4b82';
+                btnEl.style.background = 'rgba(255, 75, 130, 0.15)';
+                statusDot.style.backgroundColor = '#ff4b82';
+                statusDot.style.animation = 'pulse-red 2s infinite';
+                statusText.innerText = 'LIVE: Video Feed Active';
+            } else {
+                timerEl.style.color = '#f1fa8c';
+                timerEl.style.textShadow = '0 0 40px rgba(241, 250, 140, 0.5)';
+                labelEl.innerHTML = '<span style="color:#f1fa8c;">●</span> LIVE PRIORITY AUDIO RECORDING';
+                btnEl.style.borderColor = '#f1fa8c';
+                btnEl.style.color = '#f1fa8c';
+                btnEl.style.background = 'rgba(241, 250, 140, 0.15)';
+                statusDot.style.backgroundColor = '#f1fa8c';
+                statusDot.style.animation = 'pulse-yellow 2s infinite';
+                statusText.innerText = 'LIVE: Audio Feed Active';
+            }
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                let h = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
+                let m = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
+                let s = String(timerSeconds % 60).padStart(2, '0');
+                timerEl.innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopOverlayTimer() {
+            overlay.classList.remove('active');
+            if (timerInterval) clearInterval(timerInterval);
+            statusDot.style.backgroundColor = '#3fb950';
+            statusDot.style.animation = 'none';
+            statusText.innerText = 'System Idle';
+        }
+
+        // 📱 20-MINUTE INACTIVITY SLEEP / SCREEN SAVER & SLIDE TO OPEN
+        const IDLE_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+        let idleTimer = null;
+
+        function resetIdleTimer() {
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(triggerIdleScreenSaver, IDLE_TIMEOUT_MS);
+        }
+
+        function triggerIdleScreenSaver() {
+            const ss = document.getElementById('idle-screensaver');
+            const now = new Date();
+            document.getElementById('screensaver-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('screensaver-date').innerText = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+            
+            const subjStatus = document.getElementById('screensaver-subj-status');
+            if (currentSubject) {
+                subjStatus.innerText = `● In Session: ${currentSubject} Lecture · Inactivity Timer Elapsed (20m)`;
+            } else {
+                subjStatus.innerText = `🔒 Lectern Standby · No Active Subject · Inactivity Timer Elapsed (20m)`;
+            }
+
+            ss.classList.add('active');
+        }
+
+        function unlockFromScreensaver() {
+            const ss = document.getElementById('idle-screensaver');
+            const thumb = document.getElementById('slide-thumb');
+            ss.classList.remove('active');
+            if (thumb) {
+                thumb.style.transition = 'left 0.3s ease';
+                thumb.style.left = '6px';
+            }
+            resetIdleTimer();
+        }
+
+        // Initialize Slide-to-Unlock drag physics
+        function initSlider() {
+            const track = document.getElementById('slide-track');
+            const thumb = document.getElementById('slide-thumb');
+            if (!track || !thumb) return;
+
+            let isDragging = false;
+            let startX = 0;
+
+            const onStart = (clientX) => {
+                isDragging = true;
+                startX = clientX - thumb.offsetLeft;
+                thumb.style.transition = 'none';
+            };
+
+            const onMove = (clientX) => {
+                if (!isDragging) return;
+                const maxDrag = track.clientWidth - thumb.clientWidth - 12;
+                let newLeft = clientX - startX;
+                if (newLeft < 6) newLeft = 6;
+                if (newLeft > maxDrag) newLeft = maxDrag;
+                thumb.style.left = newLeft + 'px';
+
+                // Unlock threshold: 75% across
+                if (newLeft >= maxDrag * 0.75) {
+                    isDragging = false;
+                    unlockFromScreensaver();
+                }
+            };
+
+            const onEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                thumb.style.transition = 'left 0.3s ease';
+                thumb.style.left = '6px';
+            };
+
+            thumb.addEventListener('mousedown', (e) => onStart(e.clientX));
+            window.addEventListener('mousemove', (e) => onMove(e.clientX));
+            window.addEventListener('mouseup', onEnd);
+
+            thumb.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
+            window.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX), { passive: true });
+            window.addEventListener('touchend', onEnd);
+
+            // Click-to-unlock fallback for touch convenience
+            track.addEventListener('click', (e) => {
+                if (e.target !== thumb) {
+                    const maxDrag = track.clientWidth - thumb.clientWidth - 12;
+                    thumb.style.transition = 'left 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+                    thumb.style.left = maxDrag + 'px';
+                    setTimeout(unlockFromScreensaver, 220);
+                }
+            });
+        }
+
+        // User activity listeners to reset 20m timer
+        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, resetIdleTimer, { passive: true });
+        });
+        resetIdleTimer();
+
+        // ☀️ THEME ENGINE
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('veronica_theme', 'dark');
+                updateThemeButton(false);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('veronica_theme', 'light');
+                updateThemeButton(true);
+            }
+        }
+
+        function updateThemeButton(isLight) {
+            const icon = document.getElementById('theme-btn-icon');
+            const text = document.getElementById('theme-btn-text');
+            if (icon && text) {
+                icon.innerText = isLight ? '🌙' : '☀️';
+                text.innerText = isLight ? 'Night Mode' : 'Day Light Mode';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLight = localStorage.getItem('veronica_theme') === 'light';
+            updateThemeButton(isLight);
+            initSlider();
+
+            // Unlock physics by default for demo convenience, but easily toggleable
+            setSubject('Physics');
+        });
+    </script>
+    <!-- 🔔 FLOATING TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-banner" id="toast-banner">
+        <span id="toast-icon">✦</span>
+        <span id="toast-text">System Ready</span>
+    </div>
+</body>
+</html>

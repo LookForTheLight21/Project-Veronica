@@ -296,7 +296,7 @@ def main():
     buzzer = BuzzerController(pod_server)
 
     # 2. Register HTTP fallback endpoints on Flask
-    register_pod_callbacks(on_key=handle_key, on_nfc=handle_nfc)
+    register_pod_callbacks(on_key=handle_key, on_nfc=handle_nfc, buzzer_ctrl=buzzer)
 
     # 3. Start Background Daemons
     threading.Thread(target=telegram_listener, daemon=True).start()

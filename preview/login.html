@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Veronica OS — Access &amp; Diagnostic Gateway</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem('veronica_theme') === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
+    <style>
+        :root { 
+            --bg-dark: #05070a;
+            --glass-bg: linear-gradient(145deg, rgba(20, 24, 32, 0.7) 0%, rgba(13, 16, 22, 0.88) 100%);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-edge-top: rgba(255, 255, 255, 0.15);
+            --neon-cyan: #7cd0ff;
+            --neon-purple: #b388ff;
+            --neon-green: #34d399;
+            --neon-amber: #fbbf24;
+            --neon-red: #ff4b82;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+
+        /* ☀️ DAY LIGHT MODE (Clean Pure White Canvas & Signature Orange) */
+        [data-theme="light"] {
+            --bg-dark: #ffffff;
+            --glass-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-edge-top: rgba(0, 0, 0, 0.03);
+            --neon-cyan: #ff6b00; /* Signature High-Gloss Orange */
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+        [data-theme="light"] body {
+            background-color: #ffffff !important;
+            background-image: none !important;
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .ambient-orb {
+            display: none !important;
+        }
+        [data-theme="light"] .login-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+        }
+        [data-theme="light"] .role-tabs {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        [data-theme="light"] .role-tab {
+            color: #64748b;
+        }
+        [data-theme="light"] .role-tab.active-tab {
+            background: #ff6b00;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        [data-theme="light"] .form-input, [data-theme="light"] .form-select {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+        [data-theme="light"] .form-select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+        [data-theme="light"] .login-btn {
+            background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%);
+            border: 1px solid rgba(255, 107, 0, 0.5);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+        }
+        [data-theme="light"] .login-title {
+            color: #0f172a;
+        }
+        [data-theme="light"] .brand-badge {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #ff6b00;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+            color: var(--text-main); 
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(124, 208, 255, 0.12) 0%, transparent 55%),
+                radial-gradient(circle at 85% 80%, rgba(179, 136, 255, 0.08) 0%, transparent 45%),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        /* Ambient Orbs */
+        .ambient-orb { 
+            position: fixed; border-radius: 50%; filter: blur(140px); z-index: -1; 
+            pointer-events: none; opacity: 0.35; animation: breathe 14s infinite alternate ease-in-out; 
+        }
+        @keyframes breathe { 
+            0% { transform: scale(1) translate(0, 0); opacity: 0.25; } 
+            100% { transform: scale(1.12) translate(25px, -25px); opacity: 0.45; } 
+        }
+        .orb-1 { top: 8%; left: 12%; width: 42vw; height: 42vw; background: rgba(88, 166, 255, 0.22); }
+        .orb-2 { bottom: 8%; right: 12%; width: 46vw; height: 46vw; background: rgba(162, 119, 255, 0.18); }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-edge-top);
+            border-radius: 26px;
+            box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(124, 208, 255, 0.12);
+            width: 100%;
+            max-width: 440px;
+            padding: 38px 34px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(10, 14, 20, 0.65);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-edge-top);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .login-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Role Selector Tabs */
+        .role-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: rgba(5, 7, 10, 0.55);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .role-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-family: inherit;
+        }
+
+        .role-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .role-tab.active-tab {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.18) 0%, rgba(162, 119, 255, 0.15) 100%);
+            border: 1px solid rgba(124, 208, 255, 0.35);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 12px rgba(124, 208, 255, 0.15);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background: rgba(10, 12, 16, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 13px 16px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(124, 208, 255, 0.28);
+            background: rgba(15, 20, 28, 0.85);
+        }
+
+        /* Styled select */
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237cd0ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .form-select option {
+            background: #0d1117;
+            color: #fff;
+            padding: 10px;
+        }
+
+        /* Classroom selector expandable panel */
+        #class-select-group {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .class-status-badge {
+            margin-top: 8px;
+            font-size: 11px;
+            padding: 7px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        .class-status-active {
+            background: rgba(52, 211, 153, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: var(--neon-green);
+        }
+
+        .class-status-pending {
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: var(--neon-amber);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.28) 0%, rgba(162, 119, 255, 0.28) 100%);
+            border: 1px solid rgba(124, 208, 255, 0.4);
+            border-radius: 14px;
+            padding: 15px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--neon-cyan);
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.45) 0%, rgba(162, 119, 255, 0.45) 100%);
+            box-shadow: 0 10px 25px rgba(124, 208, 255, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Error & Warning Boxes */
+        .notice-box {
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .notice-error {
+            background: rgba(255, 75, 130, 0.14);
+            border: 1px solid rgba(255, 75, 130, 0.4);
+            color: #ff6e99;
+        }
+
+        .notice-warning {
+            background: rgba(251, 191, 36, 0.14);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            color: #fde047;
+        }
+
+        .quick-switch-btn {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            color: #fff;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            align-self: flex-start;
+            transition: all 0.2s;
+        }
+        .quick-switch-btn:hover {
+            background: rgba(251, 191, 36, 0.35);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 22px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--neon-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
+    <div class="login-card">
+        <div class="brand-header">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <div class="brand-badge" style="margin-bottom:0;">
+                    <span>✦</span> Veronica Gateway
+                </div>
+                <button type="button" onclick="toggleTheme()" id="theme-btn" style="background:rgba(255,107,0,0.12); border:1px solid rgba(255,107,0,0.35); color:#ff6b00; border-radius:9999px; padding:5px 12px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:6px;">
+                    <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day Mode</span>
+                </button>
+            </div>
+            <h1 class="login-title" id="page-title">Diagnostic Console</h1>
+            <p class="login-sub" id="page-sub">Authenticate to access device configuration and system metrics</p>
+        </div>
+
+        <!-- Role Selector Tabs -->
+        <div class="role-tabs">
+            <button type="button" class="role-tab active-tab" id="tab-technician" onclick="setRole('technician')">
+                <span>🛠️</span> Technician
+            </button>
+            <button type="button" class="role-tab" id="tab-principal" onclick="setRole('principal')">
+                <span>🎓</span> Principal
+            </button>
+        </div>
+
+        <!-- Notice / Error Banner -->
+        <div class="notice-box notice-error" id="notice-box">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span id="notice-icon">⚠️</span> 
+                <span id="notice-text">Invalid diagnostic passkey</span>
+            </div>
+            <div id="notice-action" style="display:none;"></div>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <!-- Username Input -->
+            <div class="form-group">
+                <label class="form-label">
+                    <span id="user-label">Technician Handle</span>
+                    <span style="font-size:10px; opacity:0.6; font-family:'JetBrains Mono', monospace;" id="user-hint">Chorie</span>
+                </label>
+                <input type="text" class="form-input" id="username" placeholder="e.g. Chorie or principle" required autofocus value="Chorie" oninput="detectRoleFromUsername()"/>
+            </div>
+
+            <!-- Classroom Selector (Dynamic for Principal) -->
+            <div class="form-group" id="class-select-group" style="display: none;">
+                <label class="form-label">
+                    <span>Target Classroom Node</span>
+                    <span style="font-size:10px; color:var(--neon-cyan); font-weight:700;">PILOT: CLASS X</span>
+                </label>
+                <select class="form-select" id="classroom" onchange="onClassroomChange()">
+                    <option value="Class 1">Class 1 (Hardware Pending)</option>
+                    <option value="Class 2">Class 2 (Hardware Pending)</option>
+                    <option value="Class 3">Class 3 (Hardware Pending)</option>
+                    <option value="Class 4">Class 4 (Hardware Pending)</option>
+                    <option value="Class 5">Class 5 (Hardware Pending)</option>
+                    <option value="Class 6">Class 6 (Hardware Pending)</option>
+                    <option value="Class 7">Class 7 (Hardware Pending)</option>
+                    <option value="Class 8">Class 8 (Hardware Pending)</option>
+                    <option value="Class 9">Class 9 (Hardware Pending)</option>
+                    <option value="Class X" selected>✦ Class X (Veronica Smart Pod — Online)</option>
+                    <option value="Class 11">Class 11 (Hardware Pending)</option>
+                    <option value="Class 12">Class 12 (Hardware Pending)</option>
+                </select>
+                <div id="class-status-badge" class="class-status-badge class-status-active">
+                    <span>🟢</span> <span>Active Node: Smart Lectern hardware online in Class X</span>
+                </div>
+            </div>
+
+            <!-- Security Passkey -->
+            <div class="form-group">
+                <label class="form-label">
+                    <span>Security Passkey</span>
+                    <span style="font-size:10px; opacity:0.6; font-family:'JetBrains Mono', monospace;">Default: 1234</span>
+                </label>
+                <input type="password" class="form-input" id="password" placeholder="••••••••" required value="1234"/>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="login-btn" id="submit-btn">
+                <span id="btn-text">Authorize &amp; Enter Console</span>
+                <span id="btn-arrow">➔</span>
+            </button>
+        </form>
+
+        <a href="/" class="back-link">← Return to Teacher Command Center</a>
+    </div>
+
+    <script>
+        let currentRole = 'technician';
+
+        function setRole(role, preserveValue = false) {
+            currentRole = role;
+            const tabTech = document.getElementById('tab-technician');
+            const tabPrin = document.getElementById('tab-principal');
+            const userInp = document.getElementById('username');
+            const classGroup = document.getElementById('class-select-group');
+            const pageTitle = document.getElementById('page-title');
+            const pageSub = document.getElementById('page-sub');
+            const userLabel = document.getElementById('user-label');
+            const userHint = document.getElementById('user-hint');
+            const btnText = document.getElementById('btn-text');
+            const noticeBox = document.getElementById('notice-box');
+
+            noticeBox.style.display = 'none';
+
+            if (role === 'principal') {
+                tabPrin.classList.add('active-tab');
+                tabTech.classList.remove('active-tab');
+                if (!preserveValue) userInp.value = 'principle';
+                userLabel.innerText = 'Principal Account ID';
+                userHint.innerText = 'principle';
+                pageTitle.innerText = "Principal's Audit Portal";
+                pageSub.innerText = "Inspect lecture media ledgers and classroom delivery logs";
+                classGroup.style.display = 'block';
+                onClassroomChange();
+            } else {
+                tabTech.classList.add('active-tab');
+                tabPrin.classList.remove('active-tab');
+                if (!preserveValue) userInp.value = 'Chorie';
+                userLabel.innerText = 'Technician Handle';
+                userHint.innerText = 'Chorie';
+                pageTitle.innerText = "Diagnostic Console";
+                pageSub.innerText = "Field technician & hardware engineering control";
+                classGroup.style.display = 'none';
+                btnText.innerText = 'Authorize & Enter Console';
+            }
+        }
+
+        function detectRoleFromUsername() {
+            const val = document.getElementById('username').value.trim().toLowerCase();
+            if (val === 'principle' || val === 'principal') {
+                if (currentRole !== 'principal') setRole('principal', true);
+            } else if (val === 'chorie') {
+                if (currentRole !== 'technician') setRole('technician', true);
+            }
+        }
+
+        function onClassroomChange() {
+            const sel = document.getElementById('classroom').value;
+            const badge = document.getElementById('class-status-badge');
+            const btnText = document.getElementById('btn-text');
+            const noticeBox = document.getElementById('notice-box');
+            noticeBox.style.display = 'none';
+
+            if (sel === 'Class X') {
+                badge.className = 'class-status-badge class-status-active';
+                badge.innerHTML = '<span>🟢</span> <span>Active Node: Smart Lectern hardware online in Class X</span>';
+                if (currentRole === 'principal') {
+                    btnText.innerText = 'Access Class X Academic Ledger';
+                }
+            } else {
+                badge.className = 'class-status-badge class-status-pending';
+                badge.innerHTML = '<span>⚠️</span> <span>Node Inactive: Veronica hardware pending in ' + sel + '</span>';
+                if (currentRole === 'principal') {
+                    btnText.innerText = 'Query Node Status (' + sel + ')';
+                }
+            }
+        }
+
+        function switchToClassX() {
+            document.getElementById('classroom').value = 'Class X';
+            onClassroomChange();
+            // Automatically submit after switching
+            document.getElementById('login-form').requestSubmit();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const c = document.getElementById('classroom').value;
+            const btn = document.getElementById('submit-btn');
+            const noticeBox = document.getElementById('notice-box');
+            const noticeText = document.getElementById('notice-text');
+            const noticeAction = document.getElementById('notice-action');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Verifying Node Access...</span>';
+            noticeBox.style.display = 'none';
+            noticeAction.style.display = 'none';
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p, classroom: c })
+            })
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                return { status: res.status, ok: res.ok, data };
+            })
+            .then(result => {
+                const data = result.data;
+                if (result.ok && data.status === 'ok') {
+                    // Successful login
+                    window.location.href = data.redirect || (currentRole === 'principal' ? '/report' : '/admin');
+                } else if (data.status === 'not_installed') {
+                    // Node not installed in selected classroom
+                    noticeBox.className = 'notice-box notice-warning';
+                    noticeText.innerHTML = data.message || ('Veronica Lectern is currently installed only in Class X (Pilot Node).');
+                    noticeAction.innerHTML = '<button type="button" class="quick-switch-btn" onclick="switchToClassX()">✦ Switch to Class X &amp; Open Ledger</button>';
+                    noticeAction.style.display = 'block';
+                    noticeBox.style.display = 'flex';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Query Node Status (' + c + ')</span> <span>➔</span>';
+                } else {
+                    // Authentication error
+                    noticeBox.className = 'notice-box notice-error';
+                    noticeText.innerText = data.message || 'Access Denied: Invalid credentials.';
+                    noticeBox.style.display = 'flex';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Authorize &amp; Enter</span> <span>➔</span>';
+                }
+            })
+            .catch(() => {
+                // Client-side fallback check for static preview / offline mode
+                const uLower = u.toLowerCase();
+                if (uLower === 'chorie' && p === '1234') {
+                    document.cookie = "veronica_admin_session=active; path=/; max-age=86400";
+                    window.location.href = '/admin';
+                } else if ((uLower === 'principle' || uLower === 'principal') && p === '1234') {
+                    if (c === 'Class X') {
+                        document.cookie = "veronica_principal_session=active; path=/; max-age=86400";
+                        window.location.href = '/report';
+                    } else {
+                        noticeBox.className = 'notice-box notice-warning';
+                        noticeText.innerHTML = 'Hardware Offline: Veronica Lectern is not yet installed in ' + c + '. Active pilot is in Class X.';
+                        noticeAction.innerHTML = '<button type="button" class="quick-switch-btn" onclick="switchToClassX()">✦ Switch to Class X &amp; Open Ledger</button>';
+                        noticeAction.style.display = 'block';
+                        noticeBox.style.display = 'flex';
+                        btn.disabled = false;
+                        btn.innerHTML = '<span>Query Node Status (' + c + ')</span> <span>➔</span>';
+                    }
+                } else {
+                    noticeBox.className = 'notice-box notice-error';
+                    noticeText.innerText = 'Access Denied: Invalid credentials.';
+                    noticeBox.style.display = 'flex';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Authorize &amp; Enter</span> <span>➔</span>';
+                }
+            });
+        }
+
+        // ☀️ THEME ENGINE
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('veronica_theme', 'dark');
+                updateThemeButton(false);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('veronica_theme', 'light');
+                updateThemeButton(true);
+            }
+        }
+
+        function updateThemeButton(isLight) {
+            const icon = document.getElementById('theme-btn-icon');
+            const text = document.getElementById('theme-btn-text');
+            if (icon && text) {
+                icon.innerText = isLight ? '🌙' : '☀️';
+                text.innerText = isLight ? 'Night' : 'Day';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLight = localStorage.getItem('veronica_theme') === 'light';
+            updateThemeButton(isLight);
+        });
+    </script>
+</body>
+</html>
