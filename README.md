@@ -4,90 +4,92 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Raspberry Pi 5](https://img.shields.io/badge/Platform-Raspberry%20Pi%205-red.svg)]()
 
-Project Veronica is a distributed, multimodal lecture-capture and classroom telemetry system designed for low-cost, resource-constrained educational environments. It combines a physical teacher console, edge compute on a Raspberry Pi 5, real-time classroom capture, WhatsApp/Telegram notifications, Google Drive archival, and a local Flask dashboard for diagnostics and subject tracking.
+Project Veronica is a distributed, multimodal classroom capture and edge-control system built for low-cost, resource-constrained schools. It combines a physical lectern interface with a Raspberry Pi-based orchestration layer to record teacher activity, compile classroom notes, manage subject context, and publish live classroom data to local dashboards, Telegram, and Google Drive.
 
-This repository contains the full system implementation for the two-tier edge architecture:
-
-- Tier 1: ESP32 lectern pod with keypad, NFC, and buzzer
-- Tier 2: Raspberry Pi 5 edge hub with camera, audio capture, dashboard, Telegram integration, and Drive upload workflows
+The system is designed around a practical classroom reality: limited infrastructure, unreliable network access, and the need for tactile operation when digital systems fail. Veronica is intentionally built as an edge-first prototype that works with local capture first and cloud synchronization later.
 
 ---
 
 ## Overview
 
-Underfunded rural and Tier-2 classrooms often cannot afford commercial interactive flat panels or expensive AV systems. Project Veronica creates a screenless, tactile-first lecture appliance that enables teachers to:
+Project Veronica was designed for schools and teachers who need a low-cost digital teaching surface without a full commercial interactive panel installation. The system allows a teacher to:
 
 - log in with NFC badges
-- switch classroom subject context with a physical input
-- take instant photographs of the board
-- start and stop lecture audio/video capture
-- publish notes as compiled PDF bundles
-- push status updates to Telegram and Google Drive
+- switch subject context with physical input
+- capture board images and notes
+- record audio or video lecture content
+- compile captured session pages into PDF notes
+- publish updates to Telegram and Google Drive
 - launch a projector-facing classroom view
-- monitor system health from a web dashboard
+- monitor the system through a local dashboard and diagnostics portal
+- trigger secure shutdown or reboot with a physical passcode
 
-The system is intentionally designed to function as an edge-first kit: minimal infrastructure, local recording first, cloud sync later, and physical controls that work even when internet connectivity is poor.
+This repository contains the full implementation of the two-tier architecture, including the embedded logic for the teacher pod, the edge hub orchestrator, dashboard templates, diagnostic tools, and deployment-related design assets.
 
 ---
 
 ## System architecture
 
-### Tier 1 — Teacher Lectern Pod (ESP32)
+### Tier 1 — Teacher lectern pod (ESP32)
 
-The lectern pod is responsible for low-latency physical input and local feedback.
+The ESP32-based lectern pod handles low-latency physical interaction and immediate feedback.
 
 Hardware components:
 
 - ESP32-WROOM-32D microcontroller
-- TTP229 keypad scanner for 16-key matrix input
-- PN532 NFC reader via I2C
-- Active buzzer for confirmation and alerts
-- Wi-Fi link to the Raspberry Pi 5 host
+- TTP229 keypad scanner
+- PN532 NFC reader
+- Active/passive buzzer
+- Wi-Fi radio link to the Pi 5
 
-Key responsibilities:
+Responsibilities:
 
-- capture keypad events
-- read NFC teacher IDs and subject actions
-- send events over TCP to the Pi 5
-- provide tactile feedback using the buzzer
+- receive keypad inputs
+- read NFC teacher IDs and action tags
+- send event data to the Raspberry Pi via TCP
+- provide local tactile confirmation using the buzzer
 
-### Tier 2 — Overhead Edge Compute Hub (Raspberry Pi 5)
+### Tier 2 — Edge compute hub (Raspberry Pi 5)
 
-The Pi 5 acts as the edge orchestration and processing hub.
+The Raspberry Pi 5 acts as the orchestration and processing hub for the entire classroom workflow.
 
 Hardware components:
 
 - Raspberry Pi 5
-- Kreo Owl 4K camera or equivalent USB webcam
+- Kreo Owl 4K camera or compatible USB camera
 - USB conference microphone
-- Classroom display/projector output
-- Local Flask dashboard and telemetry web UI
+- local projector display output
+- Flask-based dashboard and diagnostics interface
 
-Key responsibilities:
+Responsibilities:
 
 - receive pod events from the ESP32
-- manage subject and recording state
-- capture board images and multi-page notes
-- compile lecture PDFs from captured frames
-- stream media to Telegram and Google Drive
-- expose local admin and projector endpoints
-- enforce secure shutdown/reboot flow with a physical passcode
+- manage subject context and recording state
+- capture board images and notes
+- compile multi-page lecture PDFs
+- stream content and notifications to Telegram and Drive
+- expose local classroom and admin web endpoints
+- handle secure shutdown/reboot flow with a physical passcode
 
 ---
 
-## Core features
+## Current feature set
+
+The repository includes the following operational features and workflows:
 
 - NFC-based teacher login and subject handoff
-- Subject-aware note collection across classes
-- Photo capture and board documentation
-- Audio-only and video+audio recording modes
-- Automatic PDF compilation for lecture sessions
-- Local spooling and failover for offline synchronization
-- Telegram notifications, reports, and admin alerting
-- Google Drive archival and file upload workflow
-- Flask dashboard for classroom telemetry and service status
-- Secure physical shutdown/restart sequence: 1-9-2-7
-- Projector view endpoint for back-row student access
+- subject-aware session tracking across classes
+- photo capture and board-note accumulation
+- audio-only and video + audio lecture recording
+- automatic or manual PDF compilation from session captures
+- offline spooling and upload retry workflow for Drive/Telegram
+- Telegram notifications, classroom reports, and admin alerts
+- Google Drive archival and file upload support
+- Flask dashboard and local web endpoints
+- projector view for classroom display
+- secure physical shutdown/restart flow using the 1-9-2-7 sequence
+- dynamic configuration engine for field technician updates
+- local preview server for simulation and UI testing without hardware
 
 ---
 
@@ -99,12 +101,15 @@ Project-Veronica/
 ├── BOM.csv
 ├── LICENSE
 ├── README.md
+├── config.json
 ├── main.py
+├── preview_server.py
 ├── requirements.txt
 ├── test_cam.py
 ├── veronica_schematic.kicad_sch
 ├── Veronica schmatic.svg
 ├── cad/
+├── docs/
 ├── esp32_firmware/
 ├── modules/
 │   ├── __init__.py
@@ -118,18 +123,29 @@ Project-Veronica/
 │   ├── system_utils.py
 │   ├── telegram_bot.py
 │   └── web_dashboard.py
-└── storage/
-    ├── photos/
-    ├── videos/
-    └── notes/
+├── preview/
+├── storage/
+│   ├── photos/
+│   ├── videos/
+│   └── notes/
+├── templates/
+│   ├── admin.html
+│   ├── index.html
+│   ├── login.html
+│   ├── projector.html
+│   ├── report.html
+│   └── sample_board.svg
+└── __pycache__/
 ```
 
-The main runtime entry point is:
+Key runtime entry points:
 
-- `main.py` — bootstraps the system by importing the core module logic
-- `modules/main.py` — primary event loop, controller logic, and service startup
-- `modules/config.py` — device mappings, credentials, network configuration, and key definitions
-- `modules/web_dashboard.py` — Flask dashboard and classroom endpoints
+- `main.py` — top-level launcher for the system
+- `modules/main.py` — orchestration loop, event handling, pod receiver, startup routines
+- `modules/config.py` — default runtime settings, hardware mappings, dynamic config engine
+- `modules/web_dashboard.py` — Flask dashboard, admin portal, projector route, command endpoints
+- `preview_server.py` — local simulation server for previewing UI and diagnostics without hardware
+- `templates/` — web templates for dashboard, projector, login, admin, and report views
 
 ---
 
@@ -137,7 +153,7 @@ The main runtime entry point is:
 
 ### ESP32 lectern pod
 
-Key hardware mapping used by the project:
+Core mapping used by the system:
 
 | Peripheral | Connection |
 |---|---|
@@ -149,13 +165,11 @@ Key hardware mapping used by the project:
 | Power | 3.3V / 5V rail |
 | Ground | Common GND |
 
-The TP229 keypad is configured for active-low serial key scanning, and the PN532 handles NFC identity events. The full ESP32 firmware and setup notes can be found in `esp32_firmware/`.
+The pod communicates with the Pi over Wi-Fi and drives short tactile response codes during subject changes, recording events, and system alerts.
 
 ### Raspberry Pi 5 edge hub
 
-The Pi 5 runs the main orchestration service and captures from the classroom sensor stack.
-
-Configured defaults in `modules/config.py`:
+Default camera and media parameters defined in `modules/config.py` include:
 
 - `POD_SERVER_HOST = "0.0.0.0"`
 - `POD_SERVER_PORT = 8765`
@@ -163,12 +177,11 @@ Configured defaults in `modules/config.py`:
 - `KERO_AUDIO_DEVICE = "plughw:CARD=webcam,DEV=0"`
 - `KERO_WIDTH = 3840`
 - `KERO_HEIGHT = 2160`
+- `KERO_FPS = 30`
 
 ---
 
-## Key behavior and control mappings
-
-The project uses both physical key input and NFC actions to drive the edge workflow.
+## Key input and action mapping
 
 ### Mode keys
 
@@ -180,13 +193,14 @@ The project uses both physical key input and NFC actions to drive the edge workf
 | 4 | PRIORITY_AUDIO_TOGGLE |
 | 6 | STATS |
 | 7 | STOP |
+| 8 | COMPILE_PDF |
 | 13 | CLEAR_SUBJECT |
 | 14 | SECURE_SHUTDOWN |
 | 15 | SECURE_RESTART |
 
 ### Subject and NFC mappings
 
-The system maps known RFID tags to subject names and operational actions:
+The system recognizes subject-based NFC tags and action tags such as:
 
 - `Physics`
 - `Chemistry`
@@ -199,26 +213,102 @@ The system maps known RFID tags to subject names and operational actions:
 
 ### Emergency security flow
 
-A four-digit physical sequence is enforced for critical functions:
+A four-digit physical sequence is enforced for critical actions:
 
 - `1-9-2-7`
 
-This sequence is used to trigger shutdown or reboot safely from the lectern hardware interface.
+This sequence is used to confirm a shutdown or reboot request from the lectern interface and prevents accidental destructive operations.
+
+---
+
+## Dynamic configuration and field updates
+
+The project now includes a dynamic configuration engine in `modules/config.py` that persists environment-specific settings in a root-level `config.json` file.
+
+This allows a technician to update values without editing source code directly, including:
+
+- Wi-Fi SSID and password
+- pod host and port
+- Telegram token and chat ID
+- allowed users
+- Google Drive folder ID
+- camera and audio device configuration
+- recording timeout values
+- subject and action mappings
+- admin credentials
+
+The runtime configuration is loaded from `config.json` on import, and can also be saved and reloaded via the diagnostic admin route.
+
+---
+
+## Web dashboard and admin features
+
+The project exposes a local web stack for classroom and admin control.
+
+### Endpoints
+
+- `/` — command center dashboard
+- `/projector` — full-screen projector view for back-row students
+- `/report` — principal / audit report page
+- `/login` — technician and principal login UI
+- `/admin` — engineering and diagnostic control portal
+- `/api/latest_asset` — latest photo, PDF, recording state, and telemetry JSON
+- `/api/admin/config` — read runtime configuration
+- `/api/admin/save_config` — update config values dynamically
+- `/api/admin/test_buzzer` — dispatch a hardware test tone
+- `/api/admin/test_telegram` — send a Telegram verification ping
+- `/cmd/<action>` — REST triggers for photo, video, audio, subject switching, stats, and reboot actions
+- `/media/<folder>/<filename>` — local media asset routing for photos, notes, and videos
+
+### Authentication
+
+The live admin portal recognizes:
+
+- technician login: `Chorie / 1234`
+- principal login: `principal / 1234`
+
+---
+
+## Local preview mode
+
+A standalone `preview_server.py` is included to simulate the operational UI without hardware dependencies.
+
+This is useful for:
+
+- UI review
+- local dashboard development
+- testing admin flows and endpoints
+- validating simulated classroom state without Raspberry Pi hardware
+
+Run it with:
+
+```bash
+python3 preview_server.py
+```
+
+Then open:
+
+- `http://localhost:5000/`
+- `http://localhost:5000/projector`
+- `http://localhost:5000/report`
+- `http://localhost:5000/login`
+- `http://localhost:5000/admin`
 
 ---
 
 ## Software stack
 
-The project is built with Python and edge hardware tooling:
+The project is built around Python and edge hardware tooling:
 
 - Python 3.11+
-- Flask for the dashboard and local web endpoints
-- OpenCV for image-processing and camera tasks
+- Flask for dashboard and API services
+- OpenCV and camera processing utilities
 - FFmpeg for media capture and muxing
-- GPIO access via `gpiozero` and hardware interfaces
-- Google API client for Drive uploads
-- Telegram bot integration for live classroom updates
-- Adafruit PN532 support for NFC communication
+- Pillow for image workflows
+- Google API client for Drive integration
+- `requests`, `psutil`, and supporting Python libs
+- GPIO and hardware integration for the ESP32 and Pi stack
+- Telegram bot integration for notifications and alerts
 
 Install dependencies with:
 
@@ -228,6 +318,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+System packages often needed on the Raspberry Pi:
+
+```bash
+sudo apt update
+sudo apt install -y python3-pip python3-opencv ffmpeg v4l2-utils
+```
+
 ---
 
 ## Quick start
@@ -235,63 +332,67 @@ pip install -r requirements.txt
 ### 1. Install dependencies
 
 ```bash
-sudo apt update && sudo apt install -y python3-pip python3-opencv fswebcam ffmpeg v4l2-utils
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure device settings
+### 2. Configure the deployment
 
-Edit `modules/config.py` to match your local classroom setup:
+Edit `config.json` or the runtime values in `modules/config.py` to match your classroom setup:
 
-- Wi-Fi SSID/password for the Pi-to-ESP32 link
-- Telegram bot token and chat ID
+- Wi-Fi SSID and password
+- Raspberry Pi pod server settings
+- Telegram token and chat ID
 - Google Drive folder ID
-- Camera and microphone device paths
-- project-specific subject mapping
+- camera and microphone device paths
+- admin and technician credentials
+- subject mapping and action tags
 
-### 3. Launch the system
+### 3. Launch the main system
 
 ```bash
 python3 main.py
 ```
 
-This starts the local services, the pod receiver, the camera/audio handlers, and the Flask web dashboard.
+### 4. Access the classroom interfaces
 
-### 4. Access the dashboard
-
-Once running, the system exposes:
+Once running, the system exposes the following local endpoints:
 
 - `http://0.0.0.0:5000`
 - `http://0.0.0.0:5000/projector`
 - `http://0.0.0.0:5000/report`
+- `http://0.0.0.0:5000/admin`
 
 ---
 
-## Notes and workflow
+## Operational workflow
 
-Project Veronica is optimized for a real classroom workflow:
+A typical teaching session follows this flow:
 
-1. Teacher taps NFC badge or uses subject key input.
-2. Subject context is associated with the class session.
-3. Board image captures are stored in the session photo set.
-4. Teacher can record audio or video while teaching.
-5. At the end of the period, the session can be finalized into a PDF or uploaded.
-6. Telegram and Google Drive receive updates and archival outputs.
+1. Teacher taps an NFC badge or presses a subject key on the lectern.
+2. Subject context is associated with the active class session.
+3. Teacher captures board images and notes during instruction.
+4. Audio or video recording is started based on classroom needs.
+5. Session content is compiled into a PDF or uploaded to Drive.
+6. Telegram and local dashboards continue to reflect classroom status.
+7. A secure physical passcode can be used to shut down or reboot the system when necessary.
 
-This enables a low-friction, physical-first experience in classrooms that do not have reliable digital infrastructure or expensive institutional equipment.
+This creates a low-friction, physical-first teaching experience optimized for classrooms that do not have expensive proprietary AV systems or strong network infrastructure.
 
 ---
 
 ## Design references
 
-The repository includes supporting design artifacts:
+Additional project artifacts are included in the repository:
 
-- `ARCHITECTURE.md` — architecture and system topology
-- `BOM.csv` — bill of materials for the build
+- `ARCHITECTURE.md` — architecture and design notes
+- `BOM.csv` — bill of materials
 - `veronica_schematic.kicad_sch` — KiCad schematic
-- `Veronica schmatic.svg` — vector schematic export
-- `cad/` — CAD/physical design materials
-- `esp32_firmware/` — embedded firmware and wiring guide
+- `Veronica schmatic.svg` — vector diagram export
+- `cad/` — design and enclosure references
+- `esp32_firmware/` — embedded pod firmware and wiring-related files
+- `docs/` — supporting documentation and deployment notes
 
 ---
 
@@ -303,26 +404,29 @@ This project is licensed under the MIT License. See `LICENSE` for details.
 
 ## Contribution notes
 
-This project is intended as a practical education-focused hardware + software prototype. Contributions are welcome if they improve:
+This project is intended as a practical, education-focused hardware + software prototype. Contributions are welcome in areas such as:
 
-- edge reliability
-- classroom usability
+- edge reliability and fault tolerance
+- classroom usability and control ergonomics
 - hardware compatibility
 - media processing quality
 - offline resilience
-- low-cost deployment practice
+- low-cost deployment patterns
 
 ---
 
 ## Status
 
-This repository reflects the current implementation of the Project Veronica system with:
+The current repository reflects the active implementation of the Project Veronica system, including:
 
-- ESP32 lectern hardware integration
-- Raspberry Pi 5 edge orchestration
-- subject- and action-aware key handling
-- Telegram + Drive integration
-- projector dashboard outputs
-- secure physical control flow
+- ESP32 lectern pod integration
+- Raspberry Pi 5 orchestration loop
+- dynamic configuration engine
+- live dashboard and admin control interface
+- projector and reporting endpoints
+- Telegram and Drive automation
+- subject-aware note capture and PDF output
+- secure physical control sequence
+- local preview / simulation tooling
 
-The implementation is ready as a prototype and deployment-oriented reference architecture for classroom edge IoT capture systems.
+This is a working prototype and reference architecture for an edge-first classroom capture and telemetry platform.
