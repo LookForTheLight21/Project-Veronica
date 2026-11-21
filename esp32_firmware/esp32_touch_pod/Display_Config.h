@@ -22,7 +22,7 @@
 #define TOUCH_IRQ      27   // Touch Interrupt (optional)
 
 // ── Peripherals ──
-#define BUZZER_PIN     19   // Buzzer module I/O trigger (moved from 25 to 19 for 8-bit parallel bus)
+#define BUZZER_PIN     15   // Buzzer module I/O trigger on GPIO 15
 #define BUZZER_FREQ  2000   // 2kHz resonant frequency
 #define PN532_SDA      21   // NFC I2C SDA (GPIO 21 on ESP32)
 #define PN532_SCL      22   // NFC I2C SCL (GPIO 22 on ESP32)

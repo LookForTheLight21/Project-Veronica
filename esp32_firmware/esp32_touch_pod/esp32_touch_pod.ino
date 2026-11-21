@@ -763,7 +763,7 @@ void setup() {
   // 1. Buzzer setup & immediate boot beep
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
-  Serial.println("🔊 Testing Passive Buzzer on GPIO 25...");
+  Serial.printf("🔊 Testing Passive Buzzer on GPIO %d...\n", BUZZER_PIN);
   playTone(2000, 80);
   delay(40);
   playTone(3000, 100);

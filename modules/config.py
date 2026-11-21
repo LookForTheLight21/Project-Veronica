@@ -62,7 +62,7 @@ BUZZER_FREQ = 2000                  # Resonant frequency in Hz for passive piezo
 INACTIVITY_TIMEOUT_SEC = 1200       # 20 minutes idle timeout before auto-compiling lecture PDF
 
 ESP32_PINS = {
-    "BUZZER": 23,     # Passive PWM Piezo driven via NPN BC547 buffer
+    "BUZZER": 15,     # Passive PWM Piezo driven via NPN BC547 buffer on GPIO 15
     "TTP229_SCL": 18, # Serial Clock
     "TTP229_SDO": 19, # Serial Data Out (active-low)
     "PN532_SDA": 21,  # I2C Data

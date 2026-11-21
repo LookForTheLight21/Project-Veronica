@@ -4,7 +4,7 @@
   ║  Hardware Controller: ESP32-WROOM-32D (30-pin)                            ║
   ║  Peripherals:                                                             ║
   ║    • PN532 NFC Module over I2C: SDA -> GPIO 21, SCL -> GPIO 22            ║
-  ║    • Passive Piezo Buzzer: Signal -> GPIO 19                              ║
+  ║    • Passive Piezo Buzzer: Signal -> GPIO 15                              ║
   ║  Function:                                                                ║
   ║    • Zero-friction teacher badge tap & dispatch via Wi-Fi TCP to Pi 5     ║
   ║    • Acoustic feedback chimes on badge scan and system alerts             ║
@@ -19,7 +19,7 @@
 // ══════════════════════════════════════════════════════════════════════
 // 1. PIN CONFIGURATION (Soldered Pins)
 // ══════════════════════════════════════════════════════════════════════
-#define BUZZER_PIN     19     // Passive buzzer pin (tone() PWM driven)
+#define BUZZER_PIN     15     // Passive buzzer pin (tone() PWM driven)
 #define BUZZER_FREQ  2000     // 2kHz resonant chime frequency
 #define PN532_SDA      21     // I2C Data
 #define PN532_SCL      22     // I2C Clock
