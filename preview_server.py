@@ -54,6 +54,8 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
         
         if url in ["/", "/index.html"]:
             self._serve_file("index.html", "text/html; charset=utf-8")
+        elif url in ["/pod", "/pod_touch", "/pod.html", "/pod_touch.html"]:
+            self._serve_file("pod_touch.html", "text/html; charset=utf-8")
         elif url == "/projector":
             self._serve_file("projector.html", "text/html; charset=utf-8")
         elif url == "/report":
@@ -257,6 +259,7 @@ def run_server(port=5000):
         print("  PROJECT VERONICA — DIAGNOSTIC & OPERATIONAL PREVIEW SERVER")
         print("=" * 65)
         print(f"  👉 Teacher Command Center:  http://localhost:{port}/")
+        print(f"  👉 3.5\" Touchscreen Pod:   http://localhost:{port}/pod")
         print(f"  👉 Classroom Projector:    http://localhost:{port}/projector")
         print(f"  👉 Principal Ledger:       http://localhost:{port}/report")
         print(f"  👉 Diagnostic Login:       http://localhost:{port}/login")

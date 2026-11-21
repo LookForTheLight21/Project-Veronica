@@ -141,6 +141,30 @@ def projector_view():
     return "<h3>Projector template not found</h3>", 404
 
 
+@app.route("/pod")
+@app.route("/pod_touch")
+def pod_touch_view():
+    path = os.path.join(TEMPLATES_DIR, "pod_touch.html")
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h3>Touch Pod template not found</h3>", 404
+
+
+# ==============================================================================
+# 🖥️ PI 5 FULL-SCREEN KIOSK DASHBOARD (Runs in Chromium on Pi 5's MPI3501 display)
+# ==============================================================================
+@app.route("/pi")
+@app.route("/kiosk")
+def pi_dashboard():
+    """Full-screen lectern UI optimised for Pi 5's 480×320 MPI3501 display."""
+    path = os.path.join(TEMPLATES_DIR, "pi_dashboard.html")
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h3>Pi Dashboard template not found</h3>", 404
+
+
 # ==============================================================================
 # 🎛️ COMMAND CENTER WEB DASHBOARD
 # ==============================================================================

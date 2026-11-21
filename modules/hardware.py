@@ -44,11 +44,12 @@ class PodReceiverServer:
     Accepts incoming TCP/UDP connections, parses JSON telemetry,
     and dispatches keypresses and NFC card events in real time (<10ms).
     """
-    def __init__(self, host=POD_SERVER_HOST, port=POD_SERVER_PORT, on_key=None, on_nfc=None):
+    def __init__(self, host=POD_SERVER_HOST, port=POD_SERVER_PORT, on_key=None, on_nfc=None, on_cmd=None):
         self.host = host
         self.port = port
         self.on_key = on_key
         self.on_nfc = on_nfc
+        self.on_cmd = on_cmd
         self.running = False
         self.active_client_sock = None
         self._lock = threading.Lock()
@@ -147,7 +148,26 @@ class PodReceiverServer:
                 if key_num is not None:
                     self.on_key(int(key_num))
 
-            # 2. NFC Card Event from ESP32 (PN532)
+            # 2. Touchscreen Command Event from ESP32 3.5" Pod
+            elif event_type == "cmd":
+                action = msg.get("action", "").lower()
+                print(f"📱 [ESP32 Touch Pod]: Wireless Command -> {action}")
+                if self.on_cmd:
+                    self.on_cmd(action)
+                elif self.on_key:
+                    cmd_to_key = {
+                        "photo": 1,
+                        "video": 2,
+                        "audio": 3,
+                        "stop": 7,
+                        "compile_pdf": 8,
+                        "report": 6,
+                        "reboot": 15
+                    }
+                    if action in cmd_to_key:
+                        self.on_key(cmd_to_key[action])
+
+            # 3. NFC Card Event from ESP32 (PN532)
             elif event_type == "nfc" and self.on_nfc:
                 uid_str = msg.get("uid", "").upper()
                 mapped_val = NFC_MAP.get(uid_str)
@@ -156,7 +176,7 @@ class PodReceiverServer:
                 else:
                     print(f"ℹ️  Unregistered NFC Card UID: {uid_str}")
 
-            # 3. Heartbeat telemetry
+            # 4. Heartbeat telemetry
             elif event_type == "heartbeat":
                 state.pod_connected = True
                 state.pod_last_seen = time.time()

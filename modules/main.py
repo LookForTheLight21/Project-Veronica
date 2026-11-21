@@ -270,6 +270,83 @@ def handle_nfc(result):
 
 
 # ═══════════════════════════════════════════════════════════════
+#  TOUCHSCREEN COMMAND HANDLER (Dispatched on ESP32 3.5" Pod events)
+# ═══════════════════════════════════════════════════════════════
+
+def handle_touch_cmd(action):
+    """Dispatches direct touch screen commands streamed wirelessly from the ESP32 3.5\" Pod."""
+    global buzzer
+    action = action.lower()
+    print(f"📱 [Touch Pod Action]: {action}")
+
+    if action == "photo":
+        if buzzer: buzzer.beep(1)
+        threading.Thread(target=take_photo_and_upload, daemon=True).start()
+
+    elif action == "compile_pdf":
+        if buzzer: buzzer.beep(2)
+        with state.state_lock:
+            photos_to_send = list(state.session_photos)
+            subj_to_send = state.current_subject or "General"
+            state.session_photos = []
+        if photos_to_send:
+            threading.Thread(
+                target=compile_and_publish_session_pdf,
+                args=(photos_to_send, subj_to_send),
+                daemon=True
+            ).start()
+        else:
+            print("ℹ️ No chalkboard photos in active session to compile.")
+
+    elif action == "video":
+        if not state.recording:
+            start_video_audio()
+            if buzzer: buzzer.beep(1)
+        else:
+            stop_video_audio()
+            if buzzer: buzzer.beep(2)
+
+    elif action == "audio":
+        if not state.audio_recording:
+            start_audio_only()
+            if buzzer: buzzer.beep(1)
+        else:
+            stop_audio_only()
+            if buzzer: buzzer.beep(2)
+
+    elif action == "stop":
+        if state.recording:
+            stop_video_audio()
+            if buzzer: buzzer.beep(2)
+        elif state.audio_recording:
+            stop_audio_only()
+            if buzzer: buzzer.beep(2)
+
+    elif action.startswith("subj_"):
+        new_subj = action.replace("subj_", "").capitalize()
+        if new_subj == "Comp": new_subj = "Computer Science"
+        elif new_subj == "Math": new_subj = "Mathematics"
+        
+        with state.state_lock:
+            prev_photos = list(state.session_photos)
+            prev_subject = state.current_subject or "General"
+            state.session_photos = []
+            state.current_subject = new_subj
+
+        if prev_photos:
+            threading.Thread(
+                target=compile_and_publish_session_pdf,
+                args=(prev_photos, prev_subject),
+                daemon=True
+            ).start()
+
+        print(f"📘 [Touchscreen Handover] Subject Context: {state.current_subject}")
+        log_activity("subject_change")
+        if buzzer: buzzer.beep(2)
+        send_telegram(f"📘 Subject changed via Lectern Pod: {state.current_subject}")
+
+
+# ═══════════════════════════════════════════════════════════════
 #  MAIN SYSTEM BOOTSTRAP
 # ═══════════════════════════════════════════════════════════════
 
@@ -290,7 +367,8 @@ def main():
         host=POD_SERVER_HOST,
         port=POD_SERVER_PORT,
         on_key=handle_key,
-        on_nfc=handle_nfc
+        on_nfc=handle_nfc,
+        on_cmd=handle_touch_cmd
     )
     pod_server.start()
     buzzer = BuzzerController(pod_server)

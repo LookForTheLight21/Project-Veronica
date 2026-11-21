@@ -1,0 +1,1454 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>Project Veronica — 800×480 Lectern Command Center</title>
+    <style>
+        /* ============================================================
+           PROJECT VERONICA — PI 5 FULL-SCREEN LECTERN DASHBOARD
+           Optimised specifically for 800×480 Touch Display
+           Theme: Obsidian Cyber-Black · High-Gloss Orange · Ice Cyan
+        ============================================================ */
+
+        :root {
+            --bg:          #05070a;
+            --surface:     #0d1117;
+            --card:        #121820;
+            --card-hover:  #182230;
+            --border:      rgba(255, 255, 255, 0.09);
+            --edge:        rgba(255, 255, 255, 0.16);
+            --orange:      #ff6b00;
+            --orange-glow: rgba(255, 107, 0, 0.35);
+            --cyan:        #00f2fe;
+            --cyan-glow:   rgba(0, 242, 254, 0.3);
+            --green:       #34d399;
+            --pink:        #ff4b82;
+            --amber:       #f59e0b;
+            --purple:      #a277ff;
+            --blue:        #38bdf8;
+            --red:         #ef4444;
+            --white:       #f8fafc;
+            --muted:       #8b949e;
+            --dim:         #30363d;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--white);
+            font-family: system-ui, -apple-system, 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+            letter-spacing: -0.2px;
+        }
+
+        /* ── ROOT SHELL: 800×480 Fullscreen Flex ──────────────────── */
+        .shell {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            max-width: 800px;
+            max-height: 480px;
+            margin: 0 auto;
+            position: relative;
+            background: var(--bg);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        /* ── 1. TOP STATUS BAR (46px) ─────────────────────────────── */
+        .topbar {
+            height: 46px;
+            min-height: 46px;
+            background: rgba(13, 17, 23, 0.98);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 50;
+        }
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: var(--orange);
+            text-transform: uppercase;
+        }
+        .topbar-brand span {
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0.85;
+            letter-spacing: 0.3px;
+        }
+
+        .topbar-status {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .status-pill .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-green  { background: var(--green);  box-shadow: 0 0 8px var(--green); }
+        .dot-orange { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+        .dot-red    { background: var(--red);    box-shadow: 0 0 8px var(--red); animation: blink 1.2s infinite; }
+        .dot-cyan   { background: var(--cyan);   box-shadow: 0 0 8px var(--cyan); }
+        .dot-grey   { background: var(--dim); }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%      { opacity: 0.3; transform: scale(0.85); }
+        }
+
+        .clock-top {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: 0.5px;
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            padding: 4px 12px;
+            border-radius: 8px;
+            color: var(--cyan);
+        }
+
+        /* ── 2. MAIN WORKSPACE (396px) ────────────────────────────── */
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── LEFT: Slide Viewport (~590px width) ──────────────────── */
+        .slide-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: radial-gradient(circle at 10% 20%, rgba(20, 26, 36, 0.4) 0%, transparent 80%);
+        }
+
+        /* NFC teacher banner (slides down smoothly when card is tapped) */
+        .nfc-banner {
+            height: 0;
+            overflow: hidden;
+            background: linear-gradient(90deg, rgba(52, 211, 153, 0.2) 0%, rgba(13, 17, 23, 0.95) 100%);
+            border-bottom: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--green);
+            transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+            flex-shrink: 0;
+        }
+        .nfc-banner.active {
+            height: 38px;
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+        .nfc-banner-name { color: var(--white); font-weight: 800; }
+        .nfc-banner-tag {
+            margin-left: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Active Context Pill Strip */
+        .context-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 14px;
+            background: rgba(13, 17, 23, 0.75);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .context-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .subj-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: rgba(255, 107, 0, 0.15);
+            border: 1px solid rgba(255, 107, 0, 0.4);
+            color: var(--orange);
+        }
+        .subj-badge.locked {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: var(--red);
+        }
+        .pages-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--cyan);
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* Slide Viewport */
+        .slide-viewport {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+
+        .slide {
+            flex: 0 0 100%;
+            height: 100%;
+            padding: 12px;
+            display: grid;
+            gap: 12px;
+            box-sizing: border-box;
+        }
+
+        /* ── SLIDE 0: 2×2 TACTILE ACTION CARDS (800×480 optimized) ── */
+        .slide-actions {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+
+        .pod-btn {
+            background: linear-gradient(180deg, #161c24 0%, #0d1117 100%);
+            border: 1.5px solid var(--border);
+            border-top: 1.5px solid var(--edge);
+            border-radius: 16px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+            transition: transform 0.12s ease, border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            text-align: left;
+        }
+        .pod-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        .btn-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            fill: none;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+        .pod-btn:active .btn-icon {
+            transform: scale(1.1);
+        }
+
+        .btn-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .btn-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .btn-label {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.25;
+            color: var(--white);
+            letter-spacing: -0.3px;
+        }
+        .btn-sub {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.1px;
+        }
+
+        /* Thematic Card Colors */
+        .t-purple { border-color: rgba(162, 119, 255, 0.35); }
+        .t-purple .btn-icon { stroke: var(--purple); }
+        .t-purple .btn-tag  { background: rgba(162, 119, 255, 0.15); color: var(--purple); }
+        .t-purple:active    { background: rgba(162, 119, 255, 0.15); border-color: var(--purple); }
+
+        .t-green { border-color: rgba(52, 211, 153, 0.35); }
+        .t-green .btn-icon { stroke: var(--green); }
+        .t-green .btn-tag  { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+        .t-green:active    { background: rgba(52, 211, 153, 0.15); border-color: var(--green); }
+
+        .t-pink { border-color: rgba(255, 75, 130, 0.35); }
+        .t-pink .btn-icon { stroke: var(--pink); }
+        .t-pink .btn-tag  { background: rgba(255, 75, 130, 0.15); color: var(--pink); }
+        .t-pink:active    { background: rgba(255, 75, 130, 0.15); border-color: var(--pink); }
+
+        .t-amber { border-color: rgba(245, 158, 11, 0.35); }
+        .t-amber .btn-icon { stroke: var(--amber); }
+        .t-amber .btn-tag  { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+        .t-amber:active   { background: rgba(245, 158, 11, 0.15); border-color: var(--amber); }
+
+        .t-cyan { border-color: rgba(0, 242, 254, 0.35); }
+        .t-cyan .btn-icon { stroke: var(--cyan); }
+        .t-cyan .btn-tag  { background: rgba(0, 242, 254, 0.15); color: var(--cyan); }
+        .t-cyan:active    { background: rgba(0, 242, 254, 0.15); border-color: var(--cyan); }
+
+        .t-blue { border-color: rgba(56, 189, 248, 0.35); }
+        .t-blue .btn-icon { stroke: var(--blue); }
+        .t-blue .btn-tag  { background: rgba(56, 189, 248, 0.15); color: var(--blue); }
+        .t-blue:active    { background: rgba(56, 189, 248, 0.15); border-color: var(--blue); }
+
+        .t-red { border-color: rgba(239, 68, 68, 0.35); }
+        .t-red .btn-icon { stroke: var(--red); }
+        .t-red .btn-tag  { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .t-red:active    { background: rgba(239, 68, 68, 0.15); border-color: var(--red); }
+
+        .t-orange { border-color: rgba(255, 107, 0, 0.35); }
+        .t-orange .btn-icon { stroke: var(--orange); }
+        .t-orange .btn-tag  { background: rgba(255, 107, 0, 0.15); color: var(--orange); }
+        .t-orange:active    { background: rgba(255, 107, 0, 0.15); border-color: var(--orange); }
+
+        /* ── SLIDE 1: 2×3 SUBJECT SELECTOR (800×480) ──────────────── */
+        .slide-subjects {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .subj-btn {
+            padding: 14px 16px;
+        }
+        .subj-btn.active-subj {
+            border-color: var(--orange) !important;
+            box-shadow: 0 0 20px var(--orange-glow), 0 6px 18px rgba(0, 0, 0, 0.5) !important;
+            background: linear-gradient(180deg, #221c17 0%, #161210 100%) !important;
+        }
+        .subj-btn.active-subj .btn-label {
+            color: var(--orange) !important;
+        }
+
+        /* ── SLIDE 2: SYSTEM HEALTH & QUICK TOOLS ─────────────────── */
+        .slide-system {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            flex: 1;
+        }
+        .metric-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--white);
+            margin: 4px 0;
+        }
+        .metric-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .metric-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            transition: width 0.4s ease;
+        }
+
+        .tools-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            height: 64px;
+        }
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 800;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: transform 0.12s ease;
+        }
+        .tool-btn:active { transform: scale(0.96); }
+
+        /* ── RIGHT: PERSISTENT SIDEBAR (~210px width) ─────────────── */
+        .sidebar {
+            width: 210px;
+            min-width: 210px;
+            max-width: 210px;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .sb-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .sb-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .sb-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--white);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .sb-value.orange { color: var(--orange); }
+        .sb-value.green  { color: var(--green); }
+        .sb-value.cyan   { color: var(--cyan); }
+        .sb-value.amber  { color: var(--amber); }
+
+        /* Slide navigation buttons inside sidebar */
+        .sb-nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sb-nav-btn {
+            height: 38px;
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .sb-nav-btn:active { transform: scale(0.96); }
+        .sb-nav-btn.active-nav {
+            border-color: var(--orange);
+            color: var(--orange);
+            background: rgba(255, 107, 0, 0.12);
+            box-shadow: 0 0 12px rgba(255, 107, 0, 0.2);
+        }
+
+        /* ── 3. BOTTOM PAGINATION BAR (38px) ──────────────────────── */
+        .bottombar {
+            height: 38px;
+            min-height: 38px;
+            background: rgba(13, 17, 23, 0.98);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            flex-shrink: 0;
+            z-index: 50;
+        }
+
+        .nav-dots {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .ndot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--dim);
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .ndot.active {
+            width: 24px;
+            border-radius: 5px;
+            background: var(--orange);
+            box-shadow: 0 0 8px var(--orange);
+        }
+
+        .slide-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .nav-arrows {
+            display: flex;
+            gap: 8px;
+        }
+        .nav-arrow {
+            width: 32px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--white);
+            transition: all 0.15s ease;
+        }
+        .nav-arrow:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ── 4. FULLSCREEN LIVE RECORDING OVERLAY (800×480) ───────── */
+        .rec-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 7, 10, 0.98);
+            backdrop-filter: blur(25px);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            border: 3px solid var(--red);
+            box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.35);
+        }
+        .rec-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .rec-beacon {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--red);
+        }
+        .rec-dot-big {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 18px var(--red);
+            animation: blink 1.2s infinite;
+        }
+        .rec-subj-pill {
+            padding: 5px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: var(--red);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .rec-timer-big {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 82px;
+            font-weight: 800;
+            letter-spacing: -3px;
+            color: var(--red);
+            text-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+            line-height: 1;
+        }
+        .rec-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
+        .rec-stop-btn {
+            width: 380px;
+            height: 64px;
+            background: linear-gradient(180deg, #dc2626, #b91c1c);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.45);
+            transition: all 0.15s ease;
+            margin-top: 6px;
+        }
+        .rec-stop-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ── 5. TOAST NOTIFICATION ────────────────────────────────── */
+        .toast {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(13, 17, 23, 0.98);
+            border: 1.5px solid var(--orange);
+            border-radius: 999px;
+            padding: 10px 24px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--white);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 107, 0, 0.3);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        }
+        .toast.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ── 6. SCREENSAVER STANDBY (800×480) ─────────────────────── */
+        .screensaver {
+            position: absolute;
+            inset: 0;
+            background: rgba(3, 5, 8, 0.96);
+            backdrop-filter: blur(25px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .screensaver.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .ss-brand {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--orange);
+            text-transform: uppercase;
+        }
+        .ss-clock {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 96px;
+            font-weight: 800;
+            letter-spacing: -3px;
+            color: var(--white);
+            line-height: 1;
+        }
+        .ss-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--cyan);
+            letter-spacing: 0.5px;
+        }
+        .ss-status {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .ss-unlock-track {
+            width: 360px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            position: relative;
+            margin-top: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            cursor: pointer;
+        }
+        .ss-unlock-text {
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            padding-left: 45px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0.2) 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2.5s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .ss-thumb {
+            position: absolute;
+            left: 6px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--orange), #ea580c);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(255, 107, 0, 0.5);
+            cursor: grab;
+            touch-action: none;
+            transition: transform 0.1s ease;
+        }
+        .ss-thumb:active { cursor: grabbing; transform: scale(1.08); }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+
+    <!-- ══════════════════════════════════════════════════════════
+         TOP STATUS BAR (46px)
+    ══════════════════════════════════════════════════════════ -->
+    <div class="topbar">
+        <div class="topbar-brand">
+            ✦ VERONICA <span>CORE HUB</span>
+        </div>
+        <div class="topbar-status">
+            <!-- ESP32 Hardware Pod Link -->
+            <div class="status-pill" id="pod-pill">
+                <div class="dot dot-green" id="pod-dot"></div>
+                <span id="pod-label">ESP32 POD</span>
+            </div>
+            <!-- Live Recording Indicator -->
+            <div class="status-pill" id="rec-status-pill" style="display:none; border-color:rgba(239, 68, 68, 0.4); color:var(--red);">
+                <div class="dot dot-red"></div>
+                <span>REC LIVE</span>
+            </div>
+            <!-- WiFi Network -->
+            <div class="status-pill">
+                <div class="dot dot-cyan"></div>
+                <span>5.8GHz MESH</span>
+            </div>
+        </div>
+        <!-- Digital Clock -->
+        <div class="clock-top" id="clock-top">00:00:00</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         MAIN WORKSPACE (396px)
+    ══════════════════════════════════════════════════════════ -->
+    <div class="main">
+
+        <!-- ── LEFT: SLIDE VIEWPORT ── -->
+        <div class="slide-area">
+
+            <!-- NFC Flash Banner (Reveals when card is scanned) -->
+            <div class="nfc-banner" id="nfc-banner">
+                <span>🏷️ NFC CHECK-IN:</span>
+                <span class="nfc-banner-name" id="nfc-banner-name">Prof. H. C. Verma</span>
+                <span class="nfc-banner-tag" id="nfc-banner-tag">PHYSICS DEPT · UNLOCKED</span>
+            </div>
+
+            <!-- Subject Context Strip -->
+            <div class="context-strip">
+                <div class="context-left">
+                    <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">CONTEXT:</span>
+                    <div class="subj-badge" id="subj-badge">
+                        <span id="subj-dot" style="width:6px; height:6px; border-radius:50%; background:currentColor;"></span>
+                        <span id="subj-label">PHYSICS</span>
+                    </div>
+                </div>
+                <div class="pages-counter" id="pages-counter">
+                    0 Board Pages
+                </div>
+            </div>
+
+            <!-- Slides Container -->
+            <div class="slide-viewport" id="slide-viewport">
+                <div class="slide-track" id="slide-track">
+
+                    <!-- ── SLIDE 0: PRIMARY ACTION TILES (2×2 Grid) ── -->
+                    <div class="slide slide-actions">
+                        <!-- 1. Capture Board Photo -->
+                        <button class="pod-btn t-purple" onclick="doAction('photo')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                    <circle cx="12" cy="13" r="4"/>
+                                </svg>
+                                <span class="btn-tag">OPTICAL 4K</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Capture Board</div>
+                                <div class="btn-sub">High-res chalkboard snapshot</div>
+                            </div>
+                        </button>
+
+                        <!-- 2. Compile Session PDF -->
+                        <button class="pod-btn t-green" onclick="doAction('compile_pdf')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                </svg>
+                                <span class="btn-tag">PUBLISH PDF</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Compile Notes</div>
+                                <div class="btn-sub">End class · Dispatch to Cloud</div>
+                            </div>
+                        </button>
+
+                        <!-- 3. Record Video -->
+                        <button class="pod-btn t-pink" onclick="doAction('video')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24">
+                                    <polygon points="23 7 16 12 23 17 23 7"/>
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                                </svg>
+                                <span class="btn-tag">KREO OWL 4K</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Record Video</div>
+                                <div class="btn-sub">3840×2160 @ 30 FPS Stream</div>
+                            </div>
+                        </button>
+
+                        <!-- 4. Record Audio -->
+                        <button class="pod-btn t-amber" onclick="doAction('audio')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                    <line x1="12" y1="19" x2="12" y2="23"/>
+                                    <line x1="8" y1="23" x2="16" y2="23"/>
+                                </svg>
+                                <span class="btn-tag">MIC ARRAY</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Record Audio</div>
+                                <div class="btn-sub">Noise-cancelling lecture mic</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- ── SLIDE 1: SUBJECT SELECTOR (2×3 Grid) ── -->
+                    <div class="slide slide-subjects">
+                        <button class="pod-btn subj-btn t-purple" id="subj-physics" onclick="setSubject('Physics')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg>
+                                <span class="btn-tag">01</span>
+                            </div>
+                            <div class="btn-label">Physics</div>
+                        </button>
+                        <button class="pod-btn subj-btn t-cyan" id="subj-chemistry" onclick="setSubject('Chemistry')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 3h6v11l3.5 6H5.5L9 14V3z"/></svg>
+                                <span class="btn-tag">02</span>
+                            </div>
+                            <div class="btn-label">Chemistry</div>
+                        </button>
+                        <button class="pod-btn subj-btn t-blue" id="subj-math" onclick="setSubject('Math')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="4"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+                                <span class="btn-tag">03</span>
+                            </div>
+                            <div class="btn-label">Mathematics</div>
+                        </button>
+                        <button class="pod-btn subj-btn t-amber" id="subj-english" onclick="setSubject('English')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                <span class="btn-tag">04</span>
+                            </div>
+                            <div class="btn-label">English</div>
+                        </button>
+                        <button class="pod-btn subj-btn t-green" id="subj-cs" onclick="setSubject('Computer Science')">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                <span class="btn-tag">05</span>
+                            </div>
+                            <div class="btn-label">Computer Sci</div>
+                        </button>
+                        <button class="pod-btn subj-btn t-red" onclick="setSubject(null)">
+                            <div class="btn-top">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                <span class="btn-tag">LOCK</span>
+                            </div>
+                            <div class="btn-label">Clear / Lock</div>
+                        </button>
+                    </div>
+
+                    <!-- ── SLIDE 2: SYSTEM HEALTH & METRICS ── -->
+                    <div class="slide slide-system">
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Compute Core</div>
+                                <div class="metric-value" id="sys-cpu" style="color:var(--green);">0%</div>
+                                <div class="metric-bar"><div class="metric-fill" id="cpu-bar" style="width:0%;"></div></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Memory Matrix</div>
+                                <div class="metric-value" id="sys-ram" style="color:var(--cyan);">0%</div>
+                                <div class="metric-bar"><div class="metric-fill" id="ram-bar" style="width:0%; background:linear-gradient(90deg, var(--cyan), var(--purple));"></div></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">SSD Storage</div>
+                                <div class="metric-value" id="sys-disk" style="color:var(--amber);">0%</div>
+                                <div class="metric-bar"><div class="metric-fill" id="disk-bar" style="width:0%; background:linear-gradient(90deg, var(--amber), var(--orange));"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="tools-row">
+                            <button class="tool-btn" onclick="doAction('stop')" style="background:rgba(255, 255, 255, 0.08); color:#fff;">
+                                <svg class="btn-icon" style="width:20px;height:20px;" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                                <span>Terminate All</span>
+                            </button>
+                            <button class="tool-btn" onclick="doAction('stats')" style="background:rgba(56, 189, 248, 0.15); border-color:rgba(56, 189, 248, 0.4); color:var(--blue);">
+                                <svg class="btn-icon" style="width:20px;height:20px;" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                <span>Telegram Stats</span>
+                            </button>
+                            <button class="tool-btn" onclick="doReboot()" style="background:rgba(239, 68, 68, 0.15); border-color:rgba(239, 68, 68, 0.4); color:var(--red);">
+                                <svg class="btn-icon" style="width:20px;height:20px;" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                                <span>Reboot Core</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!-- /.slide-track -->
+            </div><!-- /.slide-viewport -->
+        </div><!-- /.slide-area -->
+
+        <!-- ── RIGHT: PERSISTENT SIDEBAR (~210px) ── -->
+        <div class="sidebar">
+            <div class="sb-card">
+                <div class="sb-label">Active Period</div>
+                <div class="sb-value orange" id="sb-date">Loading…</div>
+            </div>
+
+            <div class="sb-card">
+                <div class="sb-label">ESP32 Sensor Pod</div>
+                <div class="sb-value green" id="sb-pod">Listening…</div>
+                <div style="font-size:9.5px; color:var(--muted); font-family:monospace;" id="sb-pod-meta">PN532 NFC + BUZZER</div>
+            </div>
+
+            <div class="sb-card">
+                <div class="sb-label">Chalkboard Deck</div>
+                <div class="sb-value cyan" id="sb-pages">0 Snapshots</div>
+            </div>
+
+            <!-- Page Selection Group -->
+            <div class="sb-nav-group">
+                <button class="sb-nav-btn active-nav" id="nav0" onclick="goSlide(0)">
+                    <span>⚡</span> <span>Actions (1/3)</span>
+                </button>
+                <button class="sb-nav-btn" id="nav1" onclick="goSlide(1)">
+                    <span>📚</span> <span>Subjects (2/3)</span>
+                </button>
+                <button class="sb-nav-btn" id="nav2" onclick="goSlide(2)">
+                    <span>🖥</span> <span>Systems (3/3)</span>
+                </button>
+            </div>
+
+            <!-- Standby & Admin -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <button class="sb-nav-btn" onclick="triggerScreensaver()" style="justify-content:center; padding:0;">
+                    <span>💤</span> <span>Sleep</span>
+                </button>
+                <a href="/login" class="sb-nav-btn" style="text-decoration:none; justify-content:center; padding:0;">
+                    <span>⚙️</span> <span>Admin</span>
+                </a>
+            </div>
+        </div>
+
+    </div><!-- /.main -->
+
+    <!-- ══════════════════════════════════════════════════════════
+         BOTTOM PAGINATION BAR (38px)
+    ══════════════════════════════════════════════════════════ -->
+    <div class="bottombar">
+        <div class="nav-dots">
+            <div class="ndot active" onclick="goSlide(0)" id="ndot0"></div>
+            <div class="ndot" onclick="goSlide(1)" id="ndot1"></div>
+            <div class="ndot" onclick="goSlide(2)" id="ndot2"></div>
+        </div>
+        <div class="slide-name" id="slide-name">LECTURE ACTIONS (1/3)</div>
+        <div class="nav-arrows">
+            <div class="nav-arrow" onclick="prevSlide()">◀</div>
+            <div class="nav-arrow" onclick="nextSlide()">▶</div>
+        </div>
+    </div>
+
+</div><!-- /.shell -->
+
+<!-- ══════════════════════════════════════════════════════════
+     LIVE RECORDING OVERLAY (800×480 Fullscreen HUD)
+══════════════════════════════════════════════════════════ -->
+<div class="rec-overlay" id="rec-overlay">
+    <div class="rec-beacon">
+        <div class="rec-dot-big"></div>
+        <span id="rec-mode-label">LIVE 4K VIDEO RECORDING</span>
+    </div>
+    <div class="rec-subj-pill" id="rec-subj-pill">PHYSICS</div>
+    <div class="rec-timer-big" id="rec-timer">00:00</div>
+    <div class="rec-meta" id="rec-meta">KREO OWL 4K PRO · /dev/video0 · 3840×2160 @ 30 FPS</div>
+    <button class="rec-stop-btn" onclick="doAction('stop')">
+        ⏹ TERMINATE &amp; ARCHIVE FEED
+    </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     STANDBY SCREENSAVER (800×480)
+══════════════════════════════════════════════════════════ -->
+<div class="screensaver" id="screensaver">
+    <div class="ss-brand">✦ PROJECT VERONICA OS · NODE: CLASS X</div>
+    <div class="ss-clock" id="ss-clock">00:00</div>
+    <div class="ss-date" id="ss-date">Wednesday, November 21</div>
+    <div class="ss-status" id="ss-status">🔒 Lectern Standby · Inactivity Elapsed</div>
+    <div class="ss-unlock-track" id="ss-track">
+        <div class="ss-unlock-text">Slide to unlock lectern ➔</div>
+        <div class="ss-thumb" id="ss-thumb">➔</div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOAST NOTIFICATION
+══════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast">System Ready</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  PROJECT VERONICA — Pi 5 800×480 Dashboard Controller
+// ════════════════════════════════════════════════════════════════
+
+let currentSlide = 0;
+const SLIDE_NAMES = ['LECTURE ACTIONS (1/3)', 'ACADEMIC SUBJECTS (2/3)', 'CORE TELEMETRY & SYSTEM (3/3)'];
+let currentSubject = 'Physics';
+let sessionCount = 0;
+let isRecording = false;
+let recTimer = 0;
+let recInterval = null;
+
+// ── CLOCK ───────────────────────────────────────────────────────
+function updateClock() {
+    const now = new Date();
+    const hms = now.toLocaleTimeString('en-US', { hour12: false });
+    document.getElementById('clock-top').textContent = hms;
+    document.getElementById('ss-clock').textContent = hms.slice(0, 5);
+    document.getElementById('ss-date').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'short', day: 'numeric'
+    });
+    document.getElementById('sb-date').textContent = now.toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric'
+    });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── SLIDE NAVIGATION ────────────────────────────────────────────
+function goSlide(idx) {
+    currentSlide = idx;
+    document.getElementById('slide-track').style.transform = `translateX(-${idx * 100}%)`;
+    document.querySelectorAll('.ndot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.querySelectorAll('.sb-nav-btn[id^="nav"]').forEach((b, i) => b.classList.toggle('active-nav', i === idx));
+    document.getElementById('slide-name').textContent = SLIDE_NAMES[idx];
+    resetIdle();
+}
+function nextSlide() { goSlide((currentSlide + 1) % 3); }
+function prevSlide() { goSlide((currentSlide + 2) % 3); }
+
+// ── TOAST ────────────────────────────────────────────────────────
+let toastTimer = null;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('active');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('active'), 2800);
+}
+
+// ── SUBJECT CONTEXT ──────────────────────────────────────────────
+const SUBJ_COLORS = {
+    'Physics':          'var(--purple)',
+    'Chemistry':        'var(--cyan)',
+    'Math':             'var(--blue)',
+    'English':          'var(--amber)',
+    'Computer Science': 'var(--green)',
+};
+const SUBJ_IDS = {
+    'Physics':          'subj-physics',
+    'Chemistry':        'subj-chemistry',
+    'Math':             'subj-math',
+    'English':          'subj-english',
+    'Computer Science': 'subj-cs',
+};
+
+function setSubject(subj) {
+    document.querySelectorAll('.subj-btn').forEach(b => b.classList.remove('active-subj'));
+    const badge = document.getElementById('subj-badge');
+
+    if (!subj) {
+        currentSubject = null;
+        document.getElementById('subj-label').textContent = 'CONSOLE LOCKED';
+        badge.classList.add('locked');
+        toast('🔒 Console Locked — Select a subject or tap NFC');
+        fetch('/cmd/subj_clear', { method: 'POST' }).catch(() => {});
+        return;
+    }
+
+    currentSubject = subj;
+    badge.classList.remove('locked');
+    const color = SUBJ_COLORS[subj] || 'var(--orange)';
+    document.getElementById('subj-label').textContent = subj.toUpperCase();
+    badge.style.borderColor = color;
+    badge.style.color = color;
+    document.getElementById('subj-dot').style.background = color;
+
+    if (SUBJ_IDS[subj]) document.getElementById(SUBJ_IDS[subj]).classList.add('active-subj');
+    document.getElementById('rec-subj-pill').textContent = subj.toUpperCase();
+    toast('🟢 Context Engaged: ' + subj);
+
+    const route = subj.toLowerCase().replace(' ', '_');
+    fetch('/cmd/subj_' + route, { method: 'POST' }).catch(() => {});
+}
+
+// ── ACTION HANDLER ───────────────────────────────────────────────
+function doAction(action) {
+    if (!currentSubject && !['stop', 'stats'].includes(action)) {
+        toast('🔒 Please select an academic subject first');
+        goSlide(1);
+        return;
+    }
+    resetIdle();
+
+    if (action === 'photo') {
+        sessionCount++;
+        document.getElementById('pages-counter').textContent = `${sessionCount} Board Pages`;
+        document.getElementById('sb-pages').textContent = `${sessionCount} Snapshots`;
+        toast(`📸 Captured board snapshot #${sessionCount}`);
+        fetch('/cmd/photo', { method: 'POST' }).catch(() => {});
+
+    } else if (action === 'compile_pdf') {
+        toast(`📚 Compiling ${sessionCount} pages into PDF Notes…`);
+        sessionCount = 0;
+        document.getElementById('pages-counter').textContent = `0 Board Pages`;
+        document.getElementById('sb-pages').textContent = `0 Snapshots`;
+        fetch('/cmd/compile_pdf', { method: 'POST' }).catch(() => {});
+
+    } else if (action === 'video') {
+        if (isRecording) { doAction('stop'); return; }
+        isRecording = true;
+        document.getElementById('rec-mode-label').textContent = 'LIVE 4K VIDEO RECORDING';
+        document.getElementById('rec-meta').textContent = 'KREO OWL 4K PRO · /dev/video0 · 3840×2160 @ 30 FPS';
+        startRecOverlay();
+        fetch('/cmd/video', { method: 'POST' }).catch(() => {});
+
+    } else if (action === 'audio') {
+        if (isRecording) { doAction('stop'); return; }
+        isRecording = true;
+        document.getElementById('rec-mode-label').textContent = 'LIVE PRIORITY ROOM AUDIO';
+        document.getElementById('rec-meta').textContent = 'USB CONFERENCE MIC · STEREO 48kHz';
+        startRecOverlay();
+        fetch('/cmd/audio', { method: 'POST' }).catch(() => {});
+
+    } else if (action === 'stop') {
+        stopRecOverlay();
+        fetch('/cmd/stop', { method: 'POST' }).catch(() => {});
+        toast('⏹ All recording feeds archived.');
+
+    } else if (action === 'stats') {
+        toast('📊 Transmitting system telemetry to Telegram…');
+        fetch('/cmd/stats', { method: 'POST' }).catch(() => {});
+    }
+}
+
+function doReboot() {
+    if (confirm('Reboot Veronica Edge Hub?')) {
+        toast('🔁 Reboot command dispatched…');
+        fetch('/cmd/reboot', { method: 'POST' }).catch(() => {});
+    }
+}
+
+// ── OVERLAY CONTROLLER ───────────────────────────────────────────
+function startRecOverlay() {
+    recTimer = 0;
+    document.getElementById('rec-timer').textContent = '00:00';
+    document.getElementById('rec-overlay').classList.add('active');
+    document.getElementById('rec-status-pill').style.display = 'flex';
+    if (recInterval) clearInterval(recInterval);
+    recInterval = setInterval(() => {
+        recTimer++;
+        const m = String(Math.floor(recTimer / 60)).padStart(2, '0');
+        const s = String(recTimer % 60).padStart(2, '0');
+        document.getElementById('rec-timer').textContent = m + ':' + s;
+    }, 1000);
+}
+
+function stopRecOverlay() {
+    isRecording = false;
+    document.getElementById('rec-overlay').classList.remove('active');
+    document.getElementById('rec-status-pill').style.display = 'none';
+    if (recInterval) clearInterval(recInterval);
+}
+
+// ── REAL-TIME TELEMETRY POLL (Every 1.5s) ────────────────────────
+let lastKnownSubj = null;
+function pollTelemetry() {
+    fetch('/api/latest_asset').then(r => r.json()).then(d => {
+        // CPU / RAM / Disk
+        document.getElementById('sys-cpu').textContent = d.cpu + '%';
+        document.getElementById('sys-ram').textContent = d.ram + '%';
+        document.getElementById('cpu-bar').style.width = Math.min(d.cpu, 100) + '%';
+        document.getElementById('ram-bar').style.width = Math.min(d.ram, 100) + '%';
+
+        const diskPct = d.storage_used_pct || 0;
+        document.getElementById('sys-disk').textContent = diskPct + '%';
+        document.getElementById('disk-bar').style.width = Math.min(diskPct, 100) + '%';
+
+        // ESP32 Pod Connection Status
+        const podOnline = d.pod_connected;
+        document.getElementById('sb-pod').textContent = podOnline ? (d.pod_ip || 'Online') : 'Waiting for link…';
+        document.getElementById('sb-pod').style.color = podOnline ? 'var(--green)' : 'var(--muted)';
+        document.getElementById('pod-dot').className = 'dot ' + (podOnline ? 'dot-green' : 'dot-grey');
+
+        // Subject synchronization (e.g. from ESP32 NFC tap!)
+        if (d.subject && d.subject !== 'General Session') {
+            if (d.subject !== lastKnownSubj) {
+                lastKnownSubj = d.subject;
+                currentSubject = d.subject;
+                setSubject(d.subject);
+
+                // Show NFC flash banner
+                const banner = document.getElementById('nfc-banner');
+                document.getElementById('nfc-banner-name').textContent = d.subject + ' Faculty';
+                document.getElementById('nfc-banner-tag').textContent = d.subject.toUpperCase() + ' · UNLOCKED';
+                banner.classList.add('active');
+                setTimeout(() => banner.classList.remove('active'), 4500);
+            }
+        }
+
+        // Recording synchronization
+        if (d.recording_video && !isRecording) {
+            isRecording = true;
+            document.getElementById('rec-mode-label').textContent = 'LIVE 4K VIDEO RECORDING';
+            startRecOverlay();
+        } else if (d.recording_audio && !isRecording) {
+            isRecording = true;
+            document.getElementById('rec-mode-label').textContent = 'LIVE PRIORITY ROOM AUDIO';
+            startRecOverlay();
+        } else if (!d.recording_video && !d.recording_audio && isRecording) {
+            stopRecOverlay();
+        }
+
+        // Session pages sync
+        if (d.session_pages !== undefined) {
+            sessionCount = d.session_pages;
+            document.getElementById('pages-counter').textContent = `${sessionCount} Board Pages`;
+            document.getElementById('sb-pages').textContent = `${sessionCount} Snapshots`;
+        }
+
+    }).catch(() => {});
+}
+setInterval(pollTelemetry, 1500);
+pollTelemetry();
+
+// ── SCREENSAVER & SLIDE-TO-UNLOCK ────────────────────────────────
+let idleTimer = null;
+const IDLE_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+
+function resetIdle() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(triggerScreensaver, IDLE_TIMEOUT_MS);
+}
+
+function triggerScreensaver() {
+    const ss = document.getElementById('screensaver');
+    document.getElementById('ss-status').textContent =
+        currentSubject
+            ? '● In Session: ' + currentSubject
+            : '🔒 Lectern Standby · No Active Subject';
+    ss.classList.add('active');
+}
+
+function unlockScreensaver() {
+    document.getElementById('screensaver').classList.remove('active');
+    const thumb = document.getElementById('ss-thumb');
+    thumb.style.transition = 'left 0.3s ease';
+    thumb.style.left = '6px';
+    resetIdle();
+}
+
+(function initSliderPhysics() {
+    const track = document.getElementById('ss-track');
+    const thumb = document.getElementById('ss-thumb');
+    let isDragging = false, startX = 0;
+
+    const onStart = (cx) => {
+        isDragging = true;
+        startX = cx - thumb.offsetLeft;
+        thumb.style.transition = 'none';
+    };
+    const onMove = (cx) => {
+        if (!isDragging) return;
+        const max = track.clientWidth - thumb.clientWidth - 12;
+        let pos = Math.max(6, Math.min(cx - startX, max));
+        thumb.style.left = pos + 'px';
+        if (pos >= max * 0.75) {
+            isDragging = false;
+            unlockScreensaver();
+        }
+    };
+    const onEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        thumb.style.transition = 'left 0.3s ease';
+        thumb.style.left = '6px';
+    };
+
+    thumb.addEventListener('mousedown',  e => onStart(e.clientX));
+    window.addEventListener('mousemove', e => onMove(e.clientX));
+    window.addEventListener('mouseup',   onEnd);
+    thumb.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
+    window.addEventListener('touchmove', e => onMove(e.touches[0].clientX), { passive: true });
+    window.addEventListener('touchend',  onEnd);
+    track.addEventListener('click', () => unlockScreensaver());
+})();
+
+['mousemove', 'mousedown', 'keydown', 'touchstart'].forEach(evt => {
+    window.addEventListener(evt, resetIdle, { passive: true });
+});
+resetIdle();
+
+// Initialize default state
+goSlide(0);
+setSubject('Physics');
+</script>
+</body>
+</html>
