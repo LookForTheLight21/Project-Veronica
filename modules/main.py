@@ -35,6 +35,7 @@ from config import (
     KERO_HEIGHT,
     POD_SERVER_HOST,
     POD_SERVER_PORT,
+    enforce_anti_flicker_50hz,
 )
 from hardware import PodReceiverServer, BuzzerController
 from activity_logger import log_activity
@@ -107,7 +108,6 @@ def handle_key(key_num):
             state.current_subject = new_subject
 
         if prev_photos:
-            send_telegram(f"📚 Previous class [{prev_subject}] ended. Compiling notes PDF…")
             threading.Thread(
                 target=compile_and_publish_session_pdf,
                 args=(prev_photos, prev_subject),
@@ -117,7 +117,6 @@ def handle_key(key_num):
         print(f"👆 Key {key_num} → Subject Context: {state.current_subject}")
         log_activity("subject_change")
         if buzzer: buzzer.beep(2)
-        send_telegram(f"📘 Subject: {state.current_subject}")
         return
 
     # ── 3. Operational Mode Keys ──────────────────────────────
@@ -166,7 +165,6 @@ def handle_key(key_num):
             if buzzer: buzzer.beep(2)
         elif state.session_photos:
             if buzzer: buzzer.beep(2)
-            send_telegram("📚 Manual End-of-Class triggered: Compiling lecture notes PDF…")
             with state.state_lock:
                 photos_to_send = list(state.session_photos)
                 subj_to_send = state.current_subject or "General"
@@ -186,7 +184,6 @@ def handle_key(key_num):
     elif action == "CLEAR_SUBJECT":
         # Manual Clear fallback: Finalize notes into PDF before clearing context
         if state.session_photos:
-            send_telegram("📚 Class session closed. Compiling final PDF notes…")
             with state.state_lock:
                 photos_to_send = list(state.session_photos)
                 subj_to_send = state.current_subject or "General"
@@ -198,7 +195,6 @@ def handle_key(key_num):
             ).start()
         state.current_subject = None
         if buzzer: buzzer.beep(1)
-        send_telegram("⚪ Subject context cleared.")
 
     elif action == "SECURE_SHUTDOWN":
         state.secure_target_action = "SHUTDOWN"
@@ -256,7 +252,6 @@ def handle_nfc(result):
             state.current_subject = result
 
         if prev_photos:
-            send_telegram(f"📚 Previous period [{prev_subject}] ended. Compiling lecture notes PDF…")
             threading.Thread(
                 target=compile_and_publish_session_pdf,
                 args=(prev_photos, prev_subject),
@@ -266,7 +261,6 @@ def handle_nfc(result):
         print(f"🏷️ New Teacher Checked In → Subject Context: {state.current_subject}")
         log_activity("subject_change")
         if buzzer: buzzer.beep(2)
-        send_telegram(f"🏷️ Subject Switched: {state.current_subject}")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -343,15 +337,40 @@ def handle_touch_cmd(action):
         print(f"📘 [Touchscreen Handover] Subject Context: {state.current_subject}")
         log_activity("subject_change")
         if buzzer: buzzer.beep(2)
-        send_telegram(f"📘 Subject changed via Lectern Pod: {state.current_subject}")
 
 
 # ═══════════════════════════════════════════════════════════════
 #  MAIN SYSTEM BOOTSTRAP
 # ═══════════════════════════════════════════════════════════════
 
+_instance_lock_file = None
+
+
+def acquire_instance_lock():
+    """Ensures only a single instance of Veronica Core runs to prevent hardware, web, and Telegram 409 conflicts."""
+    global _instance_lock_file
+    lock_path = "/tmp/veronica_app.lock"
+    try:
+        import fcntl
+        _instance_lock_file = open(lock_path, "w")
+        fcntl.flock(_instance_lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _instance_lock_file.write(str(os.getpid()))
+        _instance_lock_file.flush()
+        return True
+    except (IOError, BlockingIOError):
+        return False
+    except Exception as e:
+        print(f"⚠️ Lock notice: {e}")
+        return True
+
+
 def main():
     global buzzer
+
+    if not acquire_instance_lock():
+        print("❌ Another instance of Project Veronica is already running.")
+        print("   Exiting to prevent camera device, ALSA audio, port 5000, and Telegram 409 conflicts.")
+        sys.exit(1)
 
     print("═════════════════════════════════════════════════════════")
     print("🚀 PROJECT VERONICA — Two-Tier Edge Hub Starting")
@@ -361,6 +380,9 @@ def main():
         print(f"⚠️ FFmpeg not found at {FFMPEG_BIN} (run: sudo apt install ffmpeg)")
     else:
         print(f"✅ FFmpeg Binary: {FFMPEG_BIN}")
+
+    # Enforce 50Hz Anti-Flicker / Anti-Banding on Kreo Owl 4K camera hardware
+    enforce_anti_flicker_50hz(KERO_VIDEO_DEVICE)
 
     # 1. Start Tier 1 Pod Wireless Link Receiver
     pod_server = PodReceiverServer(

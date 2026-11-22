@@ -185,9 +185,31 @@ def _handle_telegram_command(cmd):
         send_telegram(f"❓ Unknown: {cmd}\nSend /help")
 
 
+_listener_running = False
+
+
 def telegram_listener():
+    global _listener_running
+    if _listener_running:
+        print("⚠️ Telegram listener is already active in this process.")
+        return
+    _listener_running = True
+
     print("📡 Telegram listener daemon online")
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
+
+    # Clear any active webhook to prevent 409 Conflict with getUpdates long polling
+    try:
+        del_resp = requests.post(
+            f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook",
+            json={"drop_pending_updates": False},
+            timeout=10
+        )
+        if del_resp.status_code == 200:
+            print("✅ Telegram webhook cleared (ready for getUpdates polling)")
+    except Exception as we:
+        print(f"ℹ️ Telegram deleteWebhook notice: {we}")
+
     last_update_id = load_last_update_id()
     while True:
         try:
@@ -216,6 +238,14 @@ def telegram_listener():
                 _handle_telegram_command(text)
         except requests.exceptions.Timeout:
             pass
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code if e.response is not None else 0
+            if status_code == 409:
+                print("⚠️ Telegram listener conflict (409): Another instance or bot process is polling getUpdates. Backing off 15s...")
+                time.sleep(15)
+            else:
+                print(f"⚠️ Telegram listener HTTP {status_code}: {e}")
+                time.sleep(5)
         except Exception as e:
             print(f"⚠️ Telegram listener: {e}")
             time.sleep(5)

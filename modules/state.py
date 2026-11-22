@@ -2,12 +2,14 @@
 Global mutable state for Project Veronica FINAL.
 All shared flags, processes, session photo queues, and link statuses live here.
 """
-from threading import Lock
+from threading import Lock, Event
 
 # Recording states & processes
 recording         = False
 ffmpeg_proc       = None
 raw_filename      = None
+camera_pause_event = Event()
+camera_target_res = "1920x1080"
 
 audio_recording   = False
 audio_proc        = None

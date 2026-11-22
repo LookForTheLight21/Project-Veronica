@@ -35,6 +35,13 @@ sim_config = {
     "INACTIVITY_TIMEOUT_SEC": 1200,
     "ADMIN_USERNAME": "Chorie",
     "ADMIN_PASSWORD": "1234",
+    "USEFUL_SITES": [
+        {"name": "Google", "url": "https://www.google.com", "icon": "🔍", "color": "#4285f4"},
+        {"name": "YouTube", "url": "https://www.youtube.com", "icon": "▶️", "color": "#ef4444"},
+        {"name": "Gmail", "url": "https://mail.google.com", "icon": "✉️", "color": "#ea4335"},
+        {"name": "Gemini", "url": "https://gemini.google.com", "icon": "✨", "color": "#8e75ff"},
+        {"name": "Google Drive", "url": "https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf", "icon": "📁", "color": "#10b981"},
+    ],
     "NFC_MAP": {
         "D035D95F": "Physics",
         "89D14906": "Chemistry",
@@ -54,6 +61,8 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
         
         if url in ["/", "/index.html"]:
             self._serve_file("index.html", "text/html; charset=utf-8")
+        elif url in ["/pi", "/kiosk", "/pi_dashboard.html"]:
+            self._serve_file("pi_dashboard.html", "text/html; charset=utf-8")
         elif url in ["/pod", "/pod_touch", "/pod.html", "/pod_touch.html"]:
             self._serve_file("pod_touch.html", "text/html; charset=utf-8")
         elif url == "/projector":
@@ -79,12 +88,64 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
         elif url in ["/sample_board.svg", "/media/photos/sample_board.svg"]:
             self._serve_file("sample_board.svg", "image/svg+xml")
         elif url == "/video_feed":
+            live_shm = "/dev/shm/live_frame.jpg"
+            if os.path.exists(live_shm):
+                try:
+                    with open(live_shm, "rb") as f:
+                        data = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/jpeg")
+                    self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    self.end_headers()
+                    self.wfile.write(data)
+                    return
+                except Exception:
+                    pass
             self.send_response(200)
             self.send_header("Content-Type", "image/svg+xml")
             self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
             self.end_headers()
             with open(os.path.join(PREVIEW_DIR, "sample_board.svg"), "rb") as f:
                 self.wfile.write(f.read())
+        elif url == "/api/status":
+            self._send_json({
+                "pod_connected": sim_state.get("pod_connected", True),
+                "pod_ip": sim_state.get("pod_ip", "192.168.4.15"),
+                "current_subject": sim_state.get("subject", "Physics"),
+                "recording_video": sim_state.get("recording_video", False),
+                "recording_audio": sim_state.get("recording_audio", False),
+                "camera_connected": True,
+                "disk_free_gb": 42.5,
+                "disk_used_pct": 28.4,
+                "disk_total_gb": 59.2,
+                "cpu_percent": 18.2,
+                "ram_percent": 34.5,
+                "cpu_temp_c": 44.2,
+                "wifi_ssid": sim_config.get("WIFI_SSID", "Veronica_AP")
+            })
+        elif url in ["/api/bookmarks", "/api/admin/bookmarks"]:
+            self._send_json({"status": "ok", "bookmarks": sim_config.get("USEFUL_SITES", [])})
+        elif url == "/api/admin/mic_sample":
+            import io, wave, struct, math
+            buf = io.BytesIO()
+            with wave.open(buf, 'wb') as wf:
+                wf.setnchannels(2)
+                wf.setsampwidth(2)
+                wf.setframerate(44100)
+                # Generate 2 seconds of pleasant 440Hz harmonic chime
+                frames = bytearray()
+                for i in range(44100 * 2):
+                    t = i / 44100.0
+                    decay = math.exp(-t * 2.0)
+                    val = int(12000 * math.sin(2 * math.pi * 440 * t) * decay)
+                    frames.extend(struct.pack('<hh', val, val))
+                wf.writeframes(frames)
+            content = buf.getvalue()
+            self.send_response(200)
+            self.send_header("Content-Type", "audio/wav")
+            self.send_header("Content-Length", str(len(content)))
+            self.end_headers()
+            self.wfile.write(content)
         elif url == "/api/latest_asset":
             self._send_json(sim_state)
         elif url == "/api/admin/config":
@@ -167,6 +228,35 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": "Access Denied: Invalid security passkey."}).encode("utf-8"))
 
+        elif url == "/api/camera/resolution":
+            res = data.get("res") if isinstance(data, dict) else "1920x1080"
+            sim_state["resolution"] = res
+            self._send_json({"status": "ok", "resolution": res, "camera_fps": 30.0})
+        elif url in ["/api/admin/test_camera", "/api/admin/ping_pod"]:
+            self._send_json({"status": "ok", "connected": True, "message": "Camera optical feed /dev/video0 verified (1080P @ 30 FPS)."})
+        elif url == "/api/admin/test_mic":
+            self._send_json({
+                "status": "ok",
+                "connected": True,
+                "device": "plughw:CARD=webcam,DEV=0",
+                "duration": "2.0s",
+                "sample_rate": "44100 Hz",
+                "channels": "Stereo",
+                "peak": 14250,
+                "peak_dbfs": "-7.2 dBFS",
+                "rms_dbfs": "-18.5 dBFS",
+                "db_num": -18.5,
+                "gain_status": "Optimal",
+                "audio_url": "/api/admin/mic_sample",
+                "message": "ALSA Audio Capture verified: -18.5 dBFS (44.1kHz Stereo, peak -7.2 dBFS)."
+            })
+        elif url == "/api/admin/bookmarks":
+            bms = data.get("bookmarks")
+            if isinstance(bms, list):
+                sim_config["USEFUL_SITES"] = bms
+                self._send_json({"status": "ok", "message": "Bookmarks updated successfully.", "bookmarks": bms})
+            else:
+                self._send_json({"status": "error", "message": "Invalid format."}, 400)
         elif url == "/api/admin/save_config":
             sim_config.update(data)
             print(f"⚙️ [DIAGNOSTIC CONFIG UPDATED]: {data.keys()}")
@@ -178,6 +268,20 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 print(f"⚠️ Error saving config.json: {e}")
             self._send_json({"status": "ok", "config": sim_config})
+
+        elif url == "/api/admin/upload_credentials":
+            content = data.get("credentials_json") if isinstance(data, dict) else None
+            cred_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "credentials.json")
+            if content:
+                try:
+                    parsed = json.loads(content)
+                    with open(cred_path, "w", encoding="utf-8") as f:
+                        json.dump(parsed, f, indent=2)
+                    self._send_json({"status": "ok", "message": "credentials.json saved to Project Veronica."})
+                except Exception as e:
+                    self._send_json({"status": "error", "message": f"Invalid JSON: {e}"}, 400)
+            else:
+                self._send_json({"status": "ok", "message": "credentials.json received."})
 
         elif url == "/api/admin/test_buzzer":
             times = data.get("times", 1)
@@ -265,6 +369,11 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
         self.wfile.write(content)
 
     def log_message(self, format, *args):
+        # Filter out high-frequency polling endpoints from console logs
+        if len(args) > 0:
+            req_line = str(args[0])
+            if any(endpoint in req_line for endpoint in ["/api/status", "/api/latest_asset", "/video_feed"]):
+                return
         print(f"🌐 [Preview]: {self.address_string()} - {args[0]}")
 
 def run_server(port=5000):

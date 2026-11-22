@@ -81,7 +81,8 @@ def upload_to_drive(filename, parent_folder_id=FOLDER_ID, pin_message=False):
         ).execute()
 
         link = f.get("webViewLink", "no-link")
-        msg = f"✅ Uploaded to Cloud: {os.path.basename(filename)}\n🔗 {link}"
+        folder_url = f"https://drive.google.com/drive/folders/{parent_folder_id}"
+        msg = f"✅ Uploaded to Cloud: {os.path.basename(filename)}\n🔗 {link}\n📁 Drive Folder: {folder_url}"
         if pin_message:
             msg = "📌 [PRIORITY NOTICE] " + msg
         send_telegram(msg, pin=pin_message)
@@ -159,7 +160,8 @@ def spooler_worker_loop():
                 ).execute()
 
                 link = f.get("webViewLink", "no-link")
-                msg = f"🔄 [Offline Sync Complete] {os.path.basename(fname)}\n🔗 {link}"
+                folder_url = f"https://drive.google.com/drive/folders/{FOLDER_ID}"
+                msg = f"🔄 [Offline Sync Complete] {os.path.basename(fname)}\n🔗 {link}\n📁 Drive Folder: {folder_url}"
                 send_telegram(msg, pin=pin)
                 print(f"📤 Spool Synced: {fname} → {link}")
             except Exception as e:

@@ -1,0 +1,250 @@
+{
+  "Physics": {
+    "total_photos": 3,
+    "total_videos": 0,
+    "total_audios": 0,
+    "subject_changes": 10,
+    "daily": {
+      "2026-11-22": {
+        "photos": 3,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:14"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:14"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:20"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:23"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:26"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:27"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:30"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:31"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:35"
+          },
+          {
+            "type": "subject_set",
+            "time": "23:03"
+          },
+          {
+            "type": "photo",
+            "time": "23:03"
+          },
+          {
+            "type": "photo",
+            "time": "23:03"
+          },
+          {
+            "type": "photo",
+            "time": "23:04"
+          }
+        ],
+        "subject_changes": 10
+      }
+    }
+  },
+  "Computer Science": {
+    "total_photos": 2,
+    "total_videos": 4,
+    "total_audios": 0,
+    "subject_changes": 6,
+    "daily": {
+      "2026-11-22": {
+        "photos": 0,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:17"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:27"
+          },
+          {
+            "type": "subject_set",
+            "time": "22:58"
+          },
+          {
+            "type": "subject_set",
+            "time": "23:47"
+          },
+          {
+            "type": "video_start",
+            "time": "23:47"
+          }
+        ],
+        "subject_changes": 4
+      },
+      "2026-11-23": {
+        "photos": 2,
+        "videos": 3,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "photo",
+            "time": "00:01"
+          },
+          {
+            "type": "photo",
+            "time": "00:16"
+          },
+          {
+            "type": "video_start",
+            "time": "00:35"
+          },
+          {
+            "type": "subject_set",
+            "time": "00:38"
+          },
+          {
+            "type": "subject_set",
+            "time": "00:57"
+          },
+          {
+            "type": "video_start",
+            "time": "00:57"
+          },
+          {
+            "type": "video_start",
+            "time": "01:35"
+          }
+        ],
+        "subject_changes": 2
+      }
+    }
+  },
+  "Chemistry": {
+    "total_photos": 1,
+    "total_videos": 4,
+    "total_audios": 0,
+    "subject_changes": 5,
+    "daily": {
+      "2026-11-22": {
+        "photos": 1,
+        "videos": 4,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:17"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:30"
+          },
+          {
+            "type": "subject_set",
+            "time": "22:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "23:05"
+          },
+          {
+            "type": "video_start",
+            "time": "23:18"
+          },
+          {
+            "type": "video_start",
+            "time": "23:19"
+          },
+          {
+            "type": "video_start",
+            "time": "23:19"
+          },
+          {
+            "type": "photo",
+            "time": "23:20"
+          },
+          {
+            "type": "video_start",
+            "time": "23:20"
+          }
+        ],
+        "subject_changes": 4
+      },
+      "2026-11-23": {
+        "photos": 0,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "00:38"
+          }
+        ],
+        "subject_changes": 1
+      }
+    }
+  },
+  "Test": {
+    "total_photos": 0,
+    "total_videos": 1,
+    "total_audios": 0,
+    "subject_changes": 0,
+    "daily": {
+      "2026-11-22": {
+        "photos": 0,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "video_start",
+            "time": "23:44"
+          }
+        ],
+        "subject_changes": 0
+      }
+    }
+  },
+  "Unassigned": {
+    "total_photos": 1,
+    "total_videos": 1,
+    "total_audios": 0,
+    "subject_changes": 0,
+    "daily": {
+      "2026-11-23": {
+        "photos": 1,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "video_start",
+            "time": "02:01"
+          },
+          {
+            "type": "photo",
+            "time": "02:01"
+          }
+        ],
+        "subject_changes": 0
+      }
+    }
+  }
+}

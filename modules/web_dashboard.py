@@ -21,6 +21,8 @@ import datetime
 import subprocess
 import shutil
 import psutil
+import logging
+import threading
 from flask import (
     Flask,
     Response,
@@ -31,6 +33,9 @@ from flask import (
     redirect,
     url_for,
 )
+
+# Silence Werkzeug recurring access logs (/api/status, etc.)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 import state
 from activity_logger import load_log, log_activity
@@ -95,12 +100,197 @@ def serve_sample_board():
     return send_from_directory(TEMPLATES_DIR, "sample_board.svg", mimetype="image/svg+xml")
 
 
+LIVE_FRAME_PATH = "/dev/shm/live_frame.jpg"
+_latest_frame_bytes = None
+LIVE_FRAME_PATH = "/dev/shm/live_frame.jpg"
+_latest_frame_bytes = None
+_latest_frame_id = 0
+_frame_condition = threading.Condition()
+_measured_fps = 30.0
+_stream_worker_started = False
+
+
+def _camera_stream_worker():
+    global _latest_frame_bytes, _latest_frame_id, _measured_fps
+    import cv2
+    from config import enforce_anti_flicker_50hz
+    cap = None
+    last_shm_write = 0.0
+    fps_frames = 0
+    fps_start = time.time()
+    current_res = None
+
+    while True:
+        try:
+            # If recording or pause requested, release camera immediately for FFmpeg / fswebcam
+            if state.recording or state.camera_pause_event.is_set():
+                if cap is not None:
+                    try:
+                        cap.release()
+                    except Exception:
+                        pass
+                    cap = None
+                time.sleep(0.08)
+                continue
+
+            # Check if dynamic resolution switch requested
+            target_res = getattr(state, 'camera_target_res', '1920x1080')
+            if cap is not None and current_res != target_res:
+                w, h = (3840, 2160) if target_res == "3840x2160" else (1920, 1080)
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, w)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+                current_res = target_res
+
+            # Ensure camera is opened in high-speed MJPG mode
+            if cap is None:
+                if not os.path.exists('/dev/video0'):
+                    time.sleep(1.0)
+                    continue
+                enforce_anti_flicker_50hz('/dev/video0')
+                cap = cv2.VideoCapture('/dev/video0')
+                if not cap.isOpened():
+                    try:
+                        cap.release()
+                    except Exception:
+                        pass
+                    cap = None
+                    time.sleep(0.5)
+                    continue
+
+                w, h = (3840, 2160) if target_res == "3840x2160" else (1920, 1080)
+                cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, w)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+                cap.set(cv2.CAP_PROP_FPS, 60 if target_res != "3840x2160" else 30)
+                current_res = target_res
+
+            ret, frame = cap.read()
+            if ret and frame is not None:
+                # Fast Turbo JPEG compression without slow Huffman tree optimization passes
+                ret_enc, jpeg = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80, cv2.IMWRITE_JPEG_OPTIMIZE, 0])
+                if ret_enc:
+                    frame_bytes = jpeg.tobytes()
+                    now = time.time()
+
+                    with _frame_condition:
+                        _latest_frame_bytes = frame_bytes
+                        _latest_frame_id += 1
+                        _frame_condition.notify_all()
+
+                    # Measure live rolling FPS
+                    fps_frames += 1
+                    elapsed = now - fps_start
+                    if elapsed >= 1.0:
+                        _measured_fps = fps_frames / elapsed
+                        fps_frames = 0
+                        fps_start = now
+
+                    # Non-blocking RAM cache write (throttled to avoid I/O bottlenecks)
+                    if now - last_shm_write >= 0.25:
+                        last_shm_write = now
+                        try:
+                            with open(LIVE_FRAME_PATH, "wb") as f:
+                                f.write(frame_bytes)
+                        except Exception:
+                            pass
+            else:
+                time.sleep(0.01)
+
+        except Exception as e:
+            if cap is not None:
+                try:
+                    cap.release()
+                except Exception:
+                    pass
+                cap = None
+            time.sleep(0.5)
+
+
+def _ensure_stream_worker():
+    global _stream_worker_started
+    if not _stream_worker_started:
+        _stream_worker_started = True
+        t = threading.Thread(target=_camera_stream_worker, daemon=True)
+        t.start()
+
+
+def _gen_mjpeg_stream():
+    """Generator for streaming live MJPEG frames with zero lag and maximum FPS."""
+    _ensure_stream_worker()
+
+    fallback_bytes = None
+    sample_svg_path = os.path.join(TEMPLATES_DIR, "sample_board.svg")
+    if os.path.exists(sample_svg_path):
+        try:
+            with open(sample_svg_path, "rb") as f:
+                fallback_bytes = f.read()
+        except Exception:
+            pass
+
+    last_sent_id = -1
+    while True:
+        frame_bytes = None
+
+        # 1. When recording, FFmpeg dual output updates /dev/shm/live_frame.jpg at 30 FPS
+        if state.recording:
+            if os.path.exists(LIVE_FRAME_PATH):
+                try:
+                    with open(LIVE_FRAME_PATH, "rb") as f:
+                        frame_bytes = f.read()
+                except Exception:
+                    pass
+            if frame_bytes:
+                chunk = (
+                    b"--frame\r\n"
+                    b"Content-Type: image/jpeg\r\n"
+                    b"Content-Length: " + str(len(frame_bytes)).encode("ascii") + b"\r\n\r\n"
+                    + frame_bytes + b"\r\n"
+                )
+                yield chunk
+            time.sleep(0.033)
+            continue
+
+        # 2. When idle, wait on condition for fresh frame from camera worker (Zero lag!)
+        with _frame_condition:
+            while _latest_frame_id == last_sent_id and not state.recording:
+                if not _frame_condition.wait(timeout=0.08):
+                    break
+            frame_bytes = _latest_frame_bytes
+            last_sent_id = _latest_frame_id
+
+        # 3. Fallback only if camera hardware is completely offline/unplugged
+        if not frame_bytes:
+            if state.latest_photo_path and os.path.exists(state.latest_photo_path):
+                try:
+                    with open(state.latest_photo_path, "rb") as f:
+                        frame_bytes = f.read()
+                except Exception:
+                    pass
+            elif fallback_bytes:
+                frame_bytes = fallback_bytes
+
+        if frame_bytes:
+            chunk = (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n"
+                b"Content-Length: " + str(len(frame_bytes)).encode("ascii") + b"\r\n\r\n"
+                + frame_bytes + b"\r\n"
+            )
+            yield chunk
+
+
 @app.route("/video_feed")
 def video_feed():
-    """Live camera stream feed for diagnostics, aiming & focus checking."""
-    if state.latest_photo_path and os.path.exists(state.latest_photo_path):
-        return send_from_directory(os.path.dirname(state.latest_photo_path), os.path.basename(state.latest_photo_path), mimetype="image/jpeg")
-    return send_from_directory(TEMPLATES_DIR, "sample_board.svg", mimetype="image/svg+xml")
+    """Real-time live camera stream (multipart MJPEG) for classroom projector and diagnostic UI."""
+    resp = Response(
+        _gen_mjpeg_stream(),
+        mimetype="multipart/x-mixed-replace; boundary=frame"
+    )
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, pre-check=0, post-check=0, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    resp.headers["X-Accel-Buffering"] = "no"
+    return resp
 
 
 @app.route("/api/latest_asset")
@@ -109,6 +299,17 @@ def api_latest_asset():
     photo_name = os.path.basename(state.latest_photo_path) if state.latest_photo_path else None
     pdf_name = os.path.basename(state.latest_pdf_path) if state.latest_pdf_path else None
     
+    # If in-memory latest_photo_path isn't set yet (e.g. freshly started app), find the newest photo in storage/photos
+    if not photo_name and os.path.exists(PHOTOS_DIR):
+        try:
+            photos = [f for f in os.listdir(PHOTOS_DIR) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+            if photos:
+                photos.sort(key=lambda x: os.path.getmtime(os.path.join(PHOTOS_DIR, x)), reverse=True)
+                photo_name = photos[0]
+                state.latest_photo_path = os.path.join(PHOTOS_DIR, photo_name)
+        except Exception:
+            pass
+
     cpu = psutil.cpu_percent() if hasattr(psutil, 'cpu_percent') else 0
     ram = psutil.virtual_memory().percent if hasattr(psutil, 'virtual_memory') else 0
     used_pct, free_gb, total_gb = get_storage_usage()
@@ -125,7 +326,7 @@ def api_latest_asset():
         "latest_photo": photo_name,
         "latest_photo_url": f"/media/photos/{photo_name}" if photo_name else "/sample_board.svg",
         "latest_pdf": pdf_name,
-        "session_pages": len(state.session_photos),
+        "session_pages": len(state.session_photos) if state.session_photos else (1 if photo_name else 0),
         "recording_video": state.recording,
         "recording_audio": state.audio_recording,
         "pod_connected": pod_online,
@@ -134,7 +335,24 @@ def api_latest_asset():
         "ram": ram,
         "uptime": get_uptime(),
         "storage_free_gb": free_gb,
-        "storage_used_pct": used_pct
+        "storage_used_pct": used_pct,
+        "camera_fps": round(_measured_fps, 1),
+        "camera_resolution": getattr(state, "camera_target_res", "1920x1080")
+    })
+
+
+@app.route("/api/camera/resolution", methods=["GET", "POST"])
+def api_camera_resolution():
+    """Allows instant live switching between 4K UHD (3840x2160) and 1080P High-FPS modes."""
+    res = flask_request.args.get("res") or (flask_request.get_json(silent=True) or {}).get("res")
+    if res in ["3840x2160", "4k", "4K", "uhd"]:
+        state.camera_target_res = "3840x2160"
+    elif res in ["1920x1080", "1080p", "1080P", "fhd"]:
+        state.camera_target_res = "1920x1080"
+    return jsonify({
+        "status": "ok",
+        "resolution": getattr(state, "camera_target_res", "1920x1080"),
+        "camera_fps": round(_measured_fps, 1)
     })
 
 
@@ -355,6 +573,32 @@ def api_admin_verify_drive():
         }), 500
 
 
+@app.route("/api/admin/upload_credentials", methods=["POST"])
+def api_admin_upload_credentials():
+    if not session.get("authenticated"):
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    from drive_upload import CREDENTIALS_PATH
+    content = None
+    if "file" in flask_request.files:
+        uploaded_file = flask_request.files["file"]
+        if uploaded_file.filename:
+            content = uploaded_file.read().decode("utf-8", errors="ignore")
+    elif flask_request.is_json:
+        data = flask_request.get_json(silent=True) or {}
+        content = data.get("credentials_json")
+
+    if not content:
+        return jsonify({"status": "error", "message": "No credentials content provided."}), 400
+
+    try:
+        parsed = json.loads(content)
+        with open(CREDENTIALS_PATH, "w") as f:
+            json.dump(parsed, f, indent=2)
+        return jsonify({"status": "ok", "message": "credentials.json successfully saved to Project Veronica."})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Invalid JSON format: {e}"}), 400
+
+
 @app.route("/api/admin/save_config", methods=["POST"])
 def api_admin_save_config():
     if not session.get("authenticated"):
@@ -429,7 +673,13 @@ def api_admin_test_camera():
 
 @app.route("/api/admin/test_mic", methods=["POST"])
 def api_admin_test_mic():
-    from config import KERO_AUDIO_DEVICE
+    """Real hardware microphone recording and acoustic analysis test."""
+    import wave
+    import struct
+    import math
+    from config import KERO_AUDIO_DEVICE, STORAGE_DIR
+
+    # 1. Probe ALSA hardware
     try:
         res = subprocess.run(["arecord", "-l"], capture_output=True, text=True, timeout=3)
         has_mic = "card" in res.stdout.lower()
@@ -438,19 +688,109 @@ def api_admin_test_mic():
                 "status": "error",
                 "connected": False,
                 "device": KERO_AUDIO_DEVICE,
-                "message": "No ALSA audio capture devices found on system."
+                "message": "No ALSA audio capture devices found. Please plug in USB microphone."
             }), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"ALSA probe error: {e}"}), 500
+
+    test_wav = os.path.join(STORAGE_DIR, "test_mic_sample.wav")
+    dev = KERO_AUDIO_DEVICE
+
+    # 2. Record 2 seconds of real audio
+    try:
+        # First try specified device
+        cmd = ["arecord", "-D", dev, "-f", "cd", "-d", "2", test_wav]
+        rec_res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        if rec_res.returncode != 0 or not os.path.exists(test_wav) or os.path.getsize(test_wav) < 1000:
+            # Fallback to default arecord capture
+            cmd = ["arecord", "-f", "cd", "-d", "2", test_wav]
+            subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Recording test failed: {e}"}), 500
+
+    if not os.path.exists(test_wav) or os.path.getsize(test_wav) < 1000:
+        return jsonify({
+            "status": "error",
+            "connected": False,
+            "message": "Failed to record audio sample from hardware microphone."
+        }), 500
+
+    # 3. Analyze real audio metrics from recorded WAVE file
+    try:
+        with wave.open(test_wav, "rb") as wf:
+            n_frames = wf.getnframes()
+            channels = wf.getnchannels()
+            sample_rate = wf.getframerate()
+            frames = wf.readframes(n_frames)
+            sample_count = len(frames) // 2
+            samples = struct.unpack('<' + 'h' * sample_count, frames)
+            peak = max(abs(s) for s in samples) if samples else 0
+            rms = math.sqrt(sum(s * s for s in samples) / len(samples)) if samples else 0
+            dbfs = round(20 * math.log10(rms / 32768), 1) if rms > 0 else -90.0
+            peak_dbfs = round(20 * math.log10(peak / 32768), 1) if peak > 0 else -90.0
+            duration_sec = round(n_frames / float(sample_rate), 2)
+
+        status_label = "Optimal" if dbfs > -35 else ("Good" if dbfs > -55 else "Low Gain / Muted")
+
         return jsonify({
             "status": "ok",
             "connected": True,
-            "device": KERO_AUDIO_DEVICE,
-            "message": "ALSA Audio Capture device detected and verified."
+            "device": dev,
+            "duration": f"{duration_sec}s",
+            "sample_rate": f"{sample_rate} Hz",
+            "channels": "Stereo" if channels == 2 else "Mono",
+            "peak": peak,
+            "peak_dbfs": f"{peak_dbfs} dBFS",
+            "rms_dbfs": f"{dbfs} dBFS",
+            "db_num": dbfs,
+            "gain_status": status_label,
+            "audio_url": "/api/admin/mic_sample",
+            "message": f"Hardware Microphone Verified: {dbfs} dBFS ({channels}ch, {sample_rate}Hz, peak {peak_dbfs} dBFS)."
         })
     except Exception as e:
         return jsonify({
-            "status": "error",
-            "message": f"Microphone probe error: {e}"
-        }), 500
+            "status": "ok",
+            "connected": True,
+            "audio_url": "/api/admin/mic_sample",
+            "message": f"Audio recorded successfully (sample saved)."
+        })
+
+
+@app.route("/api/admin/mic_sample")
+def api_admin_mic_sample():
+    """Serves the latest microphone test audio clip for browser playback."""
+    from config import STORAGE_DIR
+    test_wav = os.path.join(STORAGE_DIR, "test_mic_sample.wav")
+    if os.path.exists(test_wav):
+        return send_from_directory(STORAGE_DIR, "test_mic_sample.wav", mimetype="audio/wav")
+    return "No audio sample available", 404
+
+
+@app.route("/api/bookmarks", methods=["GET"])
+def api_get_bookmarks():
+    """Returns active bookmarks for the Teacher Lectern Pod UI."""
+    from config import USEFUL_SITES
+    return jsonify({"status": "ok", "bookmarks": USEFUL_SITES})
+
+
+@app.route("/api/admin/bookmarks", methods=["GET", "POST"])
+def api_admin_bookmarks():
+    """Get or update useful sites / bookmarks from Diagnostic Admin Hub."""
+    from config import USEFUL_SITES, save_dynamic_config
+    import config
+    if flask_request.method == "POST":
+        data = flask_request.get_json(force=True, silent=True) or {}
+        bookmarks = data.get("bookmarks")
+        if isinstance(bookmarks, list):
+            config.USEFUL_SITES = bookmarks
+            save_dynamic_config({"USEFUL_SITES": bookmarks})
+            return jsonify({
+                "status": "ok",
+                "message": "Useful Sites updated and synced to Lectern Pod.",
+                "bookmarks": config.USEFUL_SITES
+            })
+        return jsonify({"status": "error", "message": "Invalid bookmarks format."}), 400
+    return jsonify({"status": "ok", "bookmarks": config.USEFUL_SITES})
 
 
 @app.route("/api/admin/purge_cache", methods=["POST"])

@@ -35,6 +35,19 @@
             --dim:         #30363d;
         }
 
+        /* ☀️ DAY LIGHT MODE PALETTE */
+        [data-theme="light"] {
+            --bg:          #f1f5f9;
+            --surface:     #ffffff;
+            --card:        #ffffff;
+            --card-hover:  #f8fafc;
+            --border:      rgba(0, 0, 0, 0.1);
+            --edge:        rgba(0, 0, 0, 0.15);
+            --white:       #0f172a;
+            --muted:       #64748b;
+            --dim:         #cbd5e1;
+        }
+
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0; padding: 0;
@@ -53,14 +66,14 @@
             letter-spacing: -0.2px;
         }
 
-        /* ── ROOT SHELL: 800×480 Fullscreen Flex ──────────────────── */
+        /* ── ROOT SHELL: Responsive Fullscreen Flex ──────────────────── */
         .shell {
             display: flex;
             flex-direction: column;
             width: 100vw;
             height: 100vh;
-            max-width: 800px;
-            max-height: 480px;
+            max-width: 100%;
+            max-height: 100%;
             margin: 0 auto;
             position: relative;
             background: var(--bg);
@@ -402,7 +415,24 @@
             color: var(--orange) !important;
         }
 
-        /* ── SLIDE 2: SYSTEM HEALTH & QUICK TOOLS ─────────────────── */
+        /* ── SLIDE 2: USEFUL SITES & WEB APPS (3/4) ────────────────── */
+        .slide-bookmarks {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .bookmark-btn {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .bookmark-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ── SLIDE 3: SYSTEM HEALTH & QUICK TOOLS ─────────────────── */
         .slide-system {
             display: flex;
             flex-direction: column;
@@ -616,23 +646,51 @@
         .rec-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(5, 7, 10, 0.98);
-            backdrop-filter: blur(25px);
+            background: rgba(5, 7, 10, 0.95);
             z-index: 999;
-            display: flex;
-            flex-direction: column;
+            display: none;
             align-items: center;
             justify-content: center;
-            gap: 14px;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.25s ease;
             border: 3px solid var(--red);
             box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.35);
+            overflow: hidden;
+            transform: translateZ(0);
         }
         .rec-overlay.active {
+            display: flex;
             opacity: 1;
             pointer-events: all;
+        }
+
+        .rec-live-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            filter: brightness(0.6) contrast(1.1);
+        }
+
+        .rec-overlay-scrim {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(5, 7, 10, 0.4) 0%, rgba(5, 7, 10, 0.88) 100%);
+            z-index: 2;
+        }
+
+        .rec-hud-content {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
         }
 
         .rec-beacon {
@@ -680,7 +738,8 @@
             letter-spacing: 0.5px;
         }
         .rec-stop-btn {
-            width: 380px;
+            width: min(90vw, 380px);
+            max-width: 90%;
             height: 64px;
             background: linear-gradient(180deg, #dc2626, #b91c1c);
             border: 2px solid rgba(255, 255, 255, 0.35);
@@ -697,6 +756,7 @@
             box-shadow: 0 10px 30px rgba(220, 38, 38, 0.45);
             transition: all 0.15s ease;
             margin-top: 6px;
+            box-sizing: border-box;
         }
         .rec-stop-btn:active {
             transform: scale(0.97);
@@ -731,8 +791,7 @@
         .screensaver {
             position: absolute;
             inset: 0;
-            background: rgba(3, 5, 8, 0.96);
-            backdrop-filter: blur(25px);
+            background: rgba(3, 5, 8, 0.98);
             z-index: 10000;
             display: flex;
             flex-direction: column;
@@ -742,11 +801,135 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease;
+            transform: translateZ(0);
         }
         .screensaver.active {
             opacity: 1;
             pointer-events: all;
         }
+        /* 🏷️ NFC TEACHER GREETING FLASH CARD */
+        .nfc-greeting-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 7, 10, 0.96);
+            z-index: 10005;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.96) translateZ(0);
+        }
+        [data-theme="light"] .nfc-greeting-overlay {
+            background: rgba(248, 250, 252, 0.95);
+        }
+        .nfc-greeting-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .nfc-greeting-card {
+            width: min(92vw, 560px);
+            max-width: 95%;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(13, 17, 23, 0.96) 100%);
+            border: 2px solid var(--green);
+            border-radius: 20px;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.25), inset 0 0 25px rgba(16, 185, 129, 0.1);
+            box-sizing: border-box;
+        }
+        [data-theme="light"] .nfc-greeting-card {
+            background: #ffffff;
+            border: 2px solid #059669;
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.15);
+        }
+        .nfc-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nfc-card-chip {
+            width: 44px;
+            height: 32px;
+            background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%);
+            border-radius: 6px;
+            border: 1px solid #b45309;
+            position: relative;
+        }
+        .nfc-card-chip::after {
+            content: '';
+            position: absolute;
+            top: 9px; left: 5px; right: 5px; height: 1px;
+            background: #78350f;
+            box-shadow: 0 8px 0 #78350f;
+        }
+        .nfc-verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 800;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nfc-pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green);
+            animation: blink 1s infinite;
+        }
+        .nfc-teacher-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.3px;
+        }
+        .nfc-teacher-dept {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 2px;
+        }
+        .nfc-unlocked-banner {
+            margin: 6px 0;
+            background: var(--green);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+        .nfc-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: var(--muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 10px;
+        }
+        [data-theme="light"] .nfc-card-footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
         .ss-brand {
             font-size: 12px;
             font-weight: 800;
@@ -773,7 +956,8 @@
             color: var(--muted);
         }
         .ss-unlock-track {
-            width: 360px;
+            width: min(90vw, 360px);
+            max-width: 90%;
             height: 56px;
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -785,6 +969,7 @@
             align-items: center;
             padding: 6px;
             cursor: pointer;
+            box-sizing: border-box;
         }
         .ss-unlock-text {
             width: 100%;
@@ -938,7 +1123,7 @@
                             </div>
                             <div class="btn-info">
                                 <div class="btn-label">Record Video</div>
-                                <div class="btn-sub">3840×2160 @ 30 FPS Stream</div>
+                                <div class="btn-sub">1920×1080 @ 30 FPS Stream</div>
                             </div>
                         </button>
 
@@ -1006,7 +1191,71 @@
                         </button>
                     </div>
 
-                    <!-- ── SLIDE 2: SYSTEM HEALTH & METRICS ── -->
+                    <!-- ── SLIDE 2: USEFUL SITES & WEB APPS (3/4) ── -->
+                    <div class="slide slide-bookmarks" id="slide-bookmarks">
+                        <a href="https://www.google.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(66,133,244,0.4);">
+                            <div class="btn-top">
+                                <span style="font-size:26px;">🔍</span>
+                                <span class="btn-tag" style="background:rgba(66,133,244,0.15); color:#4285f4; border:1px solid rgba(66,133,244,0.3);">SEARCH ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Google</div>
+                                <div class="btn-sub">Search &amp; Academic Reference</div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(239,68,68,0.4);">
+                            <div class="btn-top">
+                                <span style="font-size:26px;">▶️</span>
+                                <span class="btn-tag" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3);">VIDEO ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">YouTube</div>
+                                <div class="btn-sub">Video Lectures &amp; Science Visuals</div>
+                            </div>
+                        </a>
+                        <a href="https://mail.google.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(234,67,53,0.4);">
+                            <div class="btn-top">
+                                <span style="font-size:26px;">✉️</span>
+                                <span class="btn-tag" style="background:rgba(234,67,53,0.15); color:#ea4335; border:1px solid rgba(234,67,53,0.3);">EMAIL ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Gmail</div>
+                                <div class="btn-sub">Faculty &amp; Staff Inbox</div>
+                            </div>
+                        </a>
+                        <a href="https://gemini.google.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(142,117,255,0.4);">
+                            <div class="btn-top">
+                                <span style="font-size:26px;">✨</span>
+                                <span class="btn-tag" style="background:rgba(142,117,255,0.15); color:#8e75ff; border:1px solid rgba(142,117,255,0.3);">AI ASSISTANT ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Gemini</div>
+                                <div class="btn-sub">Lesson Plan &amp; Quiz Generator</div>
+                            </div>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(16,185,129,0.4);">
+                            <div class="btn-top">
+                                <span style="font-size:26px;">📁</span>
+                                <span class="btn-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3);">DRIVE FOLDER ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Google Drive</div>
+                                <div class="btn-sub">Classroom Lecture Notes &amp; Video Archives</div>
+                            </div>
+                        </a>
+                        <a href="/projector" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(0,242,254,0.4);">
+                            <div class="btn-top">
+                                <span style="font-size:26px;">🖥️</span>
+                                <span class="btn-tag" style="background:rgba(0,242,254,0.15); color:#00f2fe; border:1px solid rgba(0,242,254,0.3);">PROJECTOR ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Live Projector</div>
+                                <div class="btn-sub">Fullscreen Classroom HDMI Feed</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- ── SLIDE 3: SYSTEM HEALTH & METRICS (4/4) ── -->
                     <div class="slide slide-system">
                         <div class="metrics-grid">
                             <div class="metric-card">
@@ -1054,9 +1303,9 @@
             </div>
 
             <div class="sb-card">
-                <div class="sb-label">ESP32 Sensor Pod</div>
-                <div class="sb-value green" id="sb-pod">Listening…</div>
-                <div style="font-size:9.5px; color:var(--muted); font-family:monospace;" id="sb-pod-meta">PN532 NFC + BUZZER</div>
+                <div class="sb-label">Lectern Sensor Pod</div>
+                <div class="sb-value green" id="sb-pod">Ready · Active</div>
+                <div style="font-size:9.5px; color:var(--muted); font-family:monospace;" id="sb-pod-meta">NFC TAP &amp; BUZZER READY</div>
             </div>
 
             <div class="sb-card">
@@ -1064,27 +1313,30 @@
                 <div class="sb-value cyan" id="sb-pages">0 Snapshots</div>
             </div>
 
-            <!-- Page Selection Group -->
+            <!-- Page Selection Group (4 Slides) -->
             <div class="sb-nav-group">
                 <button class="sb-nav-btn active-nav" id="nav0" onclick="goSlide(0)">
-                    <span>⚡</span> <span>Actions (1/3)</span>
+                    <span>⚡</span> <span>Actions (1/4)</span>
                 </button>
                 <button class="sb-nav-btn" id="nav1" onclick="goSlide(1)">
-                    <span>📚</span> <span>Subjects (2/3)</span>
+                    <span>📚</span> <span>Subjects (2/4)</span>
                 </button>
                 <button class="sb-nav-btn" id="nav2" onclick="goSlide(2)">
-                    <span>🖥</span> <span>Systems (3/3)</span>
+                    <span>🌐</span> <span>Web Apps (3/4)</span>
+                </button>
+                <button class="sb-nav-btn" id="nav3" onclick="goSlide(3)">
+                    <span>🖥</span> <span>Systems (4/4)</span>
                 </button>
             </div>
 
-            <!-- Standby & Admin -->
+            <!-- Standby & Theme Toggle -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                 <button class="sb-nav-btn" onclick="triggerScreensaver()" style="justify-content:center; padding:0;">
                     <span>💤</span> <span>Sleep</span>
                 </button>
-                <a href="/login" class="sb-nav-btn" style="text-decoration:none; justify-content:center; padding:0;">
-                    <span>⚙️</span> <span>Admin</span>
-                </a>
+                <button class="sb-nav-btn" id="theme-btn" onclick="toggleTheme()" style="justify-content:center; padding:0;">
+                    <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day</span>
+                </button>
             </div>
         </div>
 
@@ -1098,8 +1350,9 @@
             <div class="ndot active" onclick="goSlide(0)" id="ndot0"></div>
             <div class="ndot" onclick="goSlide(1)" id="ndot1"></div>
             <div class="ndot" onclick="goSlide(2)" id="ndot2"></div>
+            <div class="ndot" onclick="goSlide(3)" id="ndot3"></div>
         </div>
-        <div class="slide-name" id="slide-name">LECTURE ACTIONS (1/3)</div>
+        <div class="slide-name" id="slide-name">LECTURE ACTIONS (1/4)</div>
         <div class="nav-arrows">
             <div class="nav-arrow" onclick="prevSlide()">◀</div>
             <div class="nav-arrow" onclick="nextSlide()">▶</div>
@@ -1112,16 +1365,46 @@
      LIVE RECORDING OVERLAY (800×480 Fullscreen HUD)
 ══════════════════════════════════════════════════════════ -->
 <div class="rec-overlay" id="rec-overlay">
-    <div class="rec-beacon">
-        <div class="rec-dot-big"></div>
-        <span id="rec-mode-label">LIVE 4K VIDEO RECORDING</span>
+    <img src="" data-src="/video_feed" class="rec-live-bg" id="rec-live-feed" alt="Live Camera Preview" onerror="this.onerror=null; this.src='/sample_board.svg';">
+    <div class="rec-overlay-scrim"></div>
+    <div class="rec-hud-content">
+        <div class="rec-beacon">
+            <div class="rec-dot-big"></div>
+            <span id="rec-mode-label">LIVE 1080P VIDEO RECORDING</span>
+        </div>
+        <div class="rec-subj-pill" id="rec-subj-pill">PHYSICS</div>
+        <div class="rec-timer-big" id="rec-timer">00:00</div>
+        <div class="rec-meta" id="rec-meta">KREO OWL 1080P · 1920×1080 @ 30 FPS · ACTIVE SENSOR FEED</div>
+        <button class="rec-stop-btn" onclick="doAction('stop')">
+            ⏹ TERMINATE &amp; ARCHIVE FEED
+        </button>
     </div>
-    <div class="rec-subj-pill" id="rec-subj-pill">PHYSICS</div>
-    <div class="rec-timer-big" id="rec-timer">00:00</div>
-    <div class="rec-meta" id="rec-meta">KREO OWL 4K PRO · /dev/video0 · 3840×2160 @ 30 FPS</div>
-    <button class="rec-stop-btn" onclick="doAction('stop')">
-        ⏹ TERMINATE &amp; ARCHIVE FEED
-    </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     🏷️ NFC TEACHER GREETING FULLSCREEN MODAL
+══════════════════════════════════════════════════════════ -->
+<div class="nfc-greeting-overlay" id="nfc-greeting-overlay">
+    <div class="nfc-greeting-card">
+        <div class="nfc-card-top">
+            <div class="nfc-card-chip"></div>
+            <div class="nfc-verified-badge">
+                <span class="nfc-pulse-dot"></span>
+                <span>TEACHER VERIFIED</span>
+            </div>
+        </div>
+        <div>
+            <div class="nfc-teacher-name" id="nfc-modal-teacher-name">PROF. H. C. VERMA</div>
+            <div class="nfc-teacher-dept" id="nfc-modal-teacher-dept">DEPARTMENT OF PHYSICS</div>
+            <div class="nfc-unlocked-banner">
+                <span>✦</span> <span id="nfc-modal-unlocked-subj">CLASSROOM UNLOCKED: PHYSICS</span>
+            </div>
+        </div>
+        <div class="nfc-card-footer">
+            <span>Zero-friction handover · Cloud ledger armed</span>
+            <span style="color:var(--green); font-weight:700;">● Pi 5 Node Linked</span>
+        </div>
+    </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1149,7 +1432,8 @@
 // ════════════════════════════════════════════════════════════════
 
 let currentSlide = 0;
-const SLIDE_NAMES = ['LECTURE ACTIONS (1/3)', 'ACADEMIC SUBJECTS (2/3)', 'CORE TELEMETRY & SYSTEM (3/3)'];
+const TOTAL_SLIDES = 4;
+const SLIDE_NAMES = ['LECTURE ACTIONS (1/4)', 'ACADEMIC SUBJECTS (2/4)', 'USEFUL WEB APPS (3/4)', 'CORE TELEMETRY & SYSTEM (4/4)'];
 let currentSubject = 'Physics';
 let sessionCount = 0;
 let isRecording = false;
@@ -1172,7 +1456,7 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── SLIDE NAVIGATION ────────────────────────────────────────────
+// ── SLIDE NAVIGATION & GESTURES ───────────────────────────────
 function goSlide(idx) {
     currentSlide = idx;
     document.getElementById('slide-track').style.transform = `translateX(-${idx * 100}%)`;
@@ -1181,8 +1465,142 @@ function goSlide(idx) {
     document.getElementById('slide-name').textContent = SLIDE_NAMES[idx];
     resetIdle();
 }
-function nextSlide() { goSlide((currentSlide + 1) % 3); }
-function prevSlide() { goSlide((currentSlide + 2) % 3); }
+function nextSlide() { goSlide((currentSlide + 1) % TOTAL_SLIDES); }
+function prevSlide() { goSlide((currentSlide + TOTAL_SLIDES - 1) % TOTAL_SLIDES); }
+
+// Universal Touch Swipe & Mouse Drag Gestures
+let isDraggingSlide = false;
+
+(function initSlideSwipes() {
+    const slideArea = document.querySelector('.slide-area') || document.getElementById('slide-viewport');
+    if (!slideArea) return;
+    let startX = 0, startY = 0, distX = 0, isDown = false, startTime = 0;
+
+    function onDragStart(cx, cy) {
+        isDown = true;
+        startX = cx;
+        startY = cy;
+        distX = 0;
+        startTime = Date.now();
+        isDraggingSlide = false;
+    }
+
+    function onDragMove(cx, cy) {
+        if (!isDown) return;
+        distX = cx - startX;
+        const distY = cy - startY;
+        if (Math.abs(distX) > 15 && Math.abs(distX) > Math.abs(distY)) {
+            isDraggingSlide = true;
+        }
+    }
+
+    function onDragEnd(cx, cy) {
+        if (!isDown) return;
+        isDown = false;
+        const totalX = (cx !== undefined ? cx : (startX + distX)) - startX;
+        const totalY = (cy !== undefined ? cy : startY) - startY;
+        const elapsed = Date.now() - startTime;
+
+        // Horizontal swipe triggered if moved > 35px or flick > 20px within 300ms
+        if ((Math.abs(totalX) > 35 || (Math.abs(totalX) > 20 && elapsed < 300)) && Math.abs(totalX) > Math.abs(totalY)) {
+            if (totalX < 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+        setTimeout(() => { isDraggingSlide = false; }, 60);
+    }
+
+    // Touch events for actual touch displays
+    slideArea.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) onDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    slideArea.addEventListener('touchmove', e => {
+        if (e.touches.length === 1) onDragMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    slideArea.addEventListener('touchend', e => {
+        if (e.changedTouches.length === 1) onDragEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    }, { passive: true });
+
+    // Pointer events for desktop testing with mouse drag
+    slideArea.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        onDragStart(e.clientX, e.clientY);
+    });
+    window.addEventListener('pointermove', e => {
+        if (isDown) onDragMove(e.clientX, e.clientY);
+    });
+    window.addEventListener('pointerup', e => {
+        if (isDown) onDragEnd(e.clientX, e.clientY);
+    });
+
+    // Suppress child clicks if teacher was dragging/swiping
+    slideArea.addEventListener('click', e => {
+        if (isDraggingSlide) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+})();
+
+// ── DYNAMIC BOOKMARK ENGINE ─────────────────────────────────────
+function loadBookmarks() {
+    fetch('/api/bookmarks')
+        .then(r => r.json())
+        .then(data => {
+            if (data.bookmarks && Array.isArray(data.bookmarks)) {
+                renderBookmarks(data.bookmarks);
+            }
+        })
+        .catch(() => {});
+}
+
+function renderBookmarks(bookmarks) {
+    const container = document.getElementById('slide-bookmarks');
+    if (!container || !bookmarks || bookmarks.length === 0) return;
+    container.innerHTML = bookmarks.map(bm => `
+        <a href="${bm.url}" target="_blank" class="pod-btn bookmark-btn" style="border-color:${bm.color || '#38bdf8'}55;">
+            <div class="btn-top">
+                <span style="font-size:26px;">${bm.icon || '🌐'}</span>
+                <span class="btn-tag" style="background:${bm.color || '#38bdf8'}22; color:${bm.color || '#38bdf8'}; border:1px solid ${bm.color || '#38bdf8'}44;">OPEN ↗</span>
+            </div>
+            <div class="btn-info">
+                <div class="btn-label">${bm.name}</div>
+                <div class="btn-sub" style="font-family:'JetBrains Mono', monospace; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${(bm.url || '').replace(/^https?:\/\//, '')}</div>
+            </div>
+        </a>
+    `).join('');
+}
+
+// ☀️ DAY / NIGHT THEME CONTROLLER
+function toggleTheme() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('veronica_theme', 'dark');
+        updateThemeButton(false);
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('veronica_theme', 'light');
+        updateThemeButton(true);
+    }
+}
+
+function updateThemeButton(isLight) {
+    const icon = document.getElementById('theme-btn-icon');
+    const text = document.getElementById('theme-btn-text');
+    if (icon && text) {
+        icon.innerText = isLight ? '🌙' : '☀️';
+        text.innerText = isLight ? 'Night' : 'Day';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const isLight = localStorage.getItem('veronica_theme') === 'light';
+    if (isLight) document.documentElement.setAttribute('data-theme', 'light');
+    updateThemeButton(isLight);
+});
 
 // ── TOAST ────────────────────────────────────────────────────────
 let toastTimer = null;
@@ -1192,6 +1610,28 @@ function toast(msg) {
     el.classList.add('active');
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('active'), 2800);
+}
+
+// 🏷️ Teacher Greeting Modal Logic
+const TEACHER_PROFILES = {
+    'Physics': { name: 'PROF. H. C. VERMA', dept: 'DEPARTMENT OF PHYSICS' },
+    'Chemistry': { name: 'DR. P. MUKHERJEE', dept: 'DEPARTMENT OF CHEMISTRY' },
+    'Math': { name: 'DR. R. D. SHARMA', dept: 'DEPARTMENT OF MATHEMATICS' },
+    'English': { name: 'PROF. W. WORDSWORTH', dept: 'FACULTY OF ENGLISH & LIT' },
+    'Computer Science': { name: 'DR. A. TURING', dept: 'DEPT OF COMPUTER SCIENCE' }
+};
+
+function showTeacherGreeting(subj) {
+    const prof = TEACHER_PROFILES[subj] || { name: `${subj.toUpperCase()} FACULTY`, dept: `DEPARTMENT OF ${subj.toUpperCase()}` };
+    document.getElementById('nfc-modal-teacher-name').textContent = prof.name;
+    document.getElementById('nfc-modal-teacher-dept').textContent = prof.dept;
+    document.getElementById('nfc-modal-unlocked-subj').textContent = `CLASSROOM UNLOCKED: ${subj.toUpperCase()}`;
+    
+    const overlay = document.getElementById('nfc-greeting-overlay');
+    overlay.classList.add('active');
+    setTimeout(() => {
+        overlay.classList.remove('active');
+    }, 2800);
 }
 
 // ── SUBJECT CONTEXT ──────────────────────────────────────────────
@@ -1267,8 +1707,8 @@ function doAction(action) {
     } else if (action === 'video') {
         if (isRecording) { doAction('stop'); return; }
         isRecording = true;
-        document.getElementById('rec-mode-label').textContent = 'LIVE 4K VIDEO RECORDING';
-        document.getElementById('rec-meta').textContent = 'KREO OWL 4K PRO · /dev/video0 · 3840×2160 @ 30 FPS';
+        document.getElementById('rec-mode-label').textContent = 'LIVE 1080P VIDEO RECORDING';
+        document.getElementById('rec-meta').textContent = 'KREO OWL 1080P · /dev/video0 · 1920×1080 @ 30 FPS';
         startRecOverlay();
         fetch('/cmd/video', { method: 'POST' }).catch(() => {});
 
@@ -1302,6 +1742,8 @@ function doReboot() {
 function startRecOverlay() {
     recTimer = 0;
     document.getElementById('rec-timer').textContent = '00:00';
+    const feed = document.getElementById('rec-live-feed');
+    if (feed && !feed.src) feed.src = '/video_feed';
     document.getElementById('rec-overlay').classList.add('active');
     document.getElementById('rec-status-pill').style.display = 'flex';
     if (recInterval) clearInterval(recInterval);
@@ -1315,6 +1757,8 @@ function startRecOverlay() {
 
 function stopRecOverlay() {
     isRecording = false;
+    const feed = document.getElementById('rec-live-feed');
+    if (feed) feed.src = '';
     document.getElementById('rec-overlay').classList.remove('active');
     document.getElementById('rec-status-pill').style.display = 'none';
     if (recInterval) clearInterval(recInterval);
@@ -1334,9 +1778,9 @@ function pollTelemetry() {
         document.getElementById('sys-disk').textContent = diskPct + '%';
         document.getElementById('disk-bar').style.width = Math.min(diskPct, 100) + '%';
 
-        // ESP32 Pod Connection Status
+        // ESP32 Pod Connection Status (Teacher-friendly, no technical IP address)
         const podOnline = d.pod_connected;
-        document.getElementById('sb-pod').textContent = podOnline ? (d.pod_ip || 'Online') : 'Waiting for link…';
+        document.getElementById('sb-pod').textContent = podOnline ? 'Ready · Active' : 'Waiting for link…';
         document.getElementById('sb-pod').style.color = podOnline ? 'var(--green)' : 'var(--muted)';
         document.getElementById('pod-dot').className = 'dot ' + (podOnline ? 'dot-green' : 'dot-grey');
 
@@ -1360,9 +1804,11 @@ function pollTelemetry() {
                 currentSubject = d.subject;
                 setSubject(d.subject, false);
 
-                // Show NFC flash banner
+                // Show NFC flash banner & Fullscreen Teacher Greeting Modal
+                showTeacherGreeting(d.subject);
                 const banner = document.getElementById('nfc-banner');
-                document.getElementById('nfc-banner-name').textContent = d.subject + ' Faculty';
+                const prof = TEACHER_PROFILES[d.subject] || { name: `${d.subject} Faculty`, dept: `${d.subject.toUpperCase()} · UNLOCKED` };
+                document.getElementById('nfc-banner-name').textContent = prof.name;
                 document.getElementById('nfc-banner-tag').textContent = d.subject.toUpperCase() + ' · UNLOCKED';
                 banner.classList.add('active');
                 setTimeout(() => banner.classList.remove('active'), 4500);
@@ -1372,7 +1818,7 @@ function pollTelemetry() {
         // Recording synchronization
         if (d.recording_video && !isRecording) {
             isRecording = true;
-            document.getElementById('rec-mode-label').textContent = 'LIVE 4K VIDEO RECORDING';
+            document.getElementById('rec-mode-label').textContent = 'LIVE 1080P VIDEO RECORDING';
             startRecOverlay();
         } else if (d.recording_audio && !isRecording) {
             isRecording = true;
@@ -1461,7 +1907,8 @@ function unlockScreensaver() {
 });
 resetIdle();
 
-// Initialize default state
+// Initialize default state & quick launch bookmarks
+loadBookmarks();
 goSlide(0);
 </script>
 </body>
