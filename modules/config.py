@@ -113,6 +113,18 @@ ADMIN_PASSWORD = "1234"
 # ==============================================================================
 # 9. DYNAMIC CONFIGURATION ENGINE (Field Technician Persistence)
 # ==============================================================================
+def get_spool_count():
+    spool_path = os.path.join(BASE_DIR, "pending_uploads.json")
+    if os.path.exists(spool_path):
+        try:
+            with open(spool_path, "r") as f:
+                data = json.load(f)
+                return len(data) if isinstance(data, list) else 0
+        except Exception:
+            return 0
+    return 0
+
+
 def get_all_config():
     """Returns all current configurations as a structured dictionary."""
     return {
@@ -138,6 +150,8 @@ def get_all_config():
         "SECURE_CODE_SEQ": SECURE_CODE_SEQ,
         "ADMIN_USERNAME": ADMIN_USERNAME,
         "ADMIN_PASSWORD": ADMIN_PASSWORD,
+        "DRIVE_TOKEN_EXISTS": os.path.exists(TOKEN_PATH),
+        "SPOOL_PENDING_COUNT": get_spool_count(),
     }
 
 

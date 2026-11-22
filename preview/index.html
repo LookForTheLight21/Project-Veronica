@@ -642,7 +642,7 @@
     <div class="idle-screensaver" id="idle-screensaver">
         <div class="screensaver-top">
             <div class="screensaver-pill">✦ Project Veronica OS · Active Node: Class X</div>
-            <div class="screensaver-pill" style="color:#34d399;">● 5.8GHz Mesh Online · 192.168.4.15</div>
+            <div class="screensaver-pill" style="color:#34d399;" id="screensaver-net-pill">● Pod Status</div>
         </div>
 
         <div class="screensaver-center">
@@ -677,9 +677,9 @@
             
             <!-- 📶 NETWORK ONLINE STATUS INDICATOR -->
             <div class="glass-pill" style="gap:8px;">
-                <span class="status-dot" style="background:#3fb950; box-shadow:0 0 10px #3fb950;"></span>
-                <span style="font-weight:700;">📶 5.8GHz Mesh Online</span>
-                <span style="color:var(--text-muted); font-size:11px; font-family:'JetBrains Mono',monospace;">(192.168.4.15 | 2ms)</span>
+                <span class="status-dot" id="net-status-dot" style="background:#3fb950; box-shadow:0 0 10px #3fb950;"></span>
+                <span style="font-weight:700;" id="net-status-label">📶 Loading…</span>
+                <span style="color:var(--text-muted); font-size:11px; font-family:'JetBrains Mono',monospace;" id="net-status-pod"></span>
             </div>
 
             <div class="glass-pill">
@@ -729,11 +729,11 @@
                             <svg class="uplink-icon" style="stroke: var(--neon-cyan); width: 20px; height: 20px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                             <span style="color: #fff; font-weight: 700; font-size: 13px;">⚙️ Diagnostic &amp; Configuration Hub</span>
                         </a>
-                        <a href="projector.html" class="uplink-btn uplink-projector">
+                        <a href="/projector" class="uplink-btn uplink-projector">
                             <svg class="uplink-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                             Projector View
                         </a>
-                        <a href="report.html" class="uplink-btn uplink-gemini">
+                        <a href="/report" class="uplink-btn uplink-gemini">
                             <svg class="uplink-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             Admin Ledger
                         </a>
@@ -813,7 +813,7 @@
                         </button>
 
                         <!-- 5. Project on Wall (Neon Ice Cyan) -->
-                        <a href="projector.html" class="action-btn btn-projector">
+                        <a href="/projector" class="action-btn btn-projector">
                             <svg class="btn-icon-svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                             <span class="btn-text">Project on Wall<br>(Back-Row View)</span>
                         </a>
@@ -841,7 +841,7 @@
                     <div style="margin-top: 22px;">
                         <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">
                             <span>LATEST CHALKBOARD SNAPSHOT</span>
-                            <a href="projector.html" style="color:var(--neon-cyan); text-decoration:none;">Open Projector →</a>
+                            <a href="/projector" style="color:var(--neon-cyan); text-decoration:none;">Open Projector →</a>
                         </div>
                         <div class="deck-preview">
                             <img src="sample_board.svg" alt="Latest board snapshot" id="board-preview-img">
@@ -877,7 +877,7 @@
                     </div>
                     <div class="sys-row">
                         <span class="sys-label"><svg class="title-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Hardware Subsystems</span>
-                        <span class="sys-tag"><svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> ONLINE</span>
+                        <span class="sys-tag" id="tag-hardware"><svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> ONLINE</span>
                     </div>
                 </div>
             </div>
@@ -893,12 +893,12 @@
                 <div class="card-body">
                     <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500;">
                         <span style="color:var(--text-muted)">Volume Used</span>
-                        <span style="font-family:monospace;" id="val-storage-pct">24%</span>
+                        <span style="font-family:monospace;" id="val-storage-pct">--%</span>
                     </div>
-                    <div class="progress-track"><div class="progress-fill" id="val-storage-fill"></div></div>
+                    <div class="progress-track"><div class="progress-fill" id="val-storage-fill" style="width: 0%;"></div></div>
                     <div style="color:var(--text-muted); font-size:12px; margin-top:10px; display:flex; justify-content: space-between;">
-                        <span>Free: 14.2 GB</span>
-                        <span>Total: 32 GB</span>
+                        <span id="val-storage-free">Free: -- GB</span>
+                        <span id="val-storage-total">Total: -- GB</span>
                     </div>
                 </div>
             </div>
@@ -983,20 +983,18 @@
             }, 3000);
         }
 
-        function setSubject(subj) {
+        function applySubjectUI(subj) {
             document.querySelectorAll('.subj-btn').forEach(b => b.classList.remove('subj-active'));
-            
-            if (subj === 'clear' || !subj) {
+            if (!subj || subj === 'clear' || subj === 'None') {
                 currentSubject = null;
-                document.getElementById('active-subj-label').innerText = 'None (Console Locked)';
+                const lbl = document.getElementById('active-subj-label');
+                if (lbl) lbl.innerText = 'None (Console Locked)';
                 if (lockBadge) {
                     lockBadge.innerText = '🔒 LOCKED (TAP SUBJECT)';
                     lockBadge.style.color = '#ff4b82';
                     lockBadge.style.background = 'rgba(255, 75, 130, 0.12)';
                     lockBadge.style.borderColor = 'rgba(255, 75, 130, 0.35)';
                 }
-                showToast('🔒 Lectern Console Locked — Tap an academic subject to unlock controls.', true);
-                fetch('/cmd/subj_clear', { method: 'POST' }).catch(() => {});
                 return;
             }
 
@@ -1008,65 +1006,99 @@
                 'English': 'btn-subj-eng',
                 'Computer Science': 'btn-subj-comp'
             };
-            if (btnMap[subj]) document.getElementById(btnMap[subj]).classList.add('subj-active');
-            
-            document.getElementById('active-subj-label').innerText = currentSubject;
-            document.getElementById('rec-subj-pill').innerText = currentSubject;
+            if (btnMap[subj]) {
+                const btn = document.getElementById(btnMap[subj]);
+                if (btn) btn.classList.add('subj-active');
+            }
+            const lbl = document.getElementById('active-subj-label');
+            if (lbl) lbl.innerText = currentSubject;
+            const pill = document.getElementById('rec-subj-pill');
+            if (pill) pill.innerText = currentSubject;
             if (lockBadge) {
                 lockBadge.innerText = '🟢 ACTIVE: ' + currentSubject.toUpperCase();
                 lockBadge.style.color = '#34d399';
                 lockBadge.style.background = 'rgba(52, 211, 153, 0.12)';
                 lockBadge.style.borderColor = 'rgba(52, 211, 153, 0.35)';
             }
-            showToast('🟢 Session Context Engaged: ' + currentSubject);
+        }
 
-            fetch('/cmd/subj_' + subj.toLowerCase(), { method: 'POST' }).catch(() => {});
+        function setSubject(subj) {
+            applySubjectUI(subj);
+            if (!subj || subj === 'clear') {
+                showToast('🔒 Lectern Console Locked — Tap an academic subject to unlock controls.', true);
+                fetch('/cmd/subj_clear', { method: 'POST' }).catch(() => {});
+            } else {
+                showToast('🟢 Session Context Engaged: ' + subj);
+                fetch('/cmd/subj_' + encodeURIComponent(subj.toLowerCase()), { method: 'POST' }).catch(() => {});
+            }
         }
 
         function postAction(action) {
             // Anti-Tamper Check: Require subject selection before engaging hardware
-            if (!currentSubject && action !== 'stop') {
+            if (!currentSubject && action !== 'stop' && action !== 'stats' && action !== 'reboot') {
                 showToast('🔒 Lectern Console Locked! Please select a subject above to activate hardware.', true);
                 return;
             }
 
             if (action === 'photo') {
-                sessionCount++;
-                document.getElementById('session-count-label').innerText = `${sessionCount} Board Page(s)`;
-                document.getElementById('deck-caption').innerText = `${currentSubject}_photo_1105_0${sessionCount}.jpg`;
-                document.getElementById('val-last-photo').innerText = `${currentSubject}_photo_1105_0${sessionCount}.jpg`;
-                showToast(`📸 Captured high-res board snapshot #${sessionCount}`);
-                fetch('/cmd/photo', { method: 'POST' }).catch(() => {});
+                showToast('📸 Capturing chalkboard snapshot...');
+                fetch('/cmd/photo', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        showToast(data.message || 'Snapshot command executed.');
+                        pollStatus();
+                    })
+                    .catch(err => showToast('⚠️ Snapshot failed: ' + err, true));
             }
             else if (action === 'compile_pdf') {
-                alert(`📚 Successfully compiled ${sessionCount} chalkboard pages into [${currentSubject}_LectureNotes_1111.pdf]!\nDispatched to Telegram & Google Drive.`);
-                sessionCount = 0;
-                document.getElementById('session-count-label').innerText = `0 Board Page(s)`;
-                document.getElementById('val-last-pdf').innerText = `${currentSubject}_LectureNotes_1111.pdf`;
-                fetch('/cmd/compile_pdf', { method: 'POST' }).catch(() => {});
+                showToast('📚 Compiling lecture notebook PDF...');
+                fetch('/cmd/compile_pdf', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        showToast('📚 ' + (data.message || 'PDF compilation complete.'));
+                        pollStatus();
+                    })
+                    .catch(err => showToast('⚠️ PDF compilation error: ' + err, true));
             }
             else if (action === 'video') {
-                isRecording = true;
-                isVideo = true;
-                startOverlayTimer('video');
-                fetch('/cmd/video', { method: 'POST' }).catch(() => {});
+                fetch('/cmd/video', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        showToast(data.message || 'Video toggled.');
+                        pollStatus();
+                    })
+                    .catch(err => showToast('⚠️ Video error: ' + err, true));
             }
             else if (action === 'audio') {
-                isRecording = true;
-                isVideo = false;
-                startOverlayTimer('audio');
-                fetch('/cmd/audio', { method: 'POST' }).catch(() => {});
+                fetch('/cmd/audio', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        showToast(data.message || 'Audio toggled.');
+                        pollStatus();
+                    })
+                    .catch(err => showToast('⚠️ Audio error: ' + err, true));
             }
             else if (action === 'stop') {
-                stopOverlayTimer();
-                fetch('/cmd/stop', { method: 'POST' }).catch(() => {});
+                fetch('/cmd/stop', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        showToast('⏹ ' + (data.message || 'Feeds stopped.'));
+                        pollStatus();
+                    })
+                    .catch(err => showToast('⚠️ Stop error: ' + err, true));
             }
             else if (action === 'stats') {
-                alert("📊 System Status: Compute Stable [18%], RAM Nominal [32%], Pod Link Online (192.168.4.15).");
+                fetch('/cmd/stats', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        alert(data.message || 'Status report dispatched.');
+                    })
+                    .catch(() => alert('⚠️ Failed to query stats report.'));
             }
             else if (action === 'reboot') {
                 if (confirm("Execute command: REBOOT SYSTEM?")) {
-                    alert("🔁 Reboot signal dispatched to Veronica Core.");
+                    fetch('/cmd/reboot', { method: 'POST' });
+                    showToast('🔁 Reboot signal dispatched to Veronica Core.');
                 }
             }
         }
@@ -1237,13 +1269,132 @@
             }
         }
 
+        let isPolling = false;
+
+        async function pollStatus() {
+            if (isPolling) return;
+            isPolling = true;
+            try {
+                const res = await fetch('/api/status');
+                if (!res.ok) throw new Error('Status fetch failed');
+                const data = await res.json();
+
+                // 1. Current Subject (updates instantly from ESP32 NFC/Keypad)
+                const s = data.current_subject;
+                if (s && s !== 'None') {
+                    if (currentSubject !== s) {
+                        applySubjectUI(s);
+                    }
+                } else if (!s || s === 'None') {
+                    if (currentSubject !== null) {
+                        applySubjectUI(null);
+                    }
+                }
+
+                // 2. Pod Online / Network status
+                const netDot = document.getElementById('net-status-dot');
+                const netLbl = document.getElementById('net-status-label');
+                const netPod = document.getElementById('net-status-pod');
+                const ssNet = document.getElementById('screensaver-net-pill');
+                const wifiName = data.wifi_ssid || 'Wi-Fi';
+
+                if (data.pod_connected) {
+                    if (netDot) {
+                        netDot.style.background = '#3fb950';
+                        netDot.style.boxShadow = '0 0 10px #3fb950';
+                    }
+                    if (netLbl) netLbl.innerText = '📶 Pod Online';
+                    const rssiStr = data.pod_rssi ? ` | ${data.pod_rssi} dBm` : '';
+                    if (netPod) netPod.innerText = `(${data.pod_ip || 'Connected'} | ${wifiName}${rssiStr})`;
+                    if (ssNet) ssNet.innerText = `● Pod Online · ${data.pod_ip || ''} (${wifiName})`;
+                } else {
+                    if (netDot) {
+                        netDot.style.background = '#ff4b82';
+                        netDot.style.boxShadow = '0 0 10px #ff4b82';
+                    }
+                    if (netLbl) netLbl.innerText = '📶 Pod Offline';
+                    if (netPod) netPod.innerText = `(${wifiName} | Searching port 8765)`;
+                    if (ssNet) ssNet.innerText = `○ Pod Offline · ${wifiName}`;
+                }
+
+                // 3. Real Storage Drive Usage
+                const pctEl = document.getElementById('val-storage-pct');
+                const fillEl = document.getElementById('val-storage-fill');
+                const freeEl = document.getElementById('val-storage-free');
+                const totalEl = document.getElementById('val-storage-total');
+
+                if (pctEl) pctEl.innerText = `${data.disk_used_pct}%`;
+                if (fillEl) fillEl.style.width = `${data.disk_used_pct}%`;
+                if (freeEl) freeEl.innerText = `Free: ${data.disk_free_gb} GB`;
+                if (totalEl) totalEl.innerText = `Total: ${data.disk_total_gb} GB`;
+
+                // 4. Real CPU & RAM
+                const cpuEl = document.getElementById('tag-cpu');
+                const ramEl = document.getElementById('tag-ram');
+                if (cpuEl) cpuEl.innerHTML = `<svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> STABLE [${data.cpu_percent}%]`;
+                if (ramEl) ramEl.innerHTML = `<svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> NOMINAL [${data.ram_percent}%]`;
+
+                // 5. Hardware Subsystems & Camera
+                const hwEl = document.getElementById('tag-hardware');
+                if (hwEl) {
+                    if (data.camera_connected) {
+                        hwEl.innerHTML = `<svg class="sys-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> CAM &amp; CORE OK`;
+                        hwEl.className = 'sys-tag';
+                    } else {
+                        hwEl.innerHTML = `⚠️ NO CAMERA`;
+                        hwEl.className = 'sys-tag sys-tag-warn';
+                    }
+                }
+
+                // 6. Session pages & assets
+                const sessCount = document.getElementById('session-count-label');
+                if (sessCount && data.session_photos !== undefined) {
+                    sessCount.innerText = `${data.session_photos} Board Page(s)`;
+                }
+                if (data.latest_photo) {
+                    const deckCap = document.getElementById('deck-caption');
+                    const valPhoto = document.getElementById('val-last-photo');
+                    const boardImg = document.getElementById('board-preview-img');
+                    if (deckCap) deckCap.innerText = data.latest_photo;
+                    if (valPhoto) valPhoto.innerText = data.latest_photo;
+                    if (boardImg && !boardImg.src.includes(data.latest_photo)) {
+                        boardImg.src = '/media/photos/' + data.latest_photo;
+                    }
+                }
+                if (data.latest_pdf) {
+                    const valPdf = document.getElementById('val-last-pdf');
+                    if (valPdf) valPdf.innerText = data.latest_pdf;
+                }
+
+                // 7. Sync Recording Overlay with actual state
+                if (data.recording_video && !isRecording) {
+                    isRecording = true;
+                    isVideo = true;
+                    startOverlayTimer('video');
+                } else if (data.recording_audio && !isRecording) {
+                    isRecording = true;
+                    isVideo = false;
+                    startOverlayTimer('audio');
+                } else if (!data.recording_video && !data.recording_audio && isRecording) {
+                    isRecording = false;
+                    stopOverlayTimer();
+                }
+
+            } catch (err) {
+                // Offline / network blip
+            } finally {
+                isPolling = false;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const isLight = localStorage.getItem('veronica_theme') === 'light';
             updateThemeButton(isLight);
             initSlider();
 
-            // Unlock physics by default for demo convenience, but easily toggleable
-            setSubject('Physics');
+            // Initial poll and start regular telemetry sync every 1.5s
+            pollStatus();
+            setInterval(pollStatus, 1500);
         });
     </script>
     <!-- 🔔 FLOATING TOAST NOTIFICATION CONTAINER -->

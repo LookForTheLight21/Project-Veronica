@@ -190,6 +190,22 @@ class VeronicaPreviewHandler(BaseHTTPRequestHandler):
             print(f"📡 [DIAGNOSTIC TELEGRAM TEST]: Test beacon sent to chat {sim_config['CHAT_ID']}")
             self._send_json({"status": "ok"})
 
+        elif url == "/api/admin/purge_cache":
+            print("🗑️ [SIMULATION]: Purged raw uncompiled JPEG cache")
+            self._send_json({"status": "ok", "deleted_count": 0, "bytes_freed": 0, "message": "Raw JPEG cache cleared (simulated)."})
+
+        elif url == "/api/admin/compact_spool":
+            print("📦 [SIMULATION]: Compacted upload spool queue")
+            self._send_json({"status": "ok", "remaining_count": 0, "message": "Upload spool index compacted (simulated)."})
+
+        elif url == "/api/admin/restart_engine":
+            print("🔄 [SIMULATION]: Soft restarted Veronica core daemons")
+            self._send_json({"status": "ok", "message": "Veronica engine background services synchronized."})
+
+        elif url == "/api/admin/poweroff":
+            print("🛑 [SIMULATION]: Safe hardware power off dispatched")
+            self._send_json({"status": "ok", "message": "Hardware power-off sequence initiated (simulated)."})
+
         elif url.startswith("/cmd/"):
             action = url.replace("/cmd/", "")
             self._handle_action(action)

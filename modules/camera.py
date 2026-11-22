@@ -38,6 +38,11 @@ from activity_logger import log_activity
 # ═══════════════════════════════════════════════════════════════
 
 def take_photo_and_upload():
+    if not os.path.exists(KERO_VIDEO_DEVICE):
+        msg = f"❌ Camera hardware not detected: {KERO_VIDEO_DEVICE} is offline or unplugged."
+        print(msg)
+        return msg
+
     # Prevent Linux V4L2 Device Busy conflict if full video recording is rolling
     if state.recording:
         msg = "⚠️ Video recording is currently active on camera. Stop video recording (Key 2 or 7) before taking a high-res photo."
@@ -214,6 +219,11 @@ def _build_video_cmd(filename):
 
 
 def start_video_audio():
+    if not os.path.exists(KERO_VIDEO_DEVICE):
+        msg = f"❌ Video recording failed: Camera {KERO_VIDEO_DEVICE} not detected."
+        print(msg)
+        return msg
+
     ts = datetime.datetime.now().strftime("%m%d_%H%M")
     prefix = f"{state.current_subject}_" if state.current_subject else ""
     filename_only = f"{prefix}video_{ts}.mp4"

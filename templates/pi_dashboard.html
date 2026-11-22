@@ -851,9 +851,9 @@
                 <span>REC LIVE</span>
             </div>
             <!-- WiFi Network -->
-            <div class="status-pill">
-                <div class="dot dot-cyan"></div>
-                <span>5.8GHz MESH</span>
+            <div class="status-pill" id="wifi-status-pill">
+                <div class="dot dot-cyan" id="wifi-dot"></div>
+                <span id="wifi-label">WI-FI</span>
             </div>
         </div>
         <!-- Digital Clock -->
@@ -1210,7 +1210,7 @@ const SUBJ_IDS = {
     'Computer Science': 'subj-cs',
 };
 
-function setSubject(subj) {
+function setSubject(subj, dispatchToServer = true) {
     document.querySelectorAll('.subj-btn').forEach(b => b.classList.remove('active-subj'));
     const badge = document.getElementById('subj-badge');
 
@@ -1219,7 +1219,7 @@ function setSubject(subj) {
         document.getElementById('subj-label').textContent = 'CONSOLE LOCKED';
         badge.classList.add('locked');
         toast('🔒 Console Locked — Select a subject or tap NFC');
-        fetch('/cmd/subj_clear', { method: 'POST' }).catch(() => {});
+        if (dispatchToServer) fetch('/cmd/subj_clear', { method: 'POST' }).catch(() => {});
         return;
     }
 
@@ -1235,8 +1235,10 @@ function setSubject(subj) {
     document.getElementById('rec-subj-pill').textContent = subj.toUpperCase();
     toast('🟢 Context Engaged: ' + subj);
 
-    const route = subj.toLowerCase().replace(' ', '_');
-    fetch('/cmd/subj_' + route, { method: 'POST' }).catch(() => {});
+    if (dispatchToServer) {
+        const route = subj.toLowerCase().replace(' ', '_');
+        fetch('/cmd/subj_' + route, { method: 'POST' }).catch(() => {});
+    }
 }
 
 // ── ACTION HANDLER ───────────────────────────────────────────────
@@ -1338,12 +1340,25 @@ function pollTelemetry() {
         document.getElementById('sb-pod').style.color = podOnline ? 'var(--green)' : 'var(--muted)';
         document.getElementById('pod-dot').className = 'dot ' + (podOnline ? 'dot-green' : 'dot-grey');
 
+        // Wi-Fi Network Status
+        const wifiLabel = document.getElementById('wifi-label');
+        const wifiDot = document.getElementById('wifi-dot');
+        if (wifiLabel) {
+            if (d.wifi_ssid) {
+                wifiLabel.textContent = d.wifi_ssid;
+                if (wifiDot) wifiDot.className = 'dot dot-cyan';
+            } else {
+                wifiLabel.textContent = 'OFFLINE';
+                if (wifiDot) wifiDot.className = 'dot dot-grey';
+            }
+        }
+
         // Subject synchronization (e.g. from ESP32 NFC tap!)
         if (d.subject && d.subject !== 'General Session') {
             if (d.subject !== lastKnownSubj) {
                 lastKnownSubj = d.subject;
                 currentSubject = d.subject;
-                setSubject(d.subject);
+                setSubject(d.subject, false);
 
                 // Show NFC flash banner
                 const banner = document.getElementById('nfc-banner');
@@ -1448,7 +1463,6 @@ resetIdle();
 
 // Initialize default state
 goSlide(0);
-setSubject('Physics');
 </script>
 </body>
 </html>

@@ -29,6 +29,7 @@ latest_pdf_path   = None
 pod_connected     = False
 pod_last_seen     = 0.0
 pod_ip            = "None"
+pod_rssi          = None
 
 # Security passcode state machine (tamper prevention)
 secure_target_action = None

@@ -180,6 +180,9 @@ class PodReceiverServer:
             elif event_type == "heartbeat":
                 state.pod_connected = True
                 state.pod_last_seen = time.time()
+                rssi = msg.get("rssi")
+                if rssi is not None:
+                    state.pod_rssi = rssi
 
         except json.JSONDecodeError:
             print(f"⚠️  Malformed telemetry from Pod: {line}")

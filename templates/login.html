@@ -423,9 +423,9 @@
             <div class="form-group">
                 <label class="form-label">
                     <span id="user-label">Technician Handle</span>
-                    <span style="font-size:10px; opacity:0.6; font-family:'JetBrains Mono', monospace;" id="user-hint">Chorie</span>
+                    <span style="font-size:10px; opacity:0.6; font-family:'JetBrains Mono', monospace;" id="user-hint"></span>
                 </label>
-                <input type="text" class="form-input" id="username" placeholder="e.g. Chorie or principle" required autofocus value="Chorie" oninput="detectRoleFromUsername()"/>
+                <input type="text" class="form-input" id="username" placeholder="Enter username" required autofocus value="" oninput="detectRoleFromUsername()"/>
             </div>
 
             <!-- Classroom Selector (Dynamic for Principal) -->
@@ -457,9 +457,8 @@
             <div class="form-group">
                 <label class="form-label">
                     <span>Security Passkey</span>
-                    <span style="font-size:10px; opacity:0.6; font-family:'JetBrains Mono', monospace;">Default: 1234</span>
                 </label>
-                <input type="password" class="form-input" id="password" placeholder="••••••••" required value="1234"/>
+                <input type="password" class="form-input" id="password" placeholder="••••••••" required value=""/>
             </div>
 
             <!-- Submit Button -->
@@ -493,9 +492,9 @@
             if (role === 'principal') {
                 tabPrin.classList.add('active-tab');
                 tabTech.classList.remove('active-tab');
-                if (!preserveValue) userInp.value = 'principle';
+                if (!preserveValue) userInp.value = '';
                 userLabel.innerText = 'Principal Account ID';
-                userHint.innerText = 'principle';
+                userHint.innerText = '';
                 pageTitle.innerText = "Principal's Audit Portal";
                 pageSub.innerText = "Inspect lecture media ledgers and classroom delivery logs";
                 classGroup.style.display = 'block';
@@ -503,9 +502,9 @@
             } else {
                 tabTech.classList.add('active-tab');
                 tabPrin.classList.remove('active-tab');
-                if (!preserveValue) userInp.value = 'Chorie';
+                if (!preserveValue) userInp.value = '';
                 userLabel.innerText = 'Technician Handle';
-                userHint.innerText = 'Chorie';
+                userHint.innerText = '';
                 pageTitle.innerText = "Diagnostic Console";
                 pageSub.innerText = "Field technician & hardware engineering control";
                 classGroup.style.display = 'none';

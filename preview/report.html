@@ -275,20 +275,20 @@
         <!-- Metrics -->
         <div class="metric-grid">
             <div class="metric-card">
-                <div class="metric-label">Total Classes Taught</div>
-                <div class="metric-val" style="color:var(--accent-cyan);">18</div>
+                <div class="metric-label">Total Subjects Logged</div>
+                <div class="metric-val" id="metric-classes" style="color:var(--accent-cyan);">0</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Chalkboard Snaps</div>
-                <div class="metric-val" style="color:#fff;">64</div>
+                <div class="metric-val" id="metric-snaps" style="color:#fff;">0</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Compiled PDF Notebooks</div>
-                <div class="metric-val" style="color:var(--accent-green);">18</div>
+                <div class="metric-val" id="metric-notes" style="color:var(--accent-green);">0</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">Cloud Quota Conserved</div>
-                <div class="metric-val" style="color:var(--accent-indigo);">~85%</div>
+                <div class="metric-label">Video Captures</div>
+                <div class="metric-val" id="metric-videos" style="color:var(--accent-indigo);">0</div>
             </div>
         </div>
 
@@ -296,74 +296,27 @@
         <div class="table-card">
             <div class="table-header">
                 <div style="font-weight:700; font-size:14px;">Academic Ledger Records</div>
-                <button class="back-btn" onclick="alert('Exporting activity_log.json...');" style="padding: 8px 14px; font-size: 12px;">
+                <a href="/report/download" class="back-btn" style="padding: 8px 14px; font-size: 12px; text-decoration: none;">
                     <span>📥 Export JSON Audit Log</span>
-                </button>
+                </a>
             </div>
 
             <table class="report-table">
                 <thead>
                     <tr>
                         <th>Subject Name</th>
-                        <th>Classroom Period</th>
+                        <th>Classroom Date</th>
                         <th>Derivations Snapped</th>
                         <th>Compiled Notes</th>
                         <th>Video Capture</th>
                         <th>Handover Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="report-table-body">
                     <tr>
-                        <td>
-                            <div class="subj-badge">
-                                <div class="badge-dot"></div>
-                                <span>Physics II</span>
-                            </div>
+                        <td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">
+                            Loading verified audit entries...
                         </td>
-                        <td>09:00 AM – 09:50 AM</td>
-                        <td class="num-tag">5 Pages</td>
-                        <td style="color:var(--accent-cyan);">Physics_LectureNotes_1111_0950.pdf</td>
-                        <td style="color:var(--accent-green);">Recorded (48m)</td>
-                        <td><span style="color:var(--accent-green);">● Auto-Compiled on NFC Tap</span></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="subj-badge">
-                                <div class="badge-dot" style="background:#a78bfa;"></div>
-                                <span>Chemistry</span>
-                            </div>
-                        </td>
-                        <td>10:00 AM – 10:50 AM</td>
-                        <td class="num-tag">4 Pages</td>
-                        <td style="color:var(--accent-cyan);">Chemistry_LectureNotes_1111_1050.pdf</td>
-                        <td style="color:var(--text-muted);">None</td>
-                        <td><span style="color:var(--accent-green);">● Auto-Compiled on NFC Tap</span></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="subj-badge">
-                                <div class="badge-dot" style="background:#f472b6;"></div>
-                                <span>Mathematics</span>
-                            </div>
-                        </td>
-                        <td>11:00 AM – 11:50 AM</td>
-                        <td class="num-tag">6 Pages</td>
-                        <td style="color:var(--accent-cyan);">Math_LectureNotes_1111_1150.pdf</td>
-                        <td style="color:var(--accent-green);">Recorded (50m)</td>
-                        <td><span style="color:var(--accent-green);">● Auto-Compiled on NFC Tap</span></td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="subj-badge">
-                                <div class="badge-dot" style="background:#34d399;"></div>
-                                <span>Computer Science</span>
-                            </div>
-                        </td>
-                        <td>12:00 PM – 12:50 PM</td>
-                        <td class="num-tag">3 Pages</td>
-                        <td style="color:var(--accent-cyan);">ComputerScience_LectureNotes_1111_1250.pdf</td>
-                        <td style="color:var(--accent-green);">Recorded (45m)</td>
-                        <td><span style="color:var(--accent-green);">● Auto-Compiled on NFC Tap</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -395,9 +348,53 @@
             }
         }
 
+        function loadReportData() {
+            fetch('/api/report_data')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('metric-classes').innerText = data.total_classes;
+                    document.getElementById('metric-snaps').innerText = data.total_photos;
+                    document.getElementById('metric-notes').innerText = data.total_notes;
+                    document.getElementById('metric-videos').innerText = data.total_videos;
+
+                    const tbody = document.getElementById('report-table-body');
+                    if (!data.records || data.records.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">
+                            No archived lecture sessions logged yet.<br>
+                            <small style="opacity:0.7;">Tap an NFC card or snap chalkboard photos on the lectern to generate verified audit entries.</small>
+                        </td></tr>`;
+                        return;
+                    }
+
+                    const colors = ['#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fbbf24'];
+                    tbody.innerHTML = data.records.map((r, i) => `
+                        <tr>
+                            <td>
+                                <div class="subj-badge">
+                                    <div class="badge-dot" style="background:${colors[i % colors.length]};"></div>
+                                    <span>${r.subject}</span>
+                                </div>
+                            </td>
+                            <td>${r.date}</td>
+                            <td class="num-tag">${r.photos} Page(s)</td>
+                            <td style="color:var(--accent-cyan); font-family:monospace;">${r.subject}_Notes.pdf</td>
+                            <td style="color:${r.videos > 0 ? 'var(--accent-green)' : 'var(--text-muted)'};">${r.videos > 0 ? 'Recorded (' + r.videos + ')' : 'None'}</td>
+                            <td><span style="color:var(--accent-green);">● Auto-Compiled via NFC/Pod</span></td>
+                        </tr>
+                    `).join('');
+                })
+                .catch(() => {
+                    const tbody = document.getElementById('report-table-body');
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">
+                        Unable to connect to Veronica activity logger service.
+                    </td></tr>`;
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const isLight = localStorage.getItem('veronica_theme') === 'light';
             updateThemeButton(isLight);
+            loadReportData();
         });
     </script>
 </body>
