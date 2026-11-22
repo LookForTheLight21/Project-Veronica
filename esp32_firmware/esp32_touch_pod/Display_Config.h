@@ -9,23 +9,25 @@
 #ifndef DISPLAY_CONFIG_H
 #define DISPLAY_CONFIG_H
 
-// ── Profile 1: Standard ESP32 SPI 3.5" TFT (ILI9488 / ST7796 + XPT2046) ──
+// ── Profile 1: Standard ESP32 SPI 3.5" TFT (Dummy remapped) ──
 #define TFT_MISO       19
 #define TFT_MOSI       23
-#define TFT_SCLK       18
-#define TFT_CS         15
+#define TFT_SCLK       14
+#define TFT_CS         12
 #define TFT_DC          2
 #define TFT_RST         4
-#define TFT_BL         32   // Backlight PWM pin (controls sleep mode dimming)
+#define TFT_BL         32   // Backlight PWM pin
 
-#define TOUCH_CS        5   // XPT2046 Touch Chip Select
-#define TOUCH_IRQ      27   // Touch Interrupt (optional)
+#define TOUCH_CS       15   // Dummy
+#define TOUCH_IRQ      13   // Dummy
 
-// ── Peripherals ──
-#define BUZZER_PIN     15   // Buzzer module I/O trigger on GPIO 15
+// ── Peripherals (GPIO 27 Buzzer, GPIO 21 SDA, GPIO 22 SCL) ──
+#define BUZZER_PIN     27   // Passive buzzer on GPIO 27
 #define BUZZER_FREQ  2000   // 2kHz resonant frequency
-#define PN532_SDA      21   // NFC I2C SDA (GPIO 21 on ESP32)
-#define PN532_SCL      22   // NFC I2C SCL (GPIO 22 on ESP32)
+#define PN532_SDA      21   // NFC I2C SDA on GPIO 21
+#define PN532_SCL      22   // NFC I2C SCL on GPIO 22
+#define PN532_IRQ      34   // Dummy input pin for Adafruit constructor (pin 34 is input-only)
+#define PN532_RESET    33   // Dummy pin for Adafruit constructor
 
 // ── Display Dimensions ──
 #define SCREEN_WIDTH   320

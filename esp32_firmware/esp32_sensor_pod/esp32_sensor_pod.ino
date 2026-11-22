@@ -17,29 +17,32 @@
 #include <Adafruit_PN532.h>
 
 // ══════════════════════════════════════════════════════════════════════
-// 1. PIN CONFIGURATION (Soldered Pins)
+// 1. PIN CONFIGURATION
 // ══════════════════════════════════════════════════════════════════════
-#define BUZZER_PIN     15     // Passive buzzer pin (tone() PWM driven)
+#define BUZZER_PIN     27     // Passive buzzer pin on GPIO 27
 #define BUZZER_FREQ  2000     // 2kHz resonant chime frequency
-#define PN532_SDA      21     // I2C Data
-#define PN532_SCL      22     // I2C Clock
+#define PN532_SDA      21     // I2C Data on GPIO 21
+#define PN532_SCL      22     // I2C Clock on GPIO 22
+#define PN532_IRQ      34     // Dummy unconnected input pin for Adafruit constructor
+#define PN532_RESET    33     // Dummy unconnected pin for Adafruit constructor
 
 // ══════════════════════════════════════════════════════════════════════
 // 2. NETWORK CREDENTIALS & PI 5 HUB IP
 // ══════════════════════════════════════════════════════════════════════
-// Adjust to match your Raspberry Pi 5 Hotspot or shared Wi-Fi network:
-const char* WIFI_SSID     = "Veronica_AP";       // Match config.py or your router
-const char* WIFI_PASSWORD = "veronica_access";   // Match config.py or your router
+const char* WIFI_SSID     = "Poor_soul_5G";      // Wi-Fi SSID
+const char* WIFI_PASSWORD = "yoyo123@";          // Wi-Fi Password
 
-// If Pi 5 is running Hotspot mode: default is usually 192.168.4.1
-// If both Pi 5 and ESP32 are on your home Wi-Fi: set to Pi 5's Wi-Fi IP (e.g. 192.168.1.xxx)
-const char* PI5_HOST      = "192.168.4.1";       
+// Pi 5 IP Address:
+const char* PI5_HOST      = "192.168.0.138";     // <-- Your Pi 5 IP on the network
 const uint16_t PI5_PORT   = 8765;                // Matches POD_SERVER_PORT in config.py
 
 // ══════════════════════════════════════════════════════════════════════
 // 3. HARDWARE INSTANCES
 // ══════════════════════════════════════════════════════════════════════
-Adafruit_PN532 nfc(PN532_SDA, PN532_SCL);
+// NOTE: For I2C, Adafruit_PN532 constructor arguments are (irq, reset).
+// Since IRQ and RESET are NOT connected to ESP32 (only SDA & SCL used),
+// we pass dummy pins 34 & 33 so the library does NOT clobber GPIO 21/22!
+Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 WiFiClient client;
 
 unsigned long last_nfc_poll   = 0;
@@ -54,7 +57,7 @@ unsigned long last_tcp_retry  = 0;
 // ══════════════════════════════════════════════════════════════════════
 void playTone(int freq, int duration_ms) {
   if (freq <= 0) return;
-  tone(BUZZER_PIN, freq, duration_ms);
+  tone(BUZZER_PIN, freq);
   delay(duration_ms);
   noTone(BUZZER_PIN);
 }
@@ -70,14 +73,23 @@ void beep(int times = 1, int duration_ms = 80, int gap_ms = 60, int freq = BUZZE
 // 5. TCP NETWORK CLIENT & EVENT SENDER
 // ══════════════════════════════════════════════════════════════════════
 void ensureConnection() {
+  static bool wifi_announced = false;
+
   // 1. Maintain Wi-Fi link
   if (WiFi.status() != WL_CONNECTED) {
-    if (millis() - last_wifi_retry > 5000) {
+    wifi_announced = false;
+    if (millis() - last_wifi_retry > 6000) {
       last_wifi_retry = millis();
       Serial.printf("📶 Connecting to Wi-Fi [%s]...\n", WIFI_SSID);
       WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     }
     return;
+  }
+
+  if (!wifi_announced) {
+    wifi_announced = true;
+    Serial.print("✅ Wi-Fi Connected! ESP32 IP: ");
+    Serial.println(WiFi.localIP());
   }
 
   // 2. Maintain TCP link to Pi 5 (Port 8765)
@@ -89,7 +101,7 @@ void ensureConnection() {
         Serial.println("✅ Connected to Raspberry Pi 5 Core Hub!");
         beep(2, 60, 40, 2400); // 2 confirmation beeps
       } else {
-        Serial.println("⚠️ Pi 5 connection pending...");
+        Serial.println("⚠️ Pi 5 connection pending (ensure main.py is running on Pi 5)...");
       }
     }
   }
@@ -176,7 +188,7 @@ void pollNFC() {
 // ══════════════════════════════════════════════════════════════════════
 void setup() {
   Serial.begin(115200);
-  delay(300);
+  delay(500);
 
   Serial.println("\n══════════════════════════════════════════════════════════");
   Serial.println("  PROJECT VERONICA — ESP32 SENSOR POD FIRMWARE");
@@ -185,27 +197,50 @@ void setup() {
 
   // 1. Buzzer Setup & Quick Boot Beep
   pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
-  Serial.printf("🔊 Initializing Buzzer on GPIO %d...\n", BUZZER_PIN);
+  Serial.printf("🔊 Testing Buzzer on GPIO %d...\n", BUZZER_PIN);
   playTone(2000, 80);
   delay(40);
   playTone(2800, 100);
   Serial.println("✅ Buzzer OK");
 
   // 2. PN532 NFC Reader Initialization (I2C: SDA=GPIO21, SCL=GPIO22)
-  Serial.println("📡 Initializing PN532 NFC Reader on I2C (GPIO 21/22)...");
+  Serial.printf("📡 Initializing I2C bus on SDA=GPIO%d, SCL=GPIO%d...\n", PN532_SDA, PN532_SCL);
   Wire.begin(PN532_SDA, PN532_SCL);
   Wire.setClock(100000); // 100kHz standard I2C for rock-solid stability
+  Wire.setTimeOut(250);  // Prevent clock-stretch hang
+  delay(200);            // Allow PN532 power-on stabilization
+
+  // Run a quick I2C scan to detect PN532 hardware
+  Serial.println("🔍 Probing I2C bus for PN532 (Address 0x24)...");
+  Wire.beginTransmission(0x24);
+  byte i2c_status = Wire.endTransmission();
+  if (i2c_status == 0) {
+    Serial.println("   📍 PN532 hardware detected at I2C address 0x24!");
+  } else {
+    Serial.printf("   ⚠️ No ACK at address 0x24 (Wire error %d).\n", i2c_status);
+    Serial.println("   👉 Check PN532 DIP Switches: I2C mode requires CH1=ON (1), CH2=OFF (0).");
+    Serial.println("   👉 Check VCC: connect to 3.3V or 5V (VIN), and GND to GND.");
+  }
+
   nfc.begin();
-  uint32_t versiondata = nfc.getFirmwareVersion();
+
+  // Retry up to 5 times with wake-up delays
+  uint32_t versiondata = 0;
+  for (int attempt = 1; attempt <= 5; attempt++) {
+    versiondata = nfc.getFirmwareVersion();
+    if (versiondata) break;
+    delay(100);
+  }
+
   if (versiondata) {
     nfc.SAMConfig();
     Serial.printf("✅ PN532 Online! Chip: PN5%02X, Firmware Ver: %d.%d\n",
                   (versiondata >> 24) & 0xFF,
                   (versiondata >> 16) & 0xFF,
                   (versiondata >> 8) & 0xFF);
+    playTone(3200, 60);
   } else {
-    Serial.println("⚠️ PN532 NFC Reader not detected! Check 3.3V/GND/SDA/SCL wiring.");
+    Serial.println("⚠️ PN532 firmware read failed. Check 3.3V/GND/SDA/SCL wiring & DIP switches.");
   }
 
   // 3. Connect to Wi-Fi
@@ -233,4 +268,3 @@ void loop() {
 
   delay(10);
 }
-

@@ -22,23 +22,32 @@
 
 #include <WiFi.h>
 #include <Wire.h>
-#include <SPI.h>
-#include <TFT_eSPI.h>        // Hardware-accelerated graphics for ESP32
 #include <Adafruit_PN532.h>  // Hardware PN532 NFC Reader over I2C
 #include "Display_Config.h"
 
 // ==============================================================================
 // 1. HARDWARE INSTANCES & CONFIGURATION
 // ==============================================================================
+// Set to false: UI runs on Raspberry Pi 5 Chromium Kiosk (800x480 Fullscreen)
+// Set to true: Local 3.5" TFT SPI Shield attached to ESP32
+#define ENABLE_TFT_DISPLAY false
+
+#if ENABLE_TFT_DISPLAY
+#include <SPI.h>
+#include <TFT_eSPI.h>
 TFT_eSPI tft = TFT_eSPI();   // Custom TFT_eSPI instance (480x320 landscape)
-Adafruit_PN532 nfc(PN532_SDA, PN532_SCL);
+#endif
+
+// Pass dummy pins (34 for IRQ as input, 33 for RST) so library never touches SDA(21) or SCL(22)
+Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 WiFiClient client;
 
 // Network settings (Pi 5 Overhead Hub IP & Port)
-const char* WIFI_SSID     = "Poor_soul_5G";       // Pi 5 Hotspot SSID
-const char* WIFI_PASSWORD = "yoyo123@";   // Match config.py
-const char* PI5_HOST      = "192.168.4.1";       // Pi 5 IP
-const uint16_t PI5_PORT   = 8765;                // Matches POD_SERVER_PORT in config.py
+const char* WIFI_SSID     = "Garib";       // Match Wi-Fi SSID
+const char* WIFI_PASSWORD = "yoyo123@";           // Match Wi-Fi Password
+// Pi 5 IP Address:
+const char* PI5_HOST      = "192.168.0.138";      // <-- Your Pi 5 IP on the network
+const uint16_t PI5_PORT   = 8765;                 // Matches POD_SERVER_PORT in config.py
 
 // ==============================================================================
 // 2. UI STATE & PALETTE DEFINITIONS
@@ -99,22 +108,129 @@ uint16_t colMuted()  { return isDayMode ? COLOR_LIGHT_MUTED : COLOR_DARK_MUTED; 
 
 void playTone(int freq, int duration_ms) {
   if (freq <= 0) return;
-  // ESP32 tone() supported in arduino-esp32 v2 & v3:
-  tone(BUZZER_PIN, freq, duration_ms);
+  // 2-argument tone() attaches LEDC, then delay(), then noTone() detaches LEDC cleanly
+  // This eliminates the "ledc_get_duty: LEDC is not initialized" error on ESP32!
+  tone(BUZZER_PIN, freq);
   delay(duration_ms);
   noTone(BUZZER_PIN);
 }
 
 void beep(int times = 1, int duration_ms = 80, int gap_ms = 60, int freq = BUZZER_FREQ) {
   for (int i = 0; i < times; i++) {
-    playTone(freq > 0 ? freq : 2500, duration_ms);
+    playTone(freq > 0 ? freq : BUZZER_FREQ, duration_ms);
     if (i < times - 1) delay(gap_ms);
   }
 }
 
 // ==============================================================================
-// 5. DISPLAY DRAWING FUNCTIONS (480x320 LANDSCAPE)
+// 5. NETWORK TELEMETRY TO PI 5 (TCP SOCKET PORT 8765) — ALWAYS ACTIVE
 // ==============================================================================
+void ensureConnection() {
+  static bool wifi_announced = false;
+
+  // 1. Wi-Fi Link
+  if (WiFi.status() != WL_CONNECTED) {
+    wifi_announced = false;
+    static unsigned long last_retry = 0;
+    if (millis() - last_retry > 5000) {
+      last_retry = millis();
+      Serial.printf("📶 Connecting to Wi-Fi [%s]...\n", WIFI_SSID);
+      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    }
+    return;
+  }
+
+  // Print once as soon as Wi-Fi gets an IP
+  if (!wifi_announced) {
+    wifi_announced = true;
+    Serial.println("\n══════════════════════════════════════════");
+    Serial.print("✅ Wi-Fi Connected Successfully!\n");
+    Serial.print("📍 ESP32 IP Address : ");
+    Serial.println(WiFi.localIP());
+    Serial.print("📶 Signal Strength  : ");
+    Serial.print(WiFi.RSSI());
+    Serial.println(" dBm");
+    Serial.println("══════════════════════════════════════════\n");
+    beep(2, 50, 40, 2500); // 2 quick success beeps
+  }
+
+  // 2. TCP Socket Link to Pi 5
+  if (!client.connected()) {
+    static unsigned long last_tcp = 0;
+    if (millis() - last_tcp > 3000) {
+      last_tcp = millis();
+      Serial.printf("🔌 Connecting to Pi 5 at %s:%d...\n", PI5_HOST, PI5_PORT);
+      if (client.connect(PI5_HOST, PI5_PORT)) {
+        Serial.println("✅ Connected to Raspberry Pi 5 Core Hub!");
+        beep(2, 60, 40, 2800);
+      } else {
+        Serial.println("⚠️ Connection to Pi 5 pending... (Make sure 'python main.py' is running on the Pi 5)");
+      }
+    }
+  }
+}
+
+void sendEvent(const char* eventType, String jsonBody) {
+  if (client.connected()) {
+    String msg = String("{\"event\":\"") + eventType + "\"," + jsonBody.substring(1) + "\n";
+    client.print(msg);
+    Serial.print("📤 Dispatched: " + msg);
+  } else {
+    Serial.println("⚠️ TCP Link Offline: Event queued");
+  }
+}
+
+void checkIncomingCommands() {
+  while (client.available()) {
+    String line = client.readStringUntil('\n');
+    line.trim();
+    if (line.length() > 0) {
+      Serial.println("📥 Pi 5 Packet: " + line);
+
+      if (line.indexOf("\"cmd\":\"beep\"") >= 0) {
+        beep(1, 80);
+      }
+
+      if (line.indexOf("\"subject\":") >= 0) {
+        int idx = line.indexOf("\"subject\":\"");
+        if (idx >= 0) {
+          int endIdx = line.indexOf("\"", idx + 11);
+          if (endIdx > 0) {
+            currentSubject = line.substring(idx + 11, endIdx);
+            currentSubject.toUpperCase();
+            isSubjectLocked = (currentSubject == "NONE" || currentSubject.length() == 0);
+            if (!isSleeping && !isRecording && !isShowingNFCWelcome) renderUI();
+          }
+        }
+      }
+
+      if (line.indexOf("\"pages\":") >= 0) {
+        int pidx = line.indexOf("\"pages\":");
+        sessionPages = line.substring(pidx + 8).toInt();
+        if (!isSleeping && !isRecording && !isShowingNFCWelcome) drawHeader();
+      }
+
+      if (line.indexOf("\"recording\":true") >= 0) {
+        if (!isRecording) {
+          isRecording = true;
+          recordingStartTime = millis();
+          recordingType = (line.indexOf("\"audio\"") >= 0) ? "ROOM AUDIO" : "4K VIDEO";
+          drawRecordingHUD();
+        }
+      } else if (line.indexOf("\"recording\":false") >= 0) {
+        if (isRecording) {
+          isRecording = false;
+          renderUI();
+        }
+      }
+    }
+  }
+}
+
+// ==============================================================================
+// 6. DISPLAY DRAWING & TOUCH FUNCTIONS (Optional TFT Screen Mode)
+// ==============================================================================
+#if ENABLE_TFT_DISPLAY
 
 // Set Backlight Brightness
 void setBacklight(uint8_t brightness) {
@@ -451,89 +567,7 @@ void wakeScreen() {
 }
 
 // ==============================================================================
-// 8. NETWORK TELEMETRY TO PI 5 (TCP SOCKET PORT 8765)
-// ==============================================================================
-void ensureConnection() {
-  if (WiFi.status() != WL_CONNECTED) {
-    static unsigned long last_retry = 0;
-    if (millis() - last_retry > 5000) {
-      last_retry = millis();
-      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    }
-    return;
-  }
-
-  if (!client.connected()) {
-    static unsigned long last_tcp = 0;
-    if (millis() - last_tcp > 3000) {
-      last_tcp = millis();
-      if (client.connect(PI5_HOST, PI5_PORT)) {
-        Serial.println("✅ Connected to Raspberry Pi 5 Core Hub!");
-        beep(2, 60, 40);
-      }
-    }
-  }
-}
-
-void sendEvent(const char* eventType, String jsonBody) {
-  if (client.connected()) {
-    String msg = String("{\"event\":\"") + eventType + "\"," + jsonBody.substring(1) + "\n";
-    client.print(msg);
-    Serial.print("📤 Dispatched: " + msg);
-  } else {
-    Serial.println("⚠️ TCP Link Offline: Event queued");
-  }
-}
-
-void checkIncomingCommands() {
-  while (client.available()) {
-    String line = client.readStringUntil('\n');
-    line.trim();
-    if (line.length() > 0) {
-      Serial.println("📥 Pi 5 Packet: " + line);
-
-      if (line.indexOf("\"cmd\":\"beep\"") >= 0) {
-        beep(1, 80);
-      }
-
-      if (line.indexOf("\"subject\":") >= 0) {
-        int idx = line.indexOf("\"subject\":\"");
-        if (idx >= 0) {
-          int endIdx = line.indexOf("\"", idx + 11);
-          if (endIdx > 0) {
-            currentSubject = line.substring(idx + 11, endIdx);
-            currentSubject.toUpperCase();
-            isSubjectLocked = (currentSubject == "NONE" || currentSubject.length() == 0);
-            if (!isSleeping && !isRecording && !isShowingNFCWelcome) renderUI();
-          }
-        }
-      }
-
-      if (line.indexOf("\"pages\":") >= 0) {
-        int pidx = line.indexOf("\"pages\":");
-        sessionPages = line.substring(pidx + 8).toInt();
-        if (!isSleeping && !isRecording && !isShowingNFCWelcome) drawHeader();
-      }
-
-      if (line.indexOf("\"recording\":true") >= 0) {
-        if (!isRecording) {
-          isRecording = true;
-          recordingStartTime = millis();
-          recordingType = (line.indexOf("\"audio\"") >= 0) ? "ROOM AUDIO" : "4K VIDEO";
-          drawRecordingHUD();
-        }
-      } else if (line.indexOf("\"recording\":false") >= 0) {
-        if (isRecording) {
-          isRecording = false;
-          renderUI();
-        }
-      }
-    }
-  }
-}
-
-// ==============================================================================
-// 9. RECORDING TRIGGER & TOUCH EVENT HANDLER
+// 7. RECORDING TRIGGER & TOUCH EVENT HANDLER
 // ==============================================================================
 void startRecording(const char* type, const char* actionCmd) {
   isRecording = true;
@@ -669,6 +703,7 @@ void processTouch(int x, int y) {
 }
 
 void pollTouch() {
+#if defined(TOUCH_CS)
   uint16_t x, y;
   bool touched = tft.getTouch(&x, &y);
 
@@ -698,7 +733,29 @@ void pollTouch() {
       }
     }
   }
+#endif
 }
+
+#else
+// ══════════════════════════════════════════════════════════════════════════════
+// Bypassed TFT / Touch Stubs (UI is displayed on Raspberry Pi 5 Chromium Kiosk)
+// ══════════════════════════════════════════════════════════════════════════════
+void setBacklight(uint8_t brightness) {}
+void drawHeader() {}
+void drawRecordingHUD() {}
+void updateRecordingTimer(bool forceRedraw) {}
+void showInterlockAlert() {}
+void drawNFCWelcomeCard(const char* teacherName, const char* dept, const char* subject) {
+  // Melodic acoustic feedback on teacher badge scan
+  beep(1, 60, 20, 2200);
+  delay(30);
+  beep(1, 100, 20, 3000);
+}
+void renderUI() {}
+void enterSleepMode() {}
+void wakeScreen() {}
+void pollTouch() {}
+#endif
 
 // ==============================================================================
 // 10. PN532 NFC BADGE SCANNER (Zero-Friction Teacher Check-in via I2C)
@@ -757,18 +814,20 @@ void setup() {
   delay(500);
 
   Serial.println("\n══════════════════════════════════════════════════════════");
-  Serial.println("  PROJECT VERONICA — ESP32 3.5\" TOUCH POD FIRMWARE");
+  Serial.println("  PROJECT VERONICA — ESP32 POD FIRMWARE");
+  Serial.println("  Dedicated Node: PN532 NFC + Passive Buzzer");
   Serial.println("══════════════════════════════════════════════════════════");
 
   // 1. Buzzer setup & immediate boot beep
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
-  Serial.printf("🔊 Testing Passive Buzzer on GPIO %d...\n", BUZZER_PIN);
+  Serial.printf("🔊 Initializing Passive Buzzer on GPIO %d...\n", BUZZER_PIN);
   playTone(2000, 80);
   delay(40);
-  playTone(3000, 100);
+  playTone(2800, 100);
   Serial.println("✅ Buzzer OK");
 
+#if ENABLE_TFT_DISPLAY
   // 2. TFT Display Initialization
   Serial.println("🖥️ Initializing TFT Display (ILI9486)...");
   tft.init();
@@ -776,42 +835,80 @@ void setup() {
   tft.fillScreen(COLOR_DARK_BG);
   Serial.println("✅ TFT Initialized & Screen Cleared");
 
+#if defined(TOUCH_CS)
   uint16_t calData[5] = { 285, 3550, 395, 3450, 7 };
   tft.setTouch(calData);
+#endif
+#else
+  Serial.println("🖥️ TFT Display: Bypassed on ESP32 (UI running on Raspberry Pi 5 Chromium Kiosk)");
+#endif
 
   // 3. PN532 NFC Reader Initialization (I2C: SDA=GPIO21, SCL=GPIO22)
-  Serial.println("📡 Initializing PN532 NFC Reader...");
+  Serial.printf("📡 Initializing PN532 NFC Reader on I2C (SDA=GPIO%d, SCL=GPIO%d)...\n", PN532_SDA, PN532_SCL);
   Wire.begin(PN532_SDA, PN532_SCL);
-  Wire.setClock(100000); // 100kHz standard I2C for stability
-  nfc.begin();
-  uint32_t versiondata = nfc.getFirmwareVersion();
-  if (versiondata) {
-    nfc.SAMConfig();
-    Serial.println("✅ PN532 NFC Reader Online");
+  Wire.setClock(100000); // 100kHz standard I2C for rock-solid stability
+  Wire.setTimeOut(250);  // Prevent clock-stretch timeouts
+  delay(200);            // Allow PN532 power-on stabilization
+
+  // Probe I2C bus address 0x24
+  Serial.println("🔍 Probing I2C address 0x24 for PN532...");
+  Wire.beginTransmission(0x24);
+  byte i2c_err = Wire.endTransmission();
+  if (i2c_err == 0) {
+    Serial.println("   📍 I2C Device ACK received at address 0x24 (PN532 chip present)!");
   } else {
-    Serial.println("⚠️ PN532 NFC Reader not detected on I2C bus");
+    Serial.printf("   ⚠️ No ACK at address 0x24 (Wire error: %d).\n", i2c_err);
+    Serial.println("   👉 Check PN532 DIP Switches: I2C mode requires CH1=ON (1), CH2=OFF (0).");
+    Serial.println("   👉 Check VCC: connect to 3.3V or 5V (VIN), and GND to GND.");
   }
 
+  nfc.begin();
+
+  // Retry up to 5 times to wake PN532 from low-power standby
+  uint32_t versiondata = 0;
+  for (int attempt = 1; attempt <= 5; attempt++) {
+    versiondata = nfc.getFirmwareVersion();
+    if (versiondata) break;
+    delay(100);
+  }
+
+  if (versiondata) {
+    nfc.SAMConfig();
+    Serial.printf("✅ PN532 Online! Chip: PN5%02X, Firmware Ver: %d.%d\n",
+                  (versiondata >> 24) & 0xFF,
+                  (versiondata >> 16) & 0xFF,
+                  (versiondata >> 8) & 0xFF);
+    playTone(3200, 60);
+  } else {
+    Serial.println("⚠️ PN532 NFC Reader not detected! Check 3.3V/GND/SDA/SCL wiring & DIP switches.");
+  }
+
+#if ENABLE_TFT_DISPLAY
   // 4. Initial UI Render
   Serial.println("🎨 Rendering UI Dashboard...");
   renderUI();
   lastActivityTime = millis();
   Serial.println("✅ UI Render Complete");
+#endif
 
-  // 5. Connect to Wi-Fi (after display and NFC are fully up)
-  Serial.println("📶 Starting Wi-Fi in background...");
+  // 5. Connect to Wi-Fi
+  Serial.printf("📶 Connecting Wi-Fi to [%s]...\n", WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  beep(1, 120); // Ready chime
+  beep(1, 120, 0, 1800); // Ready chime
+  Serial.println("🚀 Sensor Pod Ready! Scanning for NFC tags...");
 }
 
 void loop() {
   ensureConnection();
+#if ENABLE_TFT_DISPLAY
   pollTouch();
+#endif
   pollNFC();
   checkIncomingCommands();
 
+#if ENABLE_TFT_DISPLAY
   // Dismiss NFC Greeting after 2.2 seconds
   if (isShowingNFCWelcome && (millis() - nfcWelcomeTime > 2200)) {
     isShowingNFCWelcome = false;
@@ -836,6 +933,7 @@ void loop() {
   if (!isSleeping && !isRecording && !isShowingNFCWelcome && !isShowingInterlock && (millis() - lastActivityTime > SLEEP_TIMEOUT_MS)) {
     enterSleepMode();
   }
+#endif
 
   // Periodic 10s Heartbeat Telemetry to Pi 5
   if (millis() - last_heartbeat > 10000) {
@@ -843,9 +941,11 @@ void loop() {
     if (client.connected()) {
       sendEvent("heartbeat", String("{\"rssi\":") + String(WiFi.RSSI()) + ",\"recording\":" + (isRecording ? "true" : "false") + "}");
     }
+#if ENABLE_TFT_DISPLAY
     if (!isSleeping && !isRecording && !isShowingNFCWelcome && !isShowingInterlock) {
       drawHeader();
     }
+#endif
   }
 
   delay(10);
