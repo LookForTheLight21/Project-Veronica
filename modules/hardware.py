@@ -65,7 +65,7 @@ class PodReceiverServer:
         with self._lock:
             if self.active_client_sock:
                 try:
-                    data = (json.dumps(payload) + "\n").encode("utf-8")
+                    data = (json.dumps(payload, separators=(',', ':')) + "\n").encode("utf-8")
                     self.active_client_sock.sendall(data)
                 except Exception as e:
                     print(f"⚠️  Failed to send command to Pod: {e}")

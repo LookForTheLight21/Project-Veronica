@@ -126,21 +126,42 @@ void checkIncomingCommands() {
       Serial.println("📥 Pi 5 Command: " + line);
 
       // Trigger Buzzer from Pi 5
-      if (line.indexOf("\"cmd\":\"beep\"") >= 0) {
+      if (line.indexOf("\"beep\"") >= 0) {
         int times = 1;
-        int dur = 80;
+        int dur = 100;
+        int gap = 60;
         int freq = BUZZER_FREQ;
 
-        int tIdx = line.indexOf("\"times\":");
-        if (tIdx >= 0) times = line.substring(tIdx + 8).toInt();
+        int tIdx = line.indexOf("\"times\"");
+        if (tIdx >= 0) {
+          int start = line.indexOf(':', tIdx) + 1;
+          times = line.substring(start).toInt();
+        }
 
-        int dIdx = line.indexOf("\"duration\":");
-        if (dIdx >= 0) dur = line.substring(dIdx + 11).toInt();
+        int dIdx = line.indexOf("\"duration\"");
+        if (dIdx >= 0) {
+          int start = line.indexOf(':', dIdx) + 1;
+          dur = line.substring(start).toInt();
+        }
 
-        int fIdx = line.indexOf("\"freq\":");
-        if (fIdx >= 0) freq = line.substring(fIdx + 7).toInt();
+        int gIdx = line.indexOf("\"gap\"");
+        if (gIdx >= 0) {
+          int start = line.indexOf(':', gIdx) + 1;
+          gap = line.substring(start).toInt();
+        }
 
-        beep(times, dur, 50, freq);
+        int fIdx = line.indexOf("\"freq\"");
+        if (fIdx >= 0) {
+          int start = line.indexOf(':', fIdx) + 1;
+          freq = line.substring(start).toInt();
+        }
+
+        if (times <= 0) times = 1;
+        if (dur <= 0) dur = 100;
+        if (freq <= 0) freq = BUZZER_FREQ;
+
+        Serial.printf("🔊 Executing Buzzer: %d beep(s) @ %dHz (%dms)\n", times, freq, dur);
+        beep(times, dur, gap, freq);
       }
     }
   }

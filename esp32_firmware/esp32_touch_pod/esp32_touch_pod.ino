@@ -187,16 +187,54 @@ void checkIncomingCommands() {
     if (line.length() > 0) {
       Serial.println("📥 Pi 5 Packet: " + line);
 
-      if (line.indexOf("\"cmd\":\"beep\"") >= 0) {
-        beep(1, 80);
+      // 1. Acoustic Beep Command from Pi 5
+      if (line.indexOf("\"beep\"") >= 0) {
+        int times = 1;
+        int dur = 100;
+        int gap = 60;
+        int freq = BUZZER_FREQ;
+
+        int tIdx = line.indexOf("\"times\"");
+        if (tIdx >= 0) {
+          int start = line.indexOf(':', tIdx) + 1;
+          times = line.substring(start).toInt();
+        }
+
+        int dIdx = line.indexOf("\"duration\"");
+        if (dIdx >= 0) {
+          int start = line.indexOf(':', dIdx) + 1;
+          dur = line.substring(start).toInt();
+        }
+
+        int gIdx = line.indexOf("\"gap\"");
+        if (gIdx >= 0) {
+          int start = line.indexOf(':', gIdx) + 1;
+          gap = line.substring(start).toInt();
+        }
+
+        int fIdx = line.indexOf("\"freq\"");
+        if (fIdx >= 0) {
+          int start = line.indexOf(':', fIdx) + 1;
+          freq = line.substring(start).toInt();
+        }
+
+        if (times <= 0) times = 1;
+        if (dur <= 0) dur = 100;
+        if (freq <= 0) freq = BUZZER_FREQ;
+
+        Serial.printf("🔊 Executing Buzzer: %d beep(s) @ %dHz (%dms)\n", times, freq, dur);
+        beep(times, dur, gap, freq);
       }
 
-      if (line.indexOf("\"subject\":") >= 0) {
-        int idx = line.indexOf("\"subject\":\"");
-        if (idx >= 0) {
-          int endIdx = line.indexOf("\"", idx + 11);
-          if (endIdx > 0) {
-            currentSubject = line.substring(idx + 11, endIdx);
+      // 2. Subject Context Update from Pi 5
+      if (line.indexOf("\"subject\"") >= 0) {
+        int idx = line.indexOf("\"subject\"");
+        int colonIdx = line.indexOf(':', idx);
+        int startQuote = line.indexOf('"', colonIdx + 1);
+        if (startQuote > 0) {
+          int endQuote = line.indexOf('"', startQuote + 1);
+          if (endQuote > 0) {
+            currentSubject = line.substring(startQuote + 1, endQuote);
             currentSubject.toUpperCase();
             isSubjectLocked = (currentSubject == "NONE" || currentSubject.length() == 0);
             if (!isSleeping && !isRecording && !isShowingNFCWelcome) renderUI();
@@ -204,20 +242,23 @@ void checkIncomingCommands() {
         }
       }
 
-      if (line.indexOf("\"pages\":") >= 0) {
-        int pidx = line.indexOf("\"pages\":");
-        sessionPages = line.substring(pidx + 8).toInt();
+      // 3. Chalkboard Snapshot Counter from Pi 5
+      if (line.indexOf("\"pages\"") >= 0) {
+        int pidx = line.indexOf("\"pages\"");
+        int colonIdx = line.indexOf(':', pidx);
+        sessionPages = line.substring(colonIdx + 1).toInt();
         if (!isSleeping && !isRecording && !isShowingNFCWelcome) drawHeader();
       }
 
-      if (line.indexOf("\"recording\":true") >= 0) {
+      // 4. Live Recording State Update
+      if (line.indexOf("\"recording\"") >= 0 && line.indexOf("true") >= 0) {
         if (!isRecording) {
           isRecording = true;
           recordingStartTime = millis();
           recordingType = (line.indexOf("\"audio\"") >= 0) ? "ROOM AUDIO" : "4K VIDEO";
           drawRecordingHUD();
         }
-      } else if (line.indexOf("\"recording\":false") >= 0) {
+      } else if (line.indexOf("\"recording\"") >= 0 && line.indexOf("false") >= 0) {
         if (isRecording) {
           isRecording = false;
           renderUI();
