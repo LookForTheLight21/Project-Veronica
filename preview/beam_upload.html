@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>Veronica Slide Beam — Class X</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: #090d16;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 16px;
+            background-image: radial-gradient(circle at 50% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 60%);
+        }
+        .card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 28px 22px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            text-align: center;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 800;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            margin-bottom: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+        p {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+        .upload-zone {
+            border: 2px dashed rgba(56, 189, 248, 0.4);
+            border-radius: 18px;
+            padding: 32px 16px;
+            background: rgba(56, 189, 248, 0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .upload-zone:active {
+            transform: scale(0.98);
+            background: rgba(56, 189, 248, 0.08);
+            border-color: #38bdf8;
+        }
+        .upload-icon {
+            font-size: 44px;
+        }
+        .file-input {
+            display: none;
+        }
+        .formats-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+        .btn-submit {
+            width: 100%;
+            margin-top: 18px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 18px;
+            display: none;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #38bdf8;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .success-box {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+        }
+        .success-icon {
+            font-size: 48px;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.4); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .footer-note {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="badge" style="display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 6a6 6 0 0 1 6 6"></path><path d="M12 10a2 2 0 0 1 2 2"></path><circle cx="12" cy="14" r="1"></circle><path d="M12 15v7"></path><path d="M8 22h8"></path></svg> <span>Class X Wireless Slide Beam</span></div>
+    <h1>Beam Your Presentation</h1>
+    <p>Upload your lecture slides from your phone. They will instantly open on the classroom lectern &amp; projector display.</p>
+
+    <div id="upload-stage">
+        <label class="upload-zone" for="file-picker" id="drop-zone">
+            <div class="upload-icon" style="display:flex; justify-content:center;"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div>
+            <div style="font-weight: 700; font-size: 15px;" id="file-label">Tap to select PDF or PPT</div>
+            <div class="formats-pill">SUPPORTED: .PDF · .PPTX · .PPT</div>
+            <input type="file" id="file-picker" class="file-input" accept=".pdf,.pptx,.ppt,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" onchange="onFileSelected(this)">
+        </label>
+
+        <button type="button" class="btn-submit" id="btn-submit" onclick="uploadFile()">
+            <span style="display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> <span>Beam Slides to Classroom Hub</span></span>
+        </button>
+
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <div class="success-box" id="success-box">
+        <div class="success-icon" style="display:flex; justify-content:center;"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+        <h2 style="font-size: 19px; font-weight: 800; color: #34d399;">Slides Ready in Classroom!</h2>
+        <p style="margin-bottom: 8px;" id="success-filename">Your presentation has been transferred to the lectern touchscreen.</p>
+        <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 12px; padding: 12px; width: 100%; font-size: 12px; color: #34d399; font-weight: 600;">
+            Tap "Present Slides" on the Pod touchscreen to project. All files will be automatically deleted when class concludes.
+        </div>
+        <button type="button" class="btn-submit" style="display:block; background:#1e293b; margin-top:14px;" onclick="location.reload()">
+            <span style="display:inline-flex; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> <span>Send Another File</span></span>
+        </button>
+    </div>
+
+    <div class="footer-note">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Connected to Class X Local Edge Network · Zero Cloud Retainment
+    </div>
+</div>
+
+<script>
+    let selectedFile = null;
+
+    function onFileSelected(input) {
+        if (!input.files || input.files.length === 0) return;
+        selectedFile = input.files[0];
+        document.getElementById('file-label').innerText = `📄 ${selectedFile.name}`;
+        document.getElementById('drop-zone').style.borderColor = '#38bdf8';
+        document.getElementById('drop-zone').style.background = 'rgba(56, 189, 248, 0.1)';
+        document.getElementById('btn-submit').style.display = 'block';
+    }
+
+    function uploadFile() {
+        if (!selectedFile) return;
+        const btn = document.getElementById('btn-submit');
+        const pbar = document.getElementById('progress-bar');
+        const pfill = document.getElementById('progress-fill');
+
+        btn.disabled = true;
+        btn.innerText = '⏳ Transferring slides…';
+        pbar.style.display = 'block';
+        pfill.style.width = '30%';
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/beam/upload', true);
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 90);
+                pfill.style.width = percent + '%';
+            }
+        };
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                pfill.style.width = '100%';
+                setTimeout(() => {
+                    document.getElementById('upload-stage').style.display = 'none';
+                    document.getElementById('success-box').style.display = 'flex';
+                    document.getElementById('success-filename').innerText = `"${selectedFile.name}" is now loaded on the classroom pod display.`;
+                }, 300);
+            } else {
+                alert('⚠️ Upload error: ' + xhr.responseText);
+                btn.disabled = false;
+                btn.innerText = '🚀 Retry Beam Slides';
+            }
+        };
+
+        xhr.onerror = function() {
+            alert('⚠️ Network connection error with Veronica classroom pod.');
+            btn.disabled = false;
+            btn.innerText = '🚀 Retry Beam Slides';
+        };
+
+        xhr.send(formData);
+    }
+</script>
+
+</body>
+</html>

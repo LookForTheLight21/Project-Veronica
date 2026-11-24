@@ -35,6 +35,19 @@
             --dim:         #30363d;
         }
 
+        /* ☀️ DAY LIGHT MODE PALETTE */
+        [data-theme="light"] {
+            --bg:          #f1f5f9;
+            --surface:     #ffffff;
+            --card:        #ffffff;
+            --card-hover:  #f8fafc;
+            --border:      rgba(0, 0, 0, 0.1);
+            --edge:        rgba(0, 0, 0, 0.15);
+            --white:       #0f172a;
+            --muted:       #64748b;
+            --dim:         #cbd5e1;
+        }
+
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0; padding: 0;
@@ -53,14 +66,14 @@
             letter-spacing: -0.2px;
         }
 
-        /* ── ROOT SHELL: 800×480 Fullscreen Flex ──────────────────── */
+        /* ── ROOT SHELL: Responsive Fullscreen Flex ──────────────────── */
         .shell {
             display: flex;
             flex-direction: column;
             width: 100vw;
             height: 100vh;
-            max-width: 800px;
-            max-height: 480px;
+            max-width: 100%;
+            max-height: 100%;
             margin: 0 auto;
             position: relative;
             background: var(--bg);
@@ -402,7 +415,24 @@
             color: var(--orange) !important;
         }
 
-        /* ── SLIDE 2: SYSTEM HEALTH & QUICK TOOLS ─────────────────── */
+        /* ── SLIDE 2: USEFUL SITES & WEB APPS (3/4) ────────────────── */
+        .slide-bookmarks {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .bookmark-btn {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .bookmark-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ── SLIDE 3: SYSTEM HEALTH & QUICK TOOLS ─────────────────── */
         .slide-system {
             display: flex;
             flex-direction: column;
@@ -539,6 +569,16 @@
             transition: all 0.15s ease;
         }
         .sb-nav-btn:active { transform: scale(0.96); }
+        .sb-nav-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
         .sb-nav-btn.active-nav {
             border-color: var(--orange);
             color: var(--orange);
@@ -616,23 +656,51 @@
         .rec-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(5, 7, 10, 0.98);
-            backdrop-filter: blur(25px);
+            background: rgba(5, 7, 10, 0.95);
             z-index: 999;
-            display: flex;
-            flex-direction: column;
+            display: none;
             align-items: center;
             justify-content: center;
-            gap: 14px;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.25s ease;
             border: 3px solid var(--red);
             box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.35);
+            overflow: hidden;
+            transform: translateZ(0);
         }
         .rec-overlay.active {
+            display: flex;
             opacity: 1;
             pointer-events: all;
+        }
+
+        .rec-live-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            filter: brightness(0.6) contrast(1.1);
+        }
+
+        .rec-overlay-scrim {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(5, 7, 10, 0.4) 0%, rgba(5, 7, 10, 0.88) 100%);
+            z-index: 2;
+        }
+
+        .rec-hud-content {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
         }
 
         .rec-beacon {
@@ -680,7 +748,8 @@
             letter-spacing: 0.5px;
         }
         .rec-stop-btn {
-            width: 380px;
+            width: min(90vw, 380px);
+            max-width: 90%;
             height: 64px;
             background: linear-gradient(180deg, #dc2626, #b91c1c);
             border: 2px solid rgba(255, 255, 255, 0.35);
@@ -697,6 +766,7 @@
             box-shadow: 0 10px 30px rgba(220, 38, 38, 0.45);
             transition: all 0.15s ease;
             margin-top: 6px;
+            box-sizing: border-box;
         }
         .rec-stop-btn:active {
             transform: scale(0.97);
@@ -731,8 +801,7 @@
         .screensaver {
             position: absolute;
             inset: 0;
-            background: rgba(3, 5, 8, 0.96);
-            backdrop-filter: blur(25px);
+            background: rgba(3, 5, 8, 0.98);
             z-index: 10000;
             display: flex;
             flex-direction: column;
@@ -742,11 +811,135 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease;
+            transform: translateZ(0);
         }
         .screensaver.active {
             opacity: 1;
             pointer-events: all;
         }
+        /* 🏷️ NFC TEACHER GREETING FLASH CARD */
+        .nfc-greeting-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 7, 10, 0.96);
+            z-index: 10005;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.96) translateZ(0);
+        }
+        [data-theme="light"] .nfc-greeting-overlay {
+            background: rgba(248, 250, 252, 0.95);
+        }
+        .nfc-greeting-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .nfc-greeting-card {
+            width: min(92vw, 560px);
+            max-width: 95%;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(13, 17, 23, 0.96) 100%);
+            border: 2px solid var(--green);
+            border-radius: 20px;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.25), inset 0 0 25px rgba(16, 185, 129, 0.1);
+            box-sizing: border-box;
+        }
+        [data-theme="light"] .nfc-greeting-card {
+            background: #ffffff;
+            border: 2px solid #059669;
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.15);
+        }
+        .nfc-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nfc-card-chip {
+            width: 44px;
+            height: 32px;
+            background: linear-gradient(135deg, #d97706 0%, #fbbf24 100%);
+            border-radius: 6px;
+            border: 1px solid #b45309;
+            position: relative;
+        }
+        .nfc-card-chip::after {
+            content: '';
+            position: absolute;
+            top: 9px; left: 5px; right: 5px; height: 1px;
+            background: #78350f;
+            box-shadow: 0 8px 0 #78350f;
+        }
+        .nfc-verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 800;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nfc-pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green);
+            animation: blink 1s infinite;
+        }
+        .nfc-teacher-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.3px;
+        }
+        .nfc-teacher-dept {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 2px;
+        }
+        .nfc-unlocked-banner {
+            margin: 6px 0;
+            background: var(--green);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+        .nfc-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: var(--muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 10px;
+        }
+        [data-theme="light"] .nfc-card-footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
         .ss-brand {
             font-size: 12px;
             font-weight: 800;
@@ -773,7 +966,8 @@
             color: var(--muted);
         }
         .ss-unlock-track {
-            width: 360px;
+            width: min(90vw, 360px);
+            max-width: 90%;
             height: 56px;
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -785,6 +979,7 @@
             align-items: center;
             padding: 6px;
             cursor: pointer;
+            box-sizing: border-box;
         }
         .ss-unlock-text {
             width: 100%;
@@ -826,6 +1021,477 @@
             transition: transform 0.1s ease;
         }
         .ss-thumb:active { cursor: grabbing; transform: scale(1.08); }
+
+        /* ══════════════════════════════════════════════════════════════
+           ☀️ DAY LIGHT MODE FULL-DASHBOARD THEME SPECIFICATION
+           High-contrast daylight optimization for classrooms with natural light
+        ══════════════════════════════════════════════════════════════ */
+        [data-theme="light"] {
+            --bg:          #f1f5f9;
+            --surface:     #ffffff;
+            --card:        #ffffff;
+            --card-hover:  #f8fafc;
+            --border:      rgba(0, 0, 0, 0.08);
+            --edge:        rgba(0, 0, 0, 0.12);
+            --orange:      #ea580c;
+            --orange-glow: rgba(234, 88, 12, 0.25);
+            --cyan:        #0284c7;
+            --cyan-glow:   rgba(2, 132, 199, 0.2);
+            --green:       #059669;
+            --pink:        #e11d48;
+            --amber:       #d97706;
+            --purple:      #7c3aed;
+            --blue:        #2563eb;
+            --red:         #dc2626;
+            --white:       #0f172a;
+            --muted:       #64748b;
+            --dim:         #cbd5e1;
+        }
+
+        /* Topbar & Header */
+        [data-theme="light"] .topbar {
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+        [data-theme="light"] .topbar-brand {
+            color: #ea580c;
+        }
+        [data-theme="light"] .topbar-brand span {
+            color: #64748b;
+        }
+        [data-theme="light"] .status-pill {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #475569;
+        }
+        [data-theme="light"] .clock-top {
+            background: #f0f9ff;
+            border: 1px solid rgba(2, 132, 199, 0.25);
+            color: #0284c7;
+        }
+
+        /* Main Slide Area */
+        [data-theme="light"] .slide-area {
+            background: #f8fafc;
+        }
+        [data-theme="light"] .nfc-banner {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, #ffffff 100%);
+        }
+        [data-theme="light"] .nfc-banner.active {
+            border-color: rgba(5, 150, 105, 0.3);
+        }
+        [data-theme="light"] .nfc-banner-name {
+            color: #0f172a;
+        }
+        [data-theme="light"] .nfc-banner-tag {
+            color: #059669;
+            background: rgba(5, 150, 105, 0.1);
+        }
+        [data-theme="light"] .context-strip {
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="light"] .subj-badge {
+            background: #fff7ed;
+            border-color: rgba(234, 88, 12, 0.35);
+            color: #ea580c;
+        }
+        [data-theme="light"] .subj-badge.locked {
+            background: #fef2f2;
+            border-color: rgba(220, 38, 38, 0.35);
+            color: #dc2626;
+        }
+        [data-theme="light"] .pages-counter {
+            background: #f0f9ff;
+            border: 1px solid rgba(2, 132, 199, 0.25);
+            color: #0284c7;
+        }
+
+        /* Tactile Action Cards */
+        [data-theme="light"] .pod-btn {
+            background: #ffffff !important;
+            border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04) !important;
+        }
+        [data-theme="light"] .pod-btn:active {
+            background: #f8fafc !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+        }
+        [data-theme="light"] .btn-label {
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .btn-sub {
+            color: #64748b !important;
+        }
+
+        /* Thematic Color Accents */
+        [data-theme="light"] .t-purple { border-color: rgba(124, 58, 237, 0.25) !important; }
+        [data-theme="light"] .t-purple .btn-icon { stroke: #7c3aed !important; }
+        [data-theme="light"] .t-purple .btn-tag  { background: #f5f3ff !important; color: #7c3aed !important; }
+        [data-theme="light"] .t-purple:active    { background: #ede9fe !important; }
+
+        [data-theme="light"] .t-green { border-color: rgba(5, 150, 105, 0.25) !important; }
+        [data-theme="light"] .t-green .btn-icon { stroke: #059669 !important; }
+        [data-theme="light"] .t-green .btn-tag  { background: #f0fdf4 !important; color: #059669 !important; }
+        [data-theme="light"] .t-green:active    { background: #dcfce7 !important; }
+
+        [data-theme="light"] .t-pink { border-color: rgba(225, 29, 72, 0.25) !important; }
+        [data-theme="light"] .t-pink .btn-icon { stroke: #e11d48 !important; }
+        [data-theme="light"] .t-pink .btn-tag  { background: #fff1f2 !important; color: #e11d48 !important; }
+        [data-theme="light"] .t-pink:active    { background: #ffe4e6 !important; }
+
+        [data-theme="light"] .t-amber { border-color: rgba(217, 119, 6, 0.25) !important; }
+        [data-theme="light"] .t-amber .btn-icon { stroke: #d97706 !important; }
+        [data-theme="light"] .t-amber .btn-tag  { background: #fffbeb !important; color: #b45309 !important; }
+        [data-theme="light"] .t-amber:active   { background: #fef3c7 !important; }
+
+        [data-theme="light"] .t-cyan { border-color: rgba(2, 132, 199, 0.25) !important; }
+        [data-theme="light"] .t-cyan .btn-icon { stroke: #0284c7 !important; }
+        [data-theme="light"] .t-cyan .btn-tag  { background: #f0f9ff !important; color: #0284c7 !important; }
+        [data-theme="light"] .t-cyan:active    { background: #e0f2fe !important; }
+
+        [data-theme="light"] .t-blue { border-color: rgba(37, 99, 235, 0.25) !important; }
+        [data-theme="light"] .t-blue .btn-icon { stroke: #2563eb !important; }
+        [data-theme="light"] .t-blue .btn-tag  { background: #eff6ff !important; color: #2563eb !important; }
+        [data-theme="light"] .t-blue:active    { background: #dbeafe !important; }
+
+        [data-theme="light"] .t-red { border-color: rgba(220, 38, 38, 0.25) !important; }
+        [data-theme="light"] .t-red .btn-icon { stroke: #dc2626 !important; }
+        [data-theme="light"] .t-red .btn-tag  { background: #fef2f2 !important; color: #dc2626 !important; }
+        [data-theme="light"] .t-red:active    { background: #fee2e2 !important; }
+
+        [data-theme="light"] .t-orange { border-color: rgba(234, 88, 12, 0.25) !important; }
+        [data-theme="light"] .t-orange .btn-icon { stroke: #ea580c !important; }
+        [data-theme="light"] .t-orange .btn-tag  { background: #fff7ed !important; color: #ea580c !important; }
+        [data-theme="light"] .t-orange:active    { background: #ffedd5 !important; }
+
+        /* Subjects Grid */
+        [data-theme="light"] .subj-btn.active-subj {
+            background: #fff7ed !important;
+            border-color: #ea580c !important;
+            box-shadow: 0 4px 16px rgba(234, 88, 12, 0.2) !important;
+        }
+        [data-theme="light"] .subj-btn.active-subj .btn-label {
+            color: #ea580c !important;
+        }
+
+        /* Bookmarks Grid */
+        [data-theme="light"] .bookmark-btn {
+            background: #ffffff !important;
+            border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04) !important;
+        }
+        [data-theme="light"] .bookmark-btn:active {
+            background: #f8fafc !important;
+        }
+
+        /* Metrics & System Health */
+        [data-theme="light"] .metric-card {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        [data-theme="light"] .metric-label {
+            color: #64748b;
+        }
+        [data-theme="light"] .metric-value {
+            color: #0f172a;
+        }
+        [data-theme="light"] .metric-bar {
+            background: #e2e8f0;
+        }
+        [data-theme="light"] .tool-btn {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        [data-theme="light"] .tool-btn:active {
+            background: #f1f5f9;
+        }
+
+        /* Sidebar */
+        [data-theme="light"] .sidebar {
+            background: #ffffff;
+            border-left: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="light"] .sb-card {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="light"] .sb-label {
+            color: #64748b;
+        }
+        [data-theme="light"] .sb-value {
+            color: #0f172a;
+        }
+        [data-theme="light"] .sb-nav-btn {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #475569;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+        [data-theme="light"] .sb-nav-btn:active {
+            background: #f1f5f9;
+        }
+        [data-theme="light"] .sb-nav-btn.active-nav {
+            background: #fff7ed;
+            border-color: #ea580c;
+            color: #ea580c;
+            box-shadow: 0 0 10px rgba(234, 88, 12, 0.15);
+        }
+
+        /* Bottom Pagination Bar */
+        [data-theme="light"] .bottombar {
+            background: #ffffff;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.03);
+        }
+        [data-theme="light"] .nav-arrow {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #0f172a;
+        }
+        [data-theme="light"] .nav-arrow:active {
+            background: #e2e8f0;
+        }
+        [data-theme="light"] .ndot {
+            background: #cbd5e1;
+        }
+        [data-theme="light"] .ndot.active {
+            background: #ea580c;
+            box-shadow: 0 0 8px rgba(234, 88, 12, 0.4);
+        }
+        [data-theme="light"] .slide-name {
+            color: #64748b;
+        }
+
+        /* Screensaver Standby */
+        [data-theme="light"] .screensaver {
+            background: #f8fafc;
+        }
+        [data-theme="light"] .ss-brand {
+            color: #ea580c;
+        }
+        [data-theme="light"] .ss-clock {
+            color: #0f172a;
+        }
+        [data-theme="light"] .ss-date {
+            color: #0284c7;
+        }
+        [data-theme="light"] .ss-status {
+            color: #64748b;
+        }
+        [data-theme="light"] .ss-unlock-track {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+        }
+        [data-theme="light"] .ss-unlock-text {
+            color: rgba(15, 23, 42, 0.45);
+            background: linear-gradient(90deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(15, 23, 42, 0.25) 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+        }
+
+        /* Toast Alert */
+        [data-theme="light"] .toast {
+            background: #ffffff;
+            border: 1.5px solid #ea580c;
+            color: #0f172a;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 0 15px rgba(234, 88, 12, 0.2);
+        }
+
+        /* ── WIRELESS SLIDE BEAM MODAL ── */
+        .beam-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(5, 7, 10, 0.94);
+            backdrop-filter: blur(16px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .beam-modal-shell {
+            width: 100%;
+            height: 100%;
+            max-width: 780px;
+            max-height: 460px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+        }
+        .beam-modal-top {
+            height: 48px;
+            background: rgba(13, 17, 23, 0.98);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            flex-shrink: 0;
+        }
+        .btn-beam-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%);
+            border: 1px solid rgba(255, 107, 0, 0.5);
+            border-radius: 999px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(234, 88, 12, 0.35);
+        }
+        .btn-beam-back:active { transform: scale(0.96); }
+        .beam-modal-title {
+            font-size: 12.5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--cyan);
+        }
+        .beam-modal-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .beam-modal-body {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 16px;
+            padding: 16px 20px;
+            flex: 1;
+            align-items: center;
+        }
+        .beam-qr-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .beam-qr-wrap {
+            background: #fff;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px var(--cyan-glow);
+            margin-bottom: 8px;
+            display: inline-flex;
+        }
+        .beam-qr-img {
+            width: 140px;
+            height: 140px;
+            display: block;
+        }
+        .beam-qr-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+        .beam-qr-sub {
+            font-size: 10.5px;
+            color: var(--muted);
+            line-height: 1.3;
+        }
+        .beam-status-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .beam-status-header {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .beam-status-tag {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .beam-card-state {
+            border: 1.5px dashed var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.25s ease;
+        }
+        .beam-card-state.ready {
+            border-style: solid;
+            border-color: rgba(52, 211, 153, 0.6);
+            background: rgba(52, 211, 153, 0.06);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+        }
+        .beam-btn-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+        }
+        .beam-btn-open {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            border-radius: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 800;
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+            cursor: pointer;
+        }
+        .beam-btn-open.disabled {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+            color: var(--muted);
+            pointer-events: none;
+            box-shadow: none;
+        }
+        .beam-btn-discard {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            color: #f87171;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -870,7 +1536,7 @@
 
             <!-- NFC Flash Banner (Reveals when card is scanned) -->
             <div class="nfc-banner" id="nfc-banner">
-                <span>🏷️ NFC CHECK-IN:</span>
+                <span style="display:inline-flex; align-items:center; gap:5px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> NFC CHECK-IN:</span>
                 <span class="nfc-banner-name" id="nfc-banner-name">Prof. H. C. Verma</span>
                 <span class="nfc-banner-tag" id="nfc-banner-tag">PHYSICS DEPT · UNLOCKED</span>
             </div>
@@ -938,7 +1604,7 @@
                             </div>
                             <div class="btn-info">
                                 <div class="btn-label">Record Video</div>
-                                <div class="btn-sub">3840×2160 @ 30 FPS Stream</div>
+                                <div class="btn-sub">1920×1080 @ 30 FPS Stream</div>
                             </div>
                         </button>
 
@@ -1006,7 +1672,71 @@
                         </button>
                     </div>
 
-                    <!-- ── SLIDE 2: SYSTEM HEALTH & METRICS ── -->
+                    <!-- ── SLIDE 2: USEFUL SITES & WEB APPS (3/4) ── -->
+                    <div class="slide slide-bookmarks" id="slide-bookmarks">
+                        <a href="https://www.google.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(66,133,244,0.4);">
+                            <div class="btn-top">
+                                <svg class="btn-icon" style="stroke:#4285f4; width:24px; height:24px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <span class="btn-tag" style="background:rgba(66,133,244,0.15); color:#4285f4; border:1px solid rgba(66,133,244,0.3);">SEARCH ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Google</div>
+                                <div class="btn-sub">Search &amp; Academic Reference</div>
+                            </div>
+                        </a>
+                        <a href="https://www.youtube.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(239,68,68,0.4);">
+                            <div class="btn-top">
+                                <svg class="btn-icon" style="stroke:#ef4444; width:24px; height:24px;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <span class="btn-tag" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3);">VIDEO ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">YouTube</div>
+                                <div class="btn-sub">Video Lectures &amp; Science Visuals</div>
+                            </div>
+                        </a>
+                        <a href="https://mail.google.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(234,67,53,0.4);">
+                            <div class="btn-top">
+                                <svg class="btn-icon" style="stroke:#ea4335; width:24px; height:24px;" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                <span class="btn-tag" style="background:rgba(234,67,53,0.15); color:#ea4335; border:1px solid rgba(234,67,53,0.3);">EMAIL ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Gmail</div>
+                                <div class="btn-sub">Faculty &amp; Staff Inbox</div>
+                            </div>
+                        </a>
+                        <a href="https://gemini.google.com" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(142,117,255,0.4);">
+                            <div class="btn-top">
+                                <svg class="btn-icon" style="stroke:#8e75ff; width:24px; height:24px;" viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.17-6.83l-2.83 2.83m-8 8l-2.83 2.83m0-13.66l2.83 2.83m8 8l2.83 2.83"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <span class="btn-tag" style="background:rgba(142,117,255,0.15); color:#8e75ff; border:1px solid rgba(142,117,255,0.3);">AI ASSISTANT ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Gemini</div>
+                                <div class="btn-sub">Lesson Plan &amp; Quiz Generator</div>
+                            </div>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(16,185,129,0.4);">
+                            <div class="btn-top">
+                                <svg class="btn-icon" style="stroke:#10b981; width:24px; height:24px;" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                                <span class="btn-tag" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3);">DRIVE FOLDER ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Google Drive</div>
+                                <div class="btn-sub">Classroom Lecture Notes &amp; Video Archives</div>
+                            </div>
+                        </a>
+                        <a href="/projector" target="_blank" class="pod-btn bookmark-btn" style="border-color:rgba(0,242,254,0.4);">
+                            <div class="btn-top">
+                                <svg class="btn-icon" style="stroke:#00f2fe; width:24px; height:24px;" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                <span class="btn-tag" style="background:rgba(0,242,254,0.15); color:#00f2fe; border:1px solid rgba(0,242,254,0.3);">PROJECTOR ↗</span>
+                            </div>
+                            <div class="btn-info">
+                                <div class="btn-label">Live Projector</div>
+                                <div class="btn-sub">Fullscreen Classroom HDMI Feed</div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- ── SLIDE 3: SYSTEM HEALTH & METRICS (4/4) ── -->
                     <div class="slide slide-system">
                         <div class="metrics-grid">
                             <div class="metric-card">
@@ -1054,37 +1784,48 @@
             </div>
 
             <div class="sb-card">
-                <div class="sb-label">ESP32 Sensor Pod</div>
-                <div class="sb-value green" id="sb-pod">Listening…</div>
-                <div style="font-size:9.5px; color:var(--muted); font-family:monospace;" id="sb-pod-meta">PN532 NFC + BUZZER</div>
-            </div>
-
-            <div class="sb-card">
-                <div class="sb-label">Chalkboard Deck</div>
+                <div class="sb-label">Snapshot Count</div>
                 <div class="sb-value cyan" id="sb-pages">0 Snapshots</div>
             </div>
 
-            <!-- Page Selection Group -->
+            <!-- Page Selection Group (4 Slides) -->
             <div class="sb-nav-group">
                 <button class="sb-nav-btn active-nav" id="nav0" onclick="goSlide(0)">
-                    <span>⚡</span> <span>Actions (1/3)</span>
+                    <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <span>Actions (1/4)</span>
                 </button>
                 <button class="sb-nav-btn" id="nav1" onclick="goSlide(1)">
-                    <span>📚</span> <span>Subjects (2/3)</span>
+                    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span>Subjects (2/4)</span>
                 </button>
                 <button class="sb-nav-btn" id="nav2" onclick="goSlide(2)">
-                    <span>🖥</span> <span>Systems (3/3)</span>
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    <span>Web Apps (3/4)</span>
+                </button>
+                <button class="sb-nav-btn" id="nav3" onclick="goSlide(3)">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    <span>Systems (4/4)</span>
                 </button>
             </div>
 
-            <!-- Standby & Admin -->
+            <!-- Wireless Slide Beam Quick Trigger -->
+            <button class="sb-nav-btn" onclick="openBeamModal()" style="justify-content:center; padding:0; background:linear-gradient(135deg, rgba(0,242,254,0.18), rgba(162,119,255,0.18)); border:1.5px solid rgba(0,242,254,0.45); color:var(--cyan); font-weight:800; box-shadow:0 0 10px rgba(0,242,254,0.15);">
+                <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg>
+                <span>Slide Beam</span>
+            </button>
+
+            <!-- Standby & Theme Toggle -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
                 <button class="sb-nav-btn" onclick="triggerScreensaver()" style="justify-content:center; padding:0;">
-                    <span>💤</span> <span>Sleep</span>
+                    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <span>Sleep</span>
                 </button>
-                <a href="/login" class="sb-nav-btn" style="text-decoration:none; justify-content:center; padding:0;">
-                    <span>⚙️</span> <span>Admin</span>
-                </a>
+                <button class="sb-nav-btn" id="theme-btn" onclick="toggleTheme()" style="justify-content:center; padding:0;">
+                    <span id="theme-btn-icon" style="display:flex; align-items:center;">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </span>
+                    <span id="theme-btn-text">Day</span>
+                </button>
             </div>
         </div>
 
@@ -1098,8 +1839,9 @@
             <div class="ndot active" onclick="goSlide(0)" id="ndot0"></div>
             <div class="ndot" onclick="goSlide(1)" id="ndot1"></div>
             <div class="ndot" onclick="goSlide(2)" id="ndot2"></div>
+            <div class="ndot" onclick="goSlide(3)" id="ndot3"></div>
         </div>
-        <div class="slide-name" id="slide-name">LECTURE ACTIONS (1/3)</div>
+        <div class="slide-name" id="slide-name">LECTURE ACTIONS (1/4)</div>
         <div class="nav-arrows">
             <div class="nav-arrow" onclick="prevSlide()">◀</div>
             <div class="nav-arrow" onclick="nextSlide()">▶</div>
@@ -1112,16 +1854,120 @@
      LIVE RECORDING OVERLAY (800×480 Fullscreen HUD)
 ══════════════════════════════════════════════════════════ -->
 <div class="rec-overlay" id="rec-overlay">
-    <div class="rec-beacon">
-        <div class="rec-dot-big"></div>
-        <span id="rec-mode-label">LIVE 4K VIDEO RECORDING</span>
+    <img src="" data-src="/video_feed" class="rec-live-bg" id="rec-live-feed" alt="Live Camera Preview" onerror="this.onerror=null; this.src='/sample_board.svg';">
+    <div class="rec-overlay-scrim"></div>
+    <div class="rec-hud-content">
+        <div class="rec-beacon">
+            <div class="rec-dot-big"></div>
+            <span id="rec-mode-label">LIVE 1080P VIDEO RECORDING</span>
+        </div>
+        <div class="rec-subj-pill" id="rec-subj-pill">PHYSICS</div>
+        <div class="rec-timer-big" id="rec-timer">00:00</div>
+        <div class="rec-meta" id="rec-meta">KREO OWL 1080P · 1920×1080 @ 30 FPS · ACTIVE SENSOR FEED</div>
+        <button class="rec-stop-btn" onclick="doAction('stop')">
+            ⏹ TERMINATE &amp; ARCHIVE FEED
+        </button>
     </div>
-    <div class="rec-subj-pill" id="rec-subj-pill">PHYSICS</div>
-    <div class="rec-timer-big" id="rec-timer">00:00</div>
-    <div class="rec-meta" id="rec-meta">KREO OWL 4K PRO · /dev/video0 · 3840×2160 @ 30 FPS</div>
-    <button class="rec-stop-btn" onclick="doAction('stop')">
-        ⏹ TERMINATE &amp; ARCHIVE FEED
-    </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     🏷️ NFC TEACHER GREETING FULLSCREEN MODAL
+══════════════════════════════════════════════════════════ -->
+<div class="nfc-greeting-overlay" id="nfc-greeting-overlay">
+    <div class="nfc-greeting-card">
+        <div class="nfc-card-top">
+            <div class="nfc-card-chip"></div>
+            <div class="nfc-verified-badge">
+                <span class="nfc-pulse-dot"></span>
+                <span>TEACHER VERIFIED</span>
+            </div>
+        </div>
+        <div>
+            <div class="nfc-teacher-name" id="nfc-modal-teacher-name">PROF. H. C. VERMA</div>
+            <div class="nfc-teacher-dept" id="nfc-modal-teacher-dept">DEPARTMENT OF PHYSICS</div>
+            <div class="nfc-unlocked-banner">
+                <span>✦</span> <span id="nfc-modal-unlocked-subj">CLASSROOM UNLOCKED: PHYSICS</span>
+            </div>
+        </div>
+        <div class="nfc-card-footer">
+            <span>Zero-friction handover · Cloud ledger armed</span>
+            <span style="color:var(--green); font-weight:700;">● Pi 5 Node Linked</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     WIRELESS SLIDE BEAM MODAL (800×480 Fullscreen Overlay)
+══════════════════════════════════════════════════════════ -->
+<div class="beam-modal-overlay" id="beam-modal" style="display:none;">
+    <div class="beam-modal-shell">
+        <div class="beam-modal-top">
+            <button class="btn-beam-back" onclick="closeBeamModal()">
+                <span>← Return to Pod Dashboard</span>
+            </button>
+            <div class="beam-modal-title" style="display:flex; align-items:center; gap:8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg>
+                <span>WIRELESS SLIDE BEAM — CLASS X</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="beam-modal-url" id="beam-modal-url">Loading link…</div>
+                <button type="button" onclick="promptPodBeamHost()" style="padding:4px 8px; font-size:10.5px; border-radius:6px; background:rgba(0,242,254,0.1); border:1px solid rgba(0,242,254,0.3); color:var(--cyan); cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                    <span>Edit Host</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="beam-modal-body">
+            <!-- Left: QR Code -->
+            <div class="beam-qr-box">
+                <div class="beam-qr-wrap">
+                    <img src="/api/beam/qr.svg" alt="Scan to Beam Slides" class="beam-qr-img" id="beam-modal-qr">
+                </div>
+                <div class="beam-qr-label">Scan with Smartphone</div>
+                <div class="beam-qr-sub" style="margin-bottom:6px;">Upload PDF, PPTX or PPT without teacher laptop</div>
+                <div style="background:rgba(255,107,0,0.12); border:1px solid rgba(255,107,0,0.3); border-radius:8px; padding:6px 8px; font-size:10px; line-height:1.3; color:#ffedd5; width:100%;">
+                    <div style="display:flex; align-items:center; gap:4px; margin-bottom:2px;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                        <span>Wi-Fi: <strong id="modal-wifi-label" style="color:var(--orange);">Poor_soul_5G</strong></span>
+                    </div>
+                    <span>(Phone &amp; Pod must be on same Wi-Fi)</span>
+                </div>
+            </div>
+
+            <!-- Right: Live State & Launch Button -->
+            <div class="beam-status-box">
+                <div class="beam-status-header">
+                    <span class="beam-status-tag" style="display:inline-flex; align-items:center; gap:4px;">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span>Live Deck Sync</span>
+                    </span>
+                    <h2 style="font-size:18px; font-weight:800; color:var(--white);">Lecture Presentation Receiver</h2>
+                </div>
+
+                <div class="beam-card-state" id="beam-card-state">
+                    <div style="min-height:36px; display:flex; align-items:center; justify-content:center;" id="beam-state-icon">
+                        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 6a6 6 0 0 1 6 6"></path><path d="M12 10a2 2 0 0 1 2 2"></path><circle cx="12" cy="14" r="1"></circle><path d="M12 15v7"></path><path d="M8 22h8"></path></svg>
+                    </div>
+                    <div style="font-size:15px; font-weight:800; color:var(--white);" id="beam-state-title">Awaiting Slide Transmission…</div>
+                    <div style="font-size:12px; color:var(--muted); line-height:1.4;" id="beam-state-desc">
+                        Scan the QR code on the left using your phone camera to cast your presentation slides directly to the classroom lectern &amp; projector.
+                    </div>
+                </div>
+
+                <div class="beam-btn-row">
+                    <a href="/viewer" id="beam-btn-open" class="beam-btn-open disabled" style="display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <span>Open Fullscreen Presentation</span>
+                    </a>
+                    <button type="button" id="beam-btn-discard" class="beam-btn-discard" onclick="clearBeamModalDeck()" style="display:none; align-items:center; justify-content:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Clear</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1131,7 +1977,7 @@
     <div class="ss-brand">✦ PROJECT VERONICA OS · NODE: CLASS X</div>
     <div class="ss-clock" id="ss-clock">00:00</div>
     <div class="ss-date" id="ss-date">Wednesday, November 21</div>
-    <div class="ss-status" id="ss-status">🔒 Lectern Standby · Inactivity Elapsed</div>
+    <div class="ss-status" id="ss-status"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Lectern Standby · Inactivity Elapsed</div>
     <div class="ss-unlock-track" id="ss-track">
         <div class="ss-unlock-text">Slide to unlock lectern ➔</div>
         <div class="ss-thumb" id="ss-thumb">➔</div>
@@ -1149,7 +1995,8 @@
 // ════════════════════════════════════════════════════════════════
 
 let currentSlide = 0;
-const SLIDE_NAMES = ['LECTURE ACTIONS (1/3)', 'ACADEMIC SUBJECTS (2/3)', 'CORE TELEMETRY & SYSTEM (3/3)'];
+const TOTAL_SLIDES = 4;
+const SLIDE_NAMES = ['LECTURE ACTIONS (1/4)', 'ACADEMIC SUBJECTS (2/4)', 'USEFUL WEB APPS (3/4)', 'CORE TELEMETRY & SYSTEM (4/4)'];
 let currentSubject = 'Physics';
 let sessionCount = 0;
 let isRecording = false;
@@ -1172,7 +2019,7 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── SLIDE NAVIGATION ────────────────────────────────────────────
+// ── SLIDE NAVIGATION & GESTURES ───────────────────────────────
 function goSlide(idx) {
     currentSlide = idx;
     document.getElementById('slide-track').style.transform = `translateX(-${idx * 100}%)`;
@@ -1181,17 +2028,237 @@ function goSlide(idx) {
     document.getElementById('slide-name').textContent = SLIDE_NAMES[idx];
     resetIdle();
 }
-function nextSlide() { goSlide((currentSlide + 1) % 3); }
-function prevSlide() { goSlide((currentSlide + 2) % 3); }
+function nextSlide() { goSlide((currentSlide + 1) % TOTAL_SLIDES); }
+function prevSlide() { goSlide((currentSlide + TOTAL_SLIDES - 1) % TOTAL_SLIDES); }
+
+// Universal Touch Swipe & Mouse Drag Gestures
+let isDraggingSlide = false;
+
+(function initSlideSwipes() {
+    const slideArea = document.querySelector('.slide-area') || document.getElementById('slide-viewport');
+    if (!slideArea) return;
+    let startX = 0, startY = 0, distX = 0, isDown = false, startTime = 0;
+
+    function onDragStart(cx, cy) {
+        isDown = true;
+        startX = cx;
+        startY = cy;
+        distX = 0;
+        startTime = Date.now();
+        isDraggingSlide = false;
+    }
+
+    function onDragMove(cx, cy) {
+        if (!isDown) return;
+        distX = cx - startX;
+        const distY = cy - startY;
+        if (Math.abs(distX) > 15 && Math.abs(distX) > Math.abs(distY)) {
+            isDraggingSlide = true;
+        }
+    }
+
+    function onDragEnd(cx, cy) {
+        if (!isDown) return;
+        isDown = false;
+        const totalX = (cx !== undefined ? cx : (startX + distX)) - startX;
+        const totalY = (cy !== undefined ? cy : startY) - startY;
+        const elapsed = Date.now() - startTime;
+
+        // Horizontal swipe triggered if moved > 35px or flick > 20px within 300ms
+        if ((Math.abs(totalX) > 35 || (Math.abs(totalX) > 20 && elapsed < 300)) && Math.abs(totalX) > Math.abs(totalY)) {
+            if (totalX < 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
+        setTimeout(() => { isDraggingSlide = false; }, 60);
+    }
+
+    // Touch events for actual touch displays
+    slideArea.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) onDragStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    slideArea.addEventListener('touchmove', e => {
+        if (e.touches.length === 1) onDragMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    slideArea.addEventListener('touchend', e => {
+        if (e.changedTouches.length === 1) onDragEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    }, { passive: true });
+
+    // Pointer events for desktop testing with mouse drag
+    slideArea.addEventListener('pointerdown', e => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        onDragStart(e.clientX, e.clientY);
+    });
+    window.addEventListener('pointermove', e => {
+        if (isDown) onDragMove(e.clientX, e.clientY);
+    });
+    window.addEventListener('pointerup', e => {
+        if (isDown) onDragEnd(e.clientX, e.clientY);
+    });
+
+    // Suppress child clicks if teacher was dragging/swiping
+    slideArea.addEventListener('click', e => {
+        if (isDraggingSlide) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
+})();
+
+// ── DYNAMIC BOOKMARK ENGINE ─────────────────────────────────────
+function getBookmarkSvg(iconKey, color) {
+    if (!iconKey) iconKey = 'globe';
+    if (typeof iconKey === 'string' && iconKey.trim().startsWith('<svg')) {
+        return iconKey;
+    }
+    const c = color || 'currentColor';
+    const s = `style="width:24px; height:24px; stroke:${c}; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:inline-block;"`;
+    const k = String(iconKey).toLowerCase();
+
+    if (k.includes('google') || k.includes('search') || k === '🔍') {
+        return `<svg viewBox="0 0 24 24" ${s}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+    }
+    if (k.includes('youtube') || k.includes('video') || k.includes('play') || k === '▶️' || k === '▶') {
+        return `<svg viewBox="0 0 24 24" ${s}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+    }
+    if (k.includes('gmail') || k.includes('mail') || k.includes('email') || k === '✉️' || k === '✉') {
+        return `<svg viewBox="0 0 24 24" ${s}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+    }
+    if (k.includes('gemini') || k.includes('spark') || k.includes('ai') || k === '✨') {
+        return `<svg viewBox="0 0 24 24" ${s}><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.17-6.83l-2.83 2.83m-8 8l-2.83 2.83m0-13.66l2.83 2.83m8 8l2.83 2.83"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    }
+    if (k.includes('drive') || k.includes('folder') || k === '📁') {
+        return `<svg viewBox="0 0 24 24" ${s}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+    }
+    if (k.includes('projector') || k.includes('monitor') || k.includes('screen') || k === '🖥️' || k === '🖥') {
+        return `<svg viewBox="0 0 24 24" ${s}><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+    }
+    if (k.includes('beam') || k.includes('phone') || k === '📲') {
+        return `<svg viewBox="0 0 24 24" ${s}><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg>`;
+    }
+    // Default fallback: Globe SVG
+    return `<svg viewBox="0 0 24 24" ${s}><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+}
+
+function loadBookmarks() {
+    fetch('/api/bookmarks')
+        .then(r => r.json())
+        .then(data => {
+            if (data.bookmarks && Array.isArray(data.bookmarks)) {
+                renderBookmarks(data.bookmarks);
+            }
+        })
+        .catch(() => {});
+}
+
+function renderBookmarks(bookmarks) {
+    const container = document.getElementById('slide-bookmarks');
+    if (!container || !bookmarks || bookmarks.length === 0) return;
+    container.innerHTML = bookmarks.map(bm => `
+        <a href="${bm.url}" target="_blank" class="pod-btn bookmark-btn" style="border-color:${bm.color || '#38bdf8'}55;">
+            <div class="btn-top">
+                ${getBookmarkSvg(bm.icon || bm.name, bm.color)}
+                <span class="btn-tag" style="background:${bm.color || '#38bdf8'}22; color:${bm.color || '#38bdf8'}; border:1px solid ${bm.color || '#38bdf8'}44;">OPEN ↗</span>
+            </div>
+            <div class="btn-info">
+                <div class="btn-label">${bm.name}</div>
+                <div class="btn-sub" style="font-family:'JetBrains Mono', monospace; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${(bm.url || '').replace(/^https?:\/\//, '')}</div>
+            </div>
+        </a>
+    `).join('');
+}
+
+// ☀️ DAY / NIGHT THEME CONTROLLER
+function toggleTheme() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('veronica_theme', 'dark');
+        updateThemeButton(false);
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('veronica_theme', 'light');
+        updateThemeButton(true);
+    }
+}
+
+function updateThemeButton(isLight) {
+    const icon = document.getElementById('theme-btn-icon');
+    const text = document.getElementById('theme-btn-text');
+    if (icon && text) {
+        if (isLight) {
+            icon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+            text.innerText = 'Night';
+        } else {
+            icon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+            text.innerText = 'Day';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const isLight = localStorage.getItem('veronica_theme') === 'light';
+    if (isLight) document.documentElement.setAttribute('data-theme', 'light');
+    updateThemeButton(isLight);
+});
 
 // ── TOAST ────────────────────────────────────────────────────────
 let toastTimer = null;
 function toast(msg) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
+    if (!el) return;
+    let iconSvg = '';
+    let cleanMsg = msg;
+    if (msg.startsWith('🔒')) {
+        iconSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>';
+        cleanMsg = msg.replace(/^🔒\s*/, '');
+    } else if (msg.startsWith('🟢')) {
+        iconSvg = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green); margin-right:6px; vertical-align:middle;"></span>';
+        cleanMsg = msg.replace(/^🟢\s*/, '');
+    } else if (msg.startsWith('📸')) {
+        iconSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+        cleanMsg = msg.replace(/^📸\s*/, '');
+    } else if (msg.startsWith('📚')) {
+        iconSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>';
+        cleanMsg = msg.replace(/^📚\s*/, '');
+    } else if (msg.startsWith('⏹')) {
+        iconSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>';
+        cleanMsg = msg.replace(/^⏹\s*/, '');
+    } else if (msg.startsWith('📊')) {
+        iconSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>';
+        cleanMsg = msg.replace(/^📊\s*/, '');
+    } else if (msg.startsWith('🔁')) {
+        iconSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>';
+        cleanMsg = msg.replace(/^🔁\s*/, '');
+    }
+    el.innerHTML = (iconSvg ? iconSvg : '') + `<span>${cleanMsg}</span>`;
     el.classList.add('active');
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('active'), 2800);
+}
+
+// 🏷️ Teacher Greeting Modal Logic
+const TEACHER_PROFILES = {
+    'Physics': { name: 'PROF. H. C. VERMA', dept: 'DEPARTMENT OF PHYSICS' },
+    'Chemistry': { name: 'DR. P. MUKHERJEE', dept: 'DEPARTMENT OF CHEMISTRY' },
+    'Math': { name: 'DR. R. D. SHARMA', dept: 'DEPARTMENT OF MATHEMATICS' },
+    'English': { name: 'PROF. W. WORDSWORTH', dept: 'FACULTY OF ENGLISH & LIT' },
+    'Computer Science': { name: 'DR. A. TURING', dept: 'DEPT OF COMPUTER SCIENCE' }
+};
+
+function showTeacherGreeting(subj) {
+    const prof = TEACHER_PROFILES[subj] || { name: `${subj.toUpperCase()} FACULTY`, dept: `DEPARTMENT OF ${subj.toUpperCase()}` };
+    document.getElementById('nfc-modal-teacher-name').textContent = prof.name;
+    document.getElementById('nfc-modal-teacher-dept').textContent = prof.dept;
+    document.getElementById('nfc-modal-unlocked-subj').textContent = `CLASSROOM UNLOCKED: ${subj.toUpperCase()}`;
+    
+    const overlay = document.getElementById('nfc-greeting-overlay');
+    overlay.classList.add('active');
+    setTimeout(() => {
+        overlay.classList.remove('active');
+    }, 2800);
 }
 
 // ── SUBJECT CONTEXT ──────────────────────────────────────────────
@@ -1267,8 +2334,8 @@ function doAction(action) {
     } else if (action === 'video') {
         if (isRecording) { doAction('stop'); return; }
         isRecording = true;
-        document.getElementById('rec-mode-label').textContent = 'LIVE 4K VIDEO RECORDING';
-        document.getElementById('rec-meta').textContent = 'KREO OWL 4K PRO · /dev/video0 · 3840×2160 @ 30 FPS';
+        document.getElementById('rec-mode-label').textContent = 'LIVE 1080P VIDEO RECORDING';
+        document.getElementById('rec-meta').textContent = 'KREO OWL 1080P · /dev/video0 · 1920×1080 @ 30 FPS';
         startRecOverlay();
         fetch('/cmd/video', { method: 'POST' }).catch(() => {});
 
@@ -1302,6 +2369,8 @@ function doReboot() {
 function startRecOverlay() {
     recTimer = 0;
     document.getElementById('rec-timer').textContent = '00:00';
+    const feed = document.getElementById('rec-live-feed');
+    if (feed && !feed.src) feed.src = '/video_feed';
     document.getElementById('rec-overlay').classList.add('active');
     document.getElementById('rec-status-pill').style.display = 'flex';
     if (recInterval) clearInterval(recInterval);
@@ -1315,6 +2384,8 @@ function startRecOverlay() {
 
 function stopRecOverlay() {
     isRecording = false;
+    const feed = document.getElementById('rec-live-feed');
+    if (feed) feed.src = '';
     document.getElementById('rec-overlay').classList.remove('active');
     document.getElementById('rec-status-pill').style.display = 'none';
     if (recInterval) clearInterval(recInterval);
@@ -1336,9 +2407,13 @@ function pollTelemetry() {
 
         // ESP32 Pod Connection Status
         const podOnline = d.pod_connected;
-        document.getElementById('sb-pod').textContent = podOnline ? (d.pod_ip || 'Online') : 'Waiting for link…';
-        document.getElementById('sb-pod').style.color = podOnline ? 'var(--green)' : 'var(--muted)';
-        document.getElementById('pod-dot').className = 'dot ' + (podOnline ? 'dot-green' : 'dot-grey');
+        const sbPod = document.getElementById('sb-pod');
+        if (sbPod) {
+            sbPod.textContent = podOnline ? 'Ready · Active' : 'Waiting for link…';
+            sbPod.style.color = podOnline ? 'var(--green)' : 'var(--muted)';
+        }
+        const podDot = document.getElementById('pod-dot');
+        if (podDot) podDot.className = 'dot ' + (podOnline ? 'dot-green' : 'dot-grey');
 
         // Wi-Fi Network Status
         const wifiLabel = document.getElementById('wifi-label');
@@ -1360,9 +2435,11 @@ function pollTelemetry() {
                 currentSubject = d.subject;
                 setSubject(d.subject, false);
 
-                // Show NFC flash banner
+                // Show NFC flash banner & Fullscreen Teacher Greeting Modal
+                showTeacherGreeting(d.subject);
                 const banner = document.getElementById('nfc-banner');
-                document.getElementById('nfc-banner-name').textContent = d.subject + ' Faculty';
+                const prof = TEACHER_PROFILES[d.subject] || { name: `${d.subject} Faculty`, dept: `${d.subject.toUpperCase()} · UNLOCKED` };
+                document.getElementById('nfc-banner-name').textContent = prof.name;
                 document.getElementById('nfc-banner-tag').textContent = d.subject.toUpperCase() + ' · UNLOCKED';
                 banner.classList.add('active');
                 setTimeout(() => banner.classList.remove('active'), 4500);
@@ -1372,7 +2449,7 @@ function pollTelemetry() {
         // Recording synchronization
         if (d.recording_video && !isRecording) {
             isRecording = true;
-            document.getElementById('rec-mode-label').textContent = 'LIVE 4K VIDEO RECORDING';
+            document.getElementById('rec-mode-label').textContent = 'LIVE 1080P VIDEO RECORDING';
             startRecOverlay();
         } else if (d.recording_audio && !isRecording) {
             isRecording = true;
@@ -1461,7 +2538,106 @@ function unlockScreensaver() {
 });
 resetIdle();
 
-// Initialize default state
+// ── WIRELESS SLIDE BEAM MODAL CONTROLLER ─────────────────────
+let beamPollTimer = null;
+let podCustomHost = localStorage.getItem('veronica_beam_host') || '';
+
+function getPodEffectiveHost() {
+    if (podCustomHost) return podCustomHost;
+    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+    }
+    return '';
+}
+
+function promptPodBeamHost() {
+    const cur = podCustomHost || (document.getElementById('beam-modal-url') ? document.getElementById('beam-modal-url').innerText.replace(/^https?:\/\//, '').replace(/\/beam$/, '') : '');
+    const updated = prompt('Enter your computer/Pi Wi-Fi IP address or hostname:\n(Phone must reach this IP on your Wi-Fi)', cur);
+    if (updated !== null) {
+        podCustomHost = updated.trim();
+        if (podCustomHost) {
+            localStorage.setItem('veronica_beam_host', podCustomHost);
+        } else {
+            localStorage.removeItem('veronica_beam_host');
+        }
+        checkBeamModalStatus(true);
+    }
+}
+
+function openBeamModal() {
+    const modal = document.getElementById('beam-modal');
+    if (modal) modal.style.display = 'flex';
+    checkBeamModalStatus(true);
+    if (!beamPollTimer) beamPollTimer = setInterval(checkBeamModalStatus, 1500);
+    resetIdle();
+}
+function closeBeamModal() {
+    const modal = document.getElementById('beam-modal');
+    if (modal) modal.style.display = 'none';
+    if (beamPollTimer) {
+        clearInterval(beamPollTimer);
+        beamPollTimer = null;
+    }
+    resetIdle();
+}
+function checkBeamModalStatus(forceQrRefresh = false) {
+    const effHost = getPodEffectiveHost();
+    const query = effHost ? ('?host=' + encodeURIComponent(effHost)) : '';
+
+    fetch('/api/beam/status' + query)
+        .then(r => r.json())
+        .then(data => {
+            if (data.beam_url) {
+                const urlEl = document.getElementById('beam-modal-url');
+                if (urlEl) urlEl.innerText = data.beam_url;
+            }
+            if (data.wifi_ssid) {
+                const wifiEl = document.getElementById('modal-wifi-label');
+                if (wifiEl) wifiEl.innerText = data.wifi_ssid;
+            }
+            const qrImg = document.getElementById('beam-modal-qr');
+            if (qrImg) {
+                const desiredQr = '/api/beam/qr.svg' + (data.host ? ('?host=' + encodeURIComponent(data.host)) : query);
+                if (forceQrRefresh || !qrImg.getAttribute('data-loaded')) {
+                    qrImg.src = desiredQr;
+                    qrImg.setAttribute('data-loaded', 'true');
+                }
+            }
+
+            const stateBox = document.getElementById('beam-card-state');
+            const iconEl = document.getElementById('beam-state-icon');
+            const titleEl = document.getElementById('beam-state-title');
+            const descEl = document.getElementById('beam-state-desc');
+            const btnOpen = document.getElementById('beam-btn-open');
+            const btnDisc = document.getElementById('beam-btn-discard');
+            if (data.active && data.deck) {
+                if (stateBox) stateBox.classList.add('ready');
+                if (iconEl) iconEl.innerHTML = '<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+                if (titleEl) titleEl.innerText = data.deck.filename || 'Lecture Presentation';
+                if (descEl) descEl.innerText = 'Slide deck received and ready! Tap below to project in fullscreen.';
+                if (btnOpen) btnOpen.classList.remove('disabled');
+                if (btnDisc) btnDisc.style.display = 'flex';
+            } else {
+                if (stateBox) stateBox.classList.remove('ready');
+                if (iconEl) iconEl.innerHTML = '<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 6a6 6 0 0 1 6 6"></path><path d="M12 10a2 2 0 0 1 2 2"></path><circle cx="12" cy="14" r="1"></circle><path d="M12 15v7"></path><path d="M8 22h8"></path></svg>';
+                if (titleEl) titleEl.innerText = 'Awaiting Slide Transmission…';
+                if (descEl) descEl.innerText = 'Scan the QR code on the left to cast PPT / PDF slides without a laptop.';
+                if (btnOpen) btnOpen.classList.add('disabled');
+                if (btnDisc) btnDisc.style.display = 'none';
+            }
+        })
+        .catch(err => console.warn('Beam modal status error:', err));
+}
+function clearBeamModalDeck() {
+    if (!confirm('Discard current beamed slides?')) return;
+    fetch('/api/beam/clear', { method: 'POST' })
+        .then(r => r.json())
+        .then(() => checkBeamModalStatus())
+        .catch(err => console.error(err));
+}
+
+// Initialize default state & quick launch bookmarks
+loadBookmarks();
 goSlide(0);
 </script>
 </body>

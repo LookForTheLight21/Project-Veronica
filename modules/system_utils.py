@@ -83,16 +83,41 @@ def shutdown_system():
 def watchdog_loop():
     from camera import start_video_audio, start_audio_only, compile_and_publish_session_pdf
 
-    while True:
-        # 1. Recover crashed video recording
-        if state.recording and (state.ffmpeg_proc is None or state.ffmpeg_proc.poll() is not None):
-            send_telegram("🛡️ Watchdog: video crashed — restarting…")
-            start_video_audio()
+    consecutive_video_crashes = 0
+    consecutive_audio_crashes = 0
+    MAX_CRASH_RETRIES = 3
 
-        # 2. Recover crashed audio recording
+    while True:
+        # 1. Recover crashed video recording (with retry limit to prevent infinite restart loop)
+        if state.recording and (state.ffmpeg_proc is None or state.ffmpeg_proc.poll() is not None):
+            consecutive_video_crashes += 1
+            if consecutive_video_crashes <= MAX_CRASH_RETRIES:
+                print(f"🛡️ Watchdog: video crashed (recovery attempt {consecutive_video_crashes}/{MAX_CRASH_RETRIES}) — restarting…")
+                start_video_audio()
+            else:
+                send_telegram("⚠️ Something went wrong with video recording. Please contact the developer.")
+                with state.state_lock:
+                    state.recording = False
+                    state.ffmpeg_proc = None
+                consecutive_video_crashes = 0
+        elif state.recording and state.ffmpeg_proc and state.ffmpeg_proc.poll() is None:
+            consecutive_video_crashes = 0
+
+        # 2. Recover crashed audio recording (with retry limit)
         elif state.audio_recording and (state.audio_proc is None or state.audio_proc.poll() is not None):
-            send_telegram("🛡️ Watchdog: audio crashed — restarting…")
-            start_audio_only()
+            consecutive_audio_crashes += 1
+            if consecutive_audio_crashes <= MAX_CRASH_RETRIES:
+                print(f"🛡️ Watchdog: audio crashed (recovery attempt {consecutive_audio_crashes}/{MAX_CRASH_RETRIES}) — restarting…")
+                start_audio_only()
+            else:
+                send_telegram("⚠️ Something went wrong with audio recording. Please contact the developer.")
+                with state.state_lock:
+                    state.audio_recording = False
+                    state.audio_proc = None
+                    state.audio_is_priority = False
+                consecutive_audio_crashes = 0
+        elif state.audio_recording and state.audio_proc and state.audio_proc.poll() is None:
+            consecutive_audio_crashes = 0
 
         # 3. Inactivity Auto-Flush: If 20 minutes pass after last photo (e.g. final class of the day),
         # automatically wrap up and publish the lecture PDF so notes are never stranded!
@@ -104,7 +129,7 @@ def watchdog_loop():
                     state.session_photos = []
                     state.last_photo_time = 0.0
 
-                send_telegram(f"⏰ Session Timeout (Class Ended): Auto-compiling PDF notes for [{idle_subj}]…")
+                print(f"⏰ Session Timeout (Class Ended): Auto-compiling PDF notes for [{idle_subj}]…")
                 threading.Thread(
                     target=compile_and_publish_session_pdf,
                     args=(idle_photos, idle_subj),

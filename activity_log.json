@@ -1,0 +1,685 @@
+{
+  "Physics": {
+    "total_photos": 23,
+    "total_videos": 13,
+    "total_audios": 6,
+    "subject_changes": 24,
+    "daily": {
+      "2026-11-22": {
+        "photos": 3,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:14"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:14"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:20"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:23"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:26"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:27"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:30"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:31"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:35"
+          },
+          {
+            "type": "subject_set",
+            "time": "23:03"
+          },
+          {
+            "type": "photo",
+            "time": "23:03"
+          },
+          {
+            "type": "photo",
+            "time": "23:03"
+          },
+          {
+            "type": "photo",
+            "time": "23:04"
+          }
+        ],
+        "subject_changes": 10
+      },
+      "2026-11-23": {
+        "photos": 6,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:30"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:31"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:31"
+          },
+          {
+            "type": "photo",
+            "time": "21:31"
+          },
+          {
+            "type": "photo",
+            "time": "21:31"
+          },
+          {
+            "type": "video_start",
+            "time": "21:32"
+          },
+          {
+            "type": "subject_set",
+            "time": "22:50"
+          },
+          {
+            "type": "photo",
+            "time": "22:50"
+          },
+          {
+            "type": "photo",
+            "time": "22:52"
+          },
+          {
+            "type": "photo",
+            "time": "22:52"
+          },
+          {
+            "type": "photo",
+            "time": "22:52"
+          }
+        ],
+        "subject_changes": 4
+      },
+      "2026-11-24": {
+        "photos": 14,
+        "videos": 12,
+        "audios": 6,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "01:09"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:10"
+          },
+          {
+            "type": "photo",
+            "time": "01:10"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:13"
+          },
+          {
+            "type": "photo",
+            "time": "01:13"
+          },
+          {
+            "type": "photo",
+            "time": "01:13"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:14"
+          },
+          {
+            "type": "photo",
+            "time": "01:14"
+          },
+          {
+            "type": "photo",
+            "time": "01:14"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:18"
+          },
+          {
+            "type": "photo",
+            "time": "01:18"
+          },
+          {
+            "type": "video_start",
+            "time": "01:18"
+          },
+          {
+            "type": "video_start",
+            "time": "01:18"
+          },
+          {
+            "type": "video_start",
+            "time": "01:18"
+          },
+          {
+            "type": "video_start",
+            "time": "01:19"
+          },
+          {
+            "type": "video_start",
+            "time": "01:19"
+          },
+          {
+            "type": "video_start",
+            "time": "01:19"
+          },
+          {
+            "type": "audio_start",
+            "time": "01:20"
+          },
+          {
+            "type": "audio_start",
+            "time": "01:20"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:22"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:23"
+          },
+          {
+            "type": "photo",
+            "time": "01:23"
+          },
+          {
+            "type": "photo",
+            "time": "01:24"
+          },
+          {
+            "type": "video_start",
+            "time": "01:24"
+          },
+          {
+            "type": "audio_start",
+            "time": "01:24"
+          },
+          {
+            "type": "audio_start",
+            "time": "01:24"
+          },
+          {
+            "type": "photo",
+            "time": "01:27"
+          },
+          {
+            "type": "photo",
+            "time": "01:27"
+          },
+          {
+            "type": "video_start",
+            "time": "01:27"
+          },
+          {
+            "type": "audio_start",
+            "time": "01:27"
+          },
+          {
+            "type": "video_start",
+            "time": "01:27"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:34"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:36"
+          },
+          {
+            "type": "photo",
+            "time": "01:36"
+          },
+          {
+            "type": "photo",
+            "time": "01:36"
+          },
+          {
+            "type": "video_start",
+            "time": "01:36"
+          },
+          {
+            "type": "video_start",
+            "time": "01:36"
+          },
+          {
+            "type": "video_start",
+            "time": "01:37"
+          },
+          {
+            "type": "audio_start",
+            "time": "01:37"
+          },
+          {
+            "type": "subject_set",
+            "time": "14:39"
+          },
+          {
+            "type": "photo",
+            "time": "14:39"
+          },
+          {
+            "type": "photo",
+            "time": "14:39"
+          }
+        ],
+        "subject_changes": 10
+      }
+    }
+  },
+  "Computer Science": {
+    "total_photos": 2,
+    "total_videos": 4,
+    "total_audios": 0,
+    "subject_changes": 6,
+    "daily": {
+      "2026-11-22": {
+        "photos": 0,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:17"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:27"
+          },
+          {
+            "type": "subject_set",
+            "time": "22:58"
+          },
+          {
+            "type": "subject_set",
+            "time": "23:47"
+          },
+          {
+            "type": "video_start",
+            "time": "23:47"
+          }
+        ],
+        "subject_changes": 4
+      },
+      "2026-11-23": {
+        "photos": 2,
+        "videos": 3,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "photo",
+            "time": "00:01"
+          },
+          {
+            "type": "photo",
+            "time": "00:16"
+          },
+          {
+            "type": "video_start",
+            "time": "00:35"
+          },
+          {
+            "type": "subject_set",
+            "time": "00:38"
+          },
+          {
+            "type": "subject_set",
+            "time": "00:57"
+          },
+          {
+            "type": "video_start",
+            "time": "00:57"
+          },
+          {
+            "type": "video_start",
+            "time": "01:35"
+          }
+        ],
+        "subject_changes": 2
+      }
+    }
+  },
+  "Chemistry": {
+    "total_photos": 1,
+    "total_videos": 4,
+    "total_audios": 0,
+    "subject_changes": 14,
+    "daily": {
+      "2026-11-22": {
+        "photos": 1,
+        "videos": 4,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:17"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:30"
+          },
+          {
+            "type": "subject_set",
+            "time": "22:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "23:05"
+          },
+          {
+            "type": "video_start",
+            "time": "23:18"
+          },
+          {
+            "type": "video_start",
+            "time": "23:19"
+          },
+          {
+            "type": "video_start",
+            "time": "23:19"
+          },
+          {
+            "type": "photo",
+            "time": "23:20"
+          },
+          {
+            "type": "video_start",
+            "time": "23:20"
+          }
+        ],
+        "subject_changes": 4
+      },
+      "2026-11-23": {
+        "photos": 0,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "00:38"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:43"
+          }
+        ],
+        "subject_changes": 8
+      },
+      "2026-11-24": {
+        "photos": 0,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "01:10"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:21"
+          }
+        ],
+        "subject_changes": 2
+      }
+    }
+  },
+  "Test": {
+    "total_photos": 0,
+    "total_videos": 1,
+    "total_audios": 0,
+    "subject_changes": 0,
+    "daily": {
+      "2026-11-22": {
+        "photos": 0,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "video_start",
+            "time": "23:44"
+          }
+        ],
+        "subject_changes": 0
+      }
+    }
+  },
+  "Unassigned": {
+    "total_photos": 1,
+    "total_videos": 1,
+    "total_audios": 0,
+    "subject_changes": 0,
+    "daily": {
+      "2026-11-23": {
+        "photos": 1,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "video_start",
+            "time": "02:01"
+          },
+          {
+            "type": "photo",
+            "time": "02:01"
+          }
+        ],
+        "subject_changes": 0
+      },
+      "2026-11-24": {
+        "photos": 0,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [],
+        "subject_changes": 0
+      }
+    }
+  },
+  "Math": {
+    "total_photos": 0,
+    "total_videos": 1,
+    "total_audios": 0,
+    "subject_changes": 4,
+    "daily": {
+      "2026-11-23": {
+        "photos": 0,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          },
+          {
+            "type": "subject_set",
+            "time": "19:59"
+          }
+        ],
+        "subject_changes": 3
+      },
+      "2026-11-24": {
+        "photos": 0,
+        "videos": 1,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "01:22"
+          },
+          {
+            "type": "video_start",
+            "time": "01:22"
+          }
+        ],
+        "subject_changes": 1
+      }
+    }
+  },
+  "English": {
+    "total_photos": 8,
+    "total_videos": 3,
+    "total_audios": 1,
+    "subject_changes": 10,
+    "daily": {
+      "2026-11-23": {
+        "photos": 3,
+        "videos": 3,
+        "audios": 1,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "21:31"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:31"
+          },
+          {
+            "type": "subject_set",
+            "time": "21:32"
+          },
+          {
+            "type": "video_start",
+            "time": "21:32"
+          },
+          {
+            "type": "photo",
+            "time": "21:34"
+          },
+          {
+            "type": "video_start",
+            "time": "21:35"
+          },
+          {
+            "type": "subject_set",
+            "time": "22:53"
+          },
+          {
+            "type": "photo",
+            "time": "22:53"
+          },
+          {
+            "type": "photo",
+            "time": "22:53"
+          },
+          {
+            "type": "video_start",
+            "time": "22:54"
+          },
+          {
+            "type": "audio_start",
+            "time": "22:57"
+          }
+        ],
+        "subject_changes": 4
+      },
+      "2026-11-24": {
+        "photos": 5,
+        "videos": 0,
+        "audios": 0,
+        "sessions": [
+          {
+            "type": "subject_set",
+            "time": "01:12"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:13"
+          },
+          {
+            "type": "photo",
+            "time": "01:14"
+          },
+          {
+            "type": "photo",
+            "time": "01:14"
+          },
+          {
+            "type": "photo",
+            "time": "01:14"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:15"
+          },
+          {
+            "type": "photo",
+            "time": "01:15"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:23"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:31"
+          },
+          {
+            "type": "photo",
+            "time": "01:34"
+          },
+          {
+            "type": "subject_set",
+            "time": "01:34"
+          }
+        ],
+        "subject_changes": 6
+      }
+    }
+  }
+}

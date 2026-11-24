@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>Veronica Slide Viewer — Presentation Mode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+
+        /* ── FLOATING TOP PERSISTENT NAVIGATION BAR ── */
+        .viewer-nav {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-pill {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+        }
+
+        .nav-pill:active {
+            transform: scale(0.96);
+        }
+
+        .btn-exit {
+            background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%);
+            border-color: rgba(255, 107, 0, 0.6);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
+        }
+
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        .deck-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #38bdf8;
+            max-width: 240px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Slide Viewport */
+        .viewport {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            background: #111;
+        }
+
+        /* Standby Empty State */
+        .empty-state {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            text-align: center;
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── ALWAYS ACCESSIBLE FLOATING NAVIGATION CONTROLS ── -->
+    <header class="viewer-nav" id="viewer-nav">
+        <a href="/pi" class="nav-pill btn-exit" title="Return to Touchscreen Pod Dashboard">
+            <span>← Return to Pod Dashboard</span>
+        </a>
+
+        <div class="nav-pill" style="gap:8px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span class="deck-badge" id="deck-name">Loading Presentation…</span>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+            <button type="button" class="nav-pill btn-clear" onclick="clearAndExit()" style="display:inline-flex; align-items:center; gap:6px;" title="Clear temporary slides from pod and return to dashboard">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Finish &amp; Clear</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Slide PDF Frame -->
+    <iframe id="pdf-frame" class="viewport" src="" allowfullscreen></iframe>
+
+    <div class="empty-state" id="empty-state" style="display:none;">
+        <div style="display:flex; justify-content:center; margin-bottom:12px;">
+            <svg viewBox="0 0 24 24" width="54" height="54" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg>
+        </div>
+        <h2 style="font-size: 22px; font-weight: 800;">No Slides Currently Loaded</h2>
+        <p style="color: #94a3b8; font-size: 14px; max-width: 400px;">
+            Scan the Wireless Slide Beam QR code from the Pod dashboard to upload your PDF or PPT.
+        </p>
+        <a href="/pi" class="nav-pill btn-exit" style="margin-top: 12px;">
+            <span>← Back to Pod Dashboard</span>
+        </a>
+    </div>
+
+<script>
+    function loadCurrentDeck() {
+        fetch('/api/beam/status')
+            .then(r => r.json())
+            .then(d => {
+                if (d.active && d.deck && d.deck.pdf_url) {
+                    document.getElementById('deck-name').innerText = d.deck.filename || 'Lecture Slides';
+                    const frame = document.getElementById('pdf-frame');
+                    frame.src = d.deck.pdf_url + '#toolbar=0&navpanes=0&scrollbar=0';
+                    document.getElementById('empty-state').style.display = 'none';
+                    frame.style.display = 'block';
+                } else {
+                    document.getElementById('pdf-frame').style.display = 'none';
+                    document.getElementById('empty-state').style.display = 'flex';
+                }
+            })
+            .catch(() => {
+                document.getElementById('deck-name').innerText = 'Slide Viewer';
+            });
+    }
+
+    function clearAndExit() {
+        if (confirm('Finish presenting and clear temporary slides from the classroom pod?')) {
+            fetch('/api/beam/clear', { method: 'POST' })
+                .finally(() => {
+                    window.location.href = '/pi';
+                });
+        }
+    }
+
+    // Auto-dim navigation bar after 4 seconds of idle, tap anywhere to restore
+    let hideTimer = null;
+    function resetNavTimer() {
+        const nav = document.getElementById('viewer-nav');
+        nav.style.opacity = '1';
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+            nav.style.opacity = '0.35';
+        }, 4000);
+    }
+    window.addEventListener('mousemove', resetNavTimer);
+    window.addEventListener('touchstart', resetNavTimer);
+    window.addEventListener('click', resetNavTimer);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCurrentDeck();
+        resetNavTimer();
+    });
+</script>
+
+</body>
+</html>

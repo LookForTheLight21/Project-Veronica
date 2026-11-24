@@ -630,6 +630,7 @@
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('tab-diag', event)">⚡ Camera Studio &amp; Telemetry</button>
             <button class="tab-btn" onclick="switchTab('tab-cloud', event)">☁️ Cloud &amp; Telegram</button>
+            <button class="tab-btn" onclick="switchTab('tab-bookmarks', event)">🌐 Useful Sites &amp; Web Apps</button>
             <button class="tab-btn" onclick="switchTab('tab-nfc', event)">🏷️ NFC &amp; Subjects</button>
             <button class="tab-btn" onclick="switchTab('tab-keypad', event)">🎹 Keypad Matrix</button>
             <button class="tab-btn" onclick="switchTab('tab-system', event)">⚙️ System Tuning</button>
@@ -694,7 +695,7 @@
                                 <span id="feed-status-badge">SENSOR LIVE PREVIEW</span>
                             </div>
                             <div class="hud-pill">
-                                <span>MJPEG 4K UHD</span>
+                                <span>MJPEG 1080P FHD</span>
                                 <span style="opacity:0.4;">|</span>
                                 <span style="color:#34d399;">30 FPS</span>
                             </div>
@@ -790,25 +791,29 @@
                             </div>
                         </div>
 
-                        <!-- Live Simulated VU Audio Meter -->
-                        <div style="background:var(--inner-panel); padding:12px; border-radius:12px; margin-bottom:18px; border:1px solid var(--glass-border);">
+                        <!-- Live VU Audio Meter & Real Loopback Player -->
+                        <div style="background:var(--inner-panel); padding:14px; border-radius:12px; margin-bottom:18px; border:1px solid var(--glass-border);">
                             <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">
-                                <span>INPUT GAIN LEVEL</span>
-                                <span style="color:#34d399;" id="mic-db-text">-14 dBFS (Optimal)</span>
+                                <span>HARDWARE INPUT GAIN LEVEL</span>
+                                <span style="color:#34d399;" id="mic-db-text">Standby</span>
                             </div>
-                            <div style="display:flex; gap:3px; height:10px;">
-                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
-                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
-                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
-                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
-                                <div style="flex:1; background:#34d399; border-radius:3px;"></div>
-                                <div style="flex:1; background:#fbbf24; border-radius:3px;"></div>
-                                <div style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
-                                <div style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                            <div style="display:flex; gap:3px; height:12px;" id="vu-meter-bar">
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                                <div class="vu-seg" style="flex:1; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+                            </div>
+                            <div id="mic-audio-wrap" style="display:none; margin-top:12px;">
+                                <span style="font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">CAPTURED AUDIO PLAYBACK (2 SECONDS):</span>
+                                <audio id="mic-audio-player" controls style="width:100%; height:32px; border-radius:6px;"></audio>
                             </div>
                         </div>
 
-                        <button class="btn-action btn-primary" onclick="testAudioProbe()">🎙️ Test Mic Audio Loopback</button>
+                        <button class="btn-action btn-primary" id="btn-test-mic" onclick="testAudioProbe()">🎙️ Test Mic Audio Loopback (Record 2s)</button>
                     </div>
                 </div>
 
@@ -894,11 +899,18 @@
                         </div>
 
                         <div>
-                            <h3 style="font-size:14px; margin-bottom:14px; color:var(--text-primary); font-weight:800;">Google Drive Cloud Target</h3>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                                <h3 style="font-size:14px; margin:0; color:var(--text-primary); font-weight:800;">Google Drive Cloud Target</h3>
+                                <a href="https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf" target="_blank" class="btn-action btn-emerald" style="padding:4px 12px; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                    <span>📁 Open Classroom Drive Folder ↗</span>
+                                </a>
+                            </div>
                             <div class="form-group">
                                 <label class="form-label">Drive Target Folder ID</label>
                                 <input type="text" class="form-input" id="cfg-folder-id" value="12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf"/>
-                                <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:11px;">Classroom shared Google Drive folder</small>
+                                <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:11px;">
+                                    Folder Link: <a href="https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf" target="_blank" style="color:var(--accent-cyan); text-decoration:underline;">https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf</a>
+                                </small>
                             </div>
 
                             <div style="background:var(--inner-panel); border:1px solid var(--glass-border); padding:16px; border-radius:14px; margin-bottom:18px;">
@@ -906,10 +918,23 @@
                                     <span style="color:var(--text-muted);">OAuth Token Status:</span>
                                     <span style="color:var(--accent-brand); font-weight:700;" id="drive-token-status">Checking token.json...</span>
                                 </div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+                                    <span style="color:var(--text-muted);">Credentials Status:</span>
+                                    <span style="color:var(--accent-brand); font-weight:700;" id="drive-creds-status">Checking credentials.json...</span>
+                                </div>
                                 <div style="display:flex; justify-content:space-between; font-size:13px;">
                                     <span style="color:var(--text-muted);">Offline Spool Buffer:</span>
                                     <span style="color:var(--accent-brand); font-weight:700;" id="drive-spool-status">0 Pending Uploads</span>
                                 </div>
+                            </div>
+
+                            <div style="background:rgba(255,255,255,0.03); border:1px dashed var(--glass-border); border-radius:12px; padding:12px; margin-bottom:18px;">
+                                <label class="form-label" style="margin-bottom:6px;">Upload Google Cloud credentials.json</label>
+                                <div style="display:flex; gap:8px;">
+                                    <input type="file" id="creds-file-input" accept=".json" style="font-size:12px; color:var(--text-muted); flex:1;" />
+                                    <button class="btn-action btn-chrome" style="padding:4px 10px; font-size:12px;" onclick="uploadCredentialsFile()">Upload</button>
+                                </div>
+                                <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:10px;">Obtained from Google Cloud Console → APIs &amp; Services → Credentials</small>
                             </div>
 
                             <div style="display:flex; gap:10px;">
@@ -921,6 +946,54 @@
 
                     <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--glass-border); display:flex; justify-content:flex-end;">
                         <button class="btn-action btn-emerald" onclick="saveCloudConfig()">💾 Save Cloud Configuration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- TAB: USEFUL SITES & WEB APPS (Lectern Pod Bookmarks)          -->
+        <!-- ============================================================== -->
+        <div id="tab-bookmarks" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🌐 Teacher Lectern Useful Sites &amp; Web Apps</div>
+                    <button class="btn-action btn-emerald" onclick="saveAdminBookmarks()">💾 Save &amp; Sync to Lectern</button>
+                </div>
+                <div class="card-body">
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">
+                        Manage the quick-launch buttons that appear on Slide 3 of the Teacher Pod Touchscreen. Teachers can tap these to launch educational tools and resources.
+                    </p>
+
+                    <table class="admin-table" style="margin-bottom:24px;">
+                        <thead>
+                            <tr>
+                                <th style="width:70px;">Icon</th>
+                                <th>Site Name</th>
+                                <th>Target Web URL</th>
+                                <th style="width:110px;">Accent</th>
+                                <th style="width:140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookmarks-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                    Loading active web apps from Veronica Core...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Add New Bookmark Section -->
+                    <div style="background:var(--inner-panel); padding:18px; border-radius:14px; border:1px solid var(--glass-border);">
+                        <strong style="font-size:13px; color:var(--text-primary); display:block; margin-bottom:12px;">+ Add New Quick-Launch Web App</strong>
+                        <div style="display:grid; grid-template-columns: 80px 180px 1fr 100px auto; gap:10px; align-items:center;">
+                            <input type="text" id="new-bm-icon" class="admin-input" placeholder="Icon" value="🌐" style="text-align:center; font-size:18px;">
+                            <input type="text" id="new-bm-name" class="admin-input" placeholder="Name (e.g. Wikipedia)">
+                            <input type="url" id="new-bm-url" class="admin-input" placeholder="https://...">
+                            <input type="color" id="new-bm-color" class="admin-input" value="#38bdf8" style="padding:2px; height:38px; cursor:pointer;">
+                            <button class="btn-action btn-violet" onclick="addAdminBookmark()">+ Add Button</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1281,6 +1354,7 @@
             pollAdminTelemetry();
             setInterval(pollAdminTelemetry, 2000);
             loadAdminConfig();
+            loadAdminBookmarks();
         });
 
         function showToast(icon, title, msg) {
@@ -1404,17 +1478,181 @@
         }
 
         function testAudioProbe() {
-            showToast('🎙️', 'Probing Audio ALSA...', 'Checking recording hardware...');
+            const btn = document.getElementById('btn-test-mic');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = '🎙️ Recording 2s Hardware Sample...';
+            }
+            showToast('🎙️', 'Recording Audio Sample...', 'Capturing 2 seconds from hardware microphone...');
+            
             fetch('/api/admin/test_mic', { method: 'POST' })
                 .then(r => r.json().then(data => ({ ok: r.ok, data })))
                 .then(res => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = '🎙️ Test Mic Audio Loopback (Record 2s)';
+                    }
                     if (res.ok && res.data.status === 'ok') {
-                        showToast('🎙️', 'Mic Loopback Verified', res.data.message);
+                        const db = res.data.db_num !== undefined ? res.data.db_num : -20;
+                        document.getElementById('mic-db-text').innerText = `${res.data.rms_dbfs} (${res.data.gain_status})`;
+
+                        // Update dynamic VU meter bars
+                        const segments = document.querySelectorAll('#vu-meter-bar .vu-seg');
+                        // Map dB scale from -60 dB (0 bars) to -6 dB (8 bars)
+                        const activeBars = Math.max(1, Math.min(8, Math.round(((db + 60) / 54) * 8)));
+                        segments.forEach((seg, idx) => {
+                            if (idx < activeBars) {
+                                seg.style.background = idx >= 6 ? '#ef4444' : (idx >= 4 ? '#fbbf24' : '#34d399');
+                                seg.style.boxShadow = `0 0 8px ${idx >= 6 ? '#ef4444' : (idx >= 4 ? '#fbbf24' : '#34d399')}`;
+                            } else {
+                                seg.style.background = 'rgba(255, 255, 255, 0.1)';
+                                seg.style.boxShadow = 'none';
+                            }
+                        });
+
+                        // Show audio playback player
+                        const wrap = document.getElementById('mic-audio-wrap');
+                        const player = document.getElementById('mic-audio-player');
+                        if (wrap && player && res.data.audio_url) {
+                            player.src = res.data.audio_url + '?t=' + Date.now();
+                            wrap.style.display = 'block';
+                            player.play().catch(() => {});
+                        }
+
+                        showToast('🎙️', 'Microphone Verified', res.data.message);
                     } else {
                         showToast('⚠️', 'Microphone Offline', res.data.message || 'No ALSA capture device found.');
                     }
                 })
-                .catch(err => showToast('❌', 'Audio Probe Failed', err));
+                .catch(err => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = '🎙️ Test Mic Audio Loopback (Record 2s)';
+                    }
+                    showToast('❌', 'Audio Probe Failed', err);
+                });
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // 🌐 USEFUL SITES & WEB APPS MANAGEMENT
+        // ══════════════════════════════════════════════════════════════
+        let _adminBookmarks = [
+            { name: "Google", url: "https://www.google.com", icon: "🔍", color: "#4285f4" },
+            { name: "YouTube", url: "https://www.youtube.com", icon: "▶️", color: "#ef4444" },
+            { name: "Gmail", url: "https://mail.google.com", icon: "✉️", color: "#ea4335" },
+            { name: "Gemini", url: "https://gemini.google.com", icon: "✨", color: "#8e75ff" },
+            { name: "Google Drive", url: "https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf", icon: "📁", color: "#10b981" }
+        ];
+
+        function loadAdminBookmarks() {
+            fetch('/api/admin/bookmarks')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.bookmarks && Array.isArray(data.bookmarks)) {
+                        _adminBookmarks = data.bookmarks;
+                        renderAdminBookmarks();
+                    }
+                })
+                .catch(() => renderAdminBookmarks());
+        }
+
+        function getBookmarkSvg(iconKey, color) {
+            if (!iconKey) iconKey = 'globe';
+            if (typeof iconKey === 'string' && iconKey.trim().startsWith('<svg')) {
+                return iconKey;
+            }
+            const c = color || 'currentColor';
+            const s = `style="width:20px; height:20px; stroke:${c}; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:inline-block; vertical-align:middle;"`;
+            const k = String(iconKey).toLowerCase();
+
+            if (k.includes('google') || k.includes('search') || k === '🔍') {
+                return `<svg viewBox="0 0 24 24" ${s}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+            }
+            if (k.includes('youtube') || k.includes('video') || k.includes('play') || k === '▶️' || k === '▶') {
+                return `<svg viewBox="0 0 24 24" ${s}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+            }
+            if (k.includes('gmail') || k.includes('mail') || k.includes('email') || k === '✉️' || k === '✉') {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+            }
+            if (k.includes('gemini') || k.includes('spark') || k.includes('ai') || k === '✨') {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.17-6.83l-2.83 2.83m-8 8l-2.83 2.83m0-13.66l2.83 2.83m8 8l2.83 2.83"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            }
+            if (k.includes('drive') || k.includes('folder') || k === '📁') {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+            }
+            if (k.includes('projector') || k.includes('monitor') || k.includes('screen') || k === '🖥️' || k === '🖥') {
+                return `<svg viewBox="0 0 24 24" ${s}><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+            }
+            if (k.includes('beam') || k.includes('phone') || k === '📲') {
+                return `<svg viewBox="0 0 24 24" ${s}><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg>`;
+            }
+            return `<svg viewBox="0 0 24 24" ${s}><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+        }
+
+        function renderAdminBookmarks() {
+            const tbody = document.getElementById('bookmarks-table-body');
+            if (!tbody) return;
+            if (_adminBookmarks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No bookmarks configured. Add one below.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = _adminBookmarks.map((bm, idx) => `
+                <tr>
+                    <td style="text-align:center;">${getBookmarkSvg(bm.icon || bm.name, bm.color)}</td>
+                    <td><strong style="color:var(--text-primary);">${bm.name}</strong></td>
+                    <td><span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-muted);">${bm.url}</span></td>
+                    <td>
+                        <span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:${bm.color || '#38bdf8'}; vertical-align:middle; margin-right:6px;"></span>
+                        <small style="font-family:monospace;">${bm.color || '#38bdf8'}</small>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            <a href="${bm.url}" target="_blank" class="btn-action btn-chrome" style="padding:4px 8px; font-size:11px; text-decoration:none;">↗ Open</a>
+                            <button class="btn-action btn-crimson" style="padding:4px 8px; font-size:11px;" onclick="deleteAdminBookmark(${idx})">✕</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addAdminBookmark() {
+            const icon = document.getElementById('new-bm-icon').value.trim() || '🌐';
+            const name = document.getElementById('new-bm-name').value.trim();
+            const url = document.getElementById('new-bm-url').value.trim();
+            const color = document.getElementById('new-bm-color').value || '#38bdf8';
+
+            if (!name || !url) {
+                showToast('⚠️', 'Missing Information', 'Please provide both a Name and URL for the bookmark.');
+                return;
+            }
+
+            _adminBookmarks.push({ icon, name, url, color });
+            renderAdminBookmarks();
+            saveAdminBookmarks();
+
+            document.getElementById('new-bm-name').value = '';
+            document.getElementById('new-bm-url').value = '';
+        }
+
+        function deleteAdminBookmark(idx) {
+            _adminBookmarks.splice(idx, 1);
+            renderAdminBookmarks();
+            saveAdminBookmarks();
+        }
+
+        function saveAdminBookmarks() {
+            fetch('/api/admin/bookmarks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookmarks: _adminBookmarks })
+            })
+            .then(r => r.json())
+            .then(data => {
+                showToast('💾', 'Bookmarks Synced', 'Quick-launch web apps updated on Teacher Pod.');
+            })
+            .catch(err => {
+                showToast('💾', 'Saved Locally', 'Bookmarks active in current session.');
+            });
         }
 
         function pingPod() {
@@ -1489,6 +1727,17 @@
                         } else {
                             tokenStatusEl.innerText = 'NOT CONFIGURED (token.json missing)';
                             tokenStatusEl.style.color = '#ff4b82';
+                        }
+                    }
+
+                    const credsStatusEl = document.getElementById('drive-creds-status');
+                    if (credsStatusEl) {
+                        if (c.DRIVE_CREDENTIALS_EXISTS) {
+                            credsStatusEl.innerText = 'PRESENT (credentials.json saved)';
+                            credsStatusEl.style.color = '#34d399';
+                        } else {
+                            credsStatusEl.innerText = 'NOT FOUND (credentials.json needed)';
+                            credsStatusEl.style.color = '#f59e0b';
                         }
                     }
 
@@ -1582,6 +1831,44 @@
                     }
                 })
                 .catch(err => showToast('❌', 'Verification Error', err));
+        }
+
+        function uploadCredentialsFile() {
+            const input = document.getElementById('creds-file-input');
+            if (!input || !input.files || input.files.length === 0) {
+                showToast('⚠️', 'File Required', 'Please select a credentials.json file to upload.');
+                return;
+            }
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonText = e.target.result;
+                    JSON.parse(jsonText); // validate JSON syntax
+                    fetch('/api/admin/upload_credentials', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ credentials_json: jsonText })
+                    })
+                    .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
+                    .then(res => {
+                        if (res.ok) {
+                            showToast('✅', 'Credentials Saved', res.data.message);
+                            const credsStatusEl = document.getElementById('drive-creds-status');
+                            if (credsStatusEl) {
+                                credsStatusEl.innerText = 'PRESENT (credentials.json saved)';
+                                credsStatusEl.style.color = '#34d399';
+                            }
+                        } else {
+                            showToast('❌', 'Upload Failed', res.data.message);
+                        }
+                    })
+                    .catch(err => showToast('❌', 'Upload Error', err));
+                } catch (err) {
+                    showToast('❌', 'Invalid JSON', 'The selected file is not a valid JSON document.');
+                }
+            };
+            reader.readAsText(file);
         }
 
         function flushSpoolQueue() {

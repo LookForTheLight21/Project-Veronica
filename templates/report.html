@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Veronica — Principal's Activity Ledger</title>
+    <title>Veronica — Principal's Academic Audit Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -15,387 +15,1072 @@
     <style>
         :root {
             --bg-base: #060913;
-            --surface-card: rgba(15, 23, 42, 0.65);
+            --surface-card: rgba(15, 23, 42, 0.7);
+            --surface-card-hover: rgba(22, 34, 60, 0.85);
             --surface-border: rgba(255, 255, 255, 0.08);
             --accent-cyan: #38bdf8;
+            --accent-orange: #ff6b00;
             --accent-indigo: #818cf8;
             --accent-green: #34d399;
+            --accent-pink: #f472b6;
+            --accent-red: #ef4444;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
         }
 
-        /* ☀️ DAY LIGHT MODE (Clean Pure White Canvas & Signature Orange) */
+        /* ☀️ DAY LIGHT MODE */
         [data-theme="light"] {
-            --bg-base: #ffffff;
+            --bg-base: #f8fafc;
             --surface-card: #ffffff;
+            --surface-card-hover: #f1f5f9;
             --surface-border: #e2e8f0;
-            --accent-cyan: #ff6b00; /* Signature High-Gloss Orange */
-            --accent-indigo: #ea580c;
+            --accent-cyan: #ff6b00; /* Signature Orange */
+            --accent-orange: #ea580c;
+            --accent-indigo: #4f46e5;
             --accent-green: #059669;
+            --accent-pink: #db2777;
             --text-primary: #0f172a;
-            --text-secondary: #334155;
+            --text-secondary: #475569;
             --text-muted: #64748b;
         }
-        [data-theme="light"] body {
-            background-color: #ffffff !important;
-            background-image: none !important;
-            color: #0f172a !important;
-        }
-        [data-theme="light"] .back-btn {
-            background: rgba(255, 255, 255, 0.88);
-            color: #0f172a;
-            border-color: rgba(0, 0, 0, 0.08);
-        }
-        [data-theme="light"] .metric-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: rgba(0, 0, 0, 0.08);
-            box-shadow: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
-        }
-        [data-theme="light"] .metric-val {
-            color: #0f172a;
-        }
-        [data-theme="light"] .table-card {
-            background: rgba(255, 255, 255, 0.92);
-            border-color: rgba(0, 0, 0, 0.08);
-            box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.1);
-        }
-        [data-theme="light"] .table-header {
-            background: rgba(241, 245, 249, 0.9);
-            border-bottom-color: rgba(0, 0, 0, 0.08);
-            color: #0f172a;
-        }
-        [data-theme="light"] .report-table th {
-            background: rgba(241, 245, 249, 0.8);
-            color: #64748b;
-            border-bottom-color: rgba(0, 0, 0, 0.08);
-        }
-        [data-theme="light"] .report-table td {
-            color: #0f172a;
-            border-bottom-color: rgba(0, 0, 0, 0.05);
-        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         body {
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-base);
             color: var(--text-primary);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 32px 24px;
+            padding: 24px;
             background-image: 
-                radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.07) 0%, transparent 40%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 107, 0, 0.03) 0%, transparent 40%);
+            background-attachment: fixed;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            width: 100%;
         }
 
+        /* ── TOP NAVIGATION ── */
         .top-nav {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 32px;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .back-btn {
-            display: flex;
+        .nav-btn {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 600;
-            background: var(--surface-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--surface-border);
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 9999px;
-            transition: all 0.2s ease;
+            background: var(--surface-card);
+            border: 1px solid var(--surface-border);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
-
-        .back-btn:hover {
+        .nav-btn:hover {
             color: var(--text-primary);
             border-color: var(--accent-cyan);
-            transform: translateX(-2px);
+            transform: translateY(-1px);
         }
 
-        .header-title {
-            font-size: 26px;
+        /* ── SECTION HEADINGS ── */
+        .page-title {
+            font-size: 24px;
             font-weight: 800;
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+        }
+        .page-sub {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+            line-height: 1.5;
         }
 
-        /* Metric Cards */
-        .metric-grid {
+        /* ══════════════════════════════════════════════════════════
+           STAGE 1: CLASSROOM SELECTOR (First View)
+        ══════════════════════════════════════════════════════════ */
+        .class-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
         }
 
-        @media (max-width: 900px) {
-            .metric-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .metric-card {
+        .class-card {
             background: var(--surface-card);
-            backdrop-filter: blur(24px);
+            border: 1.5px solid var(--surface-border);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .class-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+        .class-card.active-pilot {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(20, 32, 55, 0.85) 100%);
+        }
+        [data-theme="light"] .class-card.active-pilot {
+            border-color: rgba(255, 107, 0, 0.4);
+            background: #ffffff;
+        }
+
+        .class-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+        .badge-live {
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            color: var(--accent-green);
+        }
+        .badge-pending {
+            background: rgba(148, 163, 184, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: var(--text-muted);
+        }
+
+        .class-name {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        .class-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .class-enter-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.12s ease;
+        }
+        .class-enter-btn:active { transform: scale(0.97); }
+
+        /* ══════════════════════════════════════════════════════════
+           STAGE 2: CLASSROOM AUDIT DASHBOARD (Multi-Subject)
+        ══════════════════════════════════════════════════════════ */
+        #stage-dashboard { display: none; }
+
+        .class-bar {
+            background: var(--surface-card);
             border: 1px solid var(--surface-border);
             border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 20px;
         }
 
-        .metric-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
+        /* Subject Selector Pills */
+        .subject-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 24px;
         }
-
-        .metric-val {
-            font-size: 30px;
-            font-weight: 800;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: -1px;
-            color: #fff;
-        }
-
-        /* Table Card */
-        .table-card {
+        .subj-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 9999px;
             background: var(--surface-card);
-            backdrop-filter: blur(28px);
+            border: 1.5px solid var(--surface-border);
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .subj-tab:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-cyan);
+        }
+        .subj-tab.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(129, 140, 248, 0.18));
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+        }
+        [data-theme="light"] .subj-tab.active {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(234, 88, 12, 0.15));
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* ── TODAY'S USAGE NUMBERS (4 Stat Cards) ── */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .metric-box {
+            background: var(--surface-card);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: var(--accent-cyan);
+        }
+        .metric-box.orange::before { background: var(--accent-orange); }
+        .metric-box.green::before  { background: var(--accent-green); }
+        .metric-box.indigo::before { background: var(--accent-indigo); }
+        .metric-box.pink::before   { background: var(--accent-pink); }
+
+        .metric-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .metric-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+        .metric-sub {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+        }
+
+        /* ── LATEST UPLOADED MATERIAL CARD ── */
+        .latest-upload-card {
+            background: var(--surface-card);
+            border: 1.5px solid var(--surface-border);
+            border-radius: 18px;
+            padding: 22px 24px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .latest-upload-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0; width: 4px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-green));
+        }
+
+        .upload-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .upload-icon {
+            font-size: 36px;
+            line-height: 1;
+        }
+        .upload-details h3 {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .upload-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .upload-filename {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--surface-border);
+        }
+
+        .upload-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-drive {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            border-radius: 10px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: transform 0.12s ease;
+        }
+        .btn-drive:active { transform: scale(0.96); }
+
+        .btn-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--surface-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 700;
+            transition: all 0.12s ease;
+        }
+        .btn-preview:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* ── 7-DAY USAGE HISTORY TABLE ── */
+        .history-card {
+            background: var(--surface-card);
             border: 1px solid var(--surface-border);
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
-
-        .table-header {
-            padding: 20px 24px;
+        .history-header {
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--surface-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            background: rgba(0, 0, 0, 0.2);
+            flex-wrap: wrap;
+            gap: 10px;
         }
-
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            text-align: left;
-        }
-
-        .report-table th {
-            padding: 14px 24px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            background: rgba(0, 0, 0, 0.15);
-        }
-
-        .report-table td {
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            color: var(--text-primary);
-        }
-
-        .report-table tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .subj-badge {
-            font-weight: 700;
-            color: #fff;
-            display: inline-flex;
+        .history-title {
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-cyan);
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .history-table th {
+            padding: 14px 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--surface-border);
+            background: rgba(0, 0, 0, 0.12);
+        }
+        .history-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--surface-border);
+            font-size: 13px;
+        }
+        .history-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .history-table tr:last-child td {
+            border-bottom: none;
         }
 
-        .num-tag {
+        .day-badge {
+            font-weight: 800;
+            font-size: 13.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .day-badge.today {
+            color: var(--accent-cyan);
+        }
+        .today-pill {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+
+        .modes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .mode-chip {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--surface-border);
+            color: var(--text-secondary);
+        }
+        .mode-chip.active {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.3);
+            color: var(--accent-green);
+        }
+
+        .link-archive {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+        .link-archive:hover { text-decoration: underline; }
+
+        /* ── LIVE CAMERA SURVEILLANCE FEED ── */
+        .feed-card {
+            border: 2px solid rgba(239, 68, 68, 0.4);
+            box-shadow: 0 20px 50px rgba(239, 68, 68, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 28px;
+            display: none;
+            background: var(--surface-card);
+        }
+        .feed-header {
+            padding: 14px 20px;
+            background: rgba(239, 68, 68, 0.08);
+            border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        
-        <div class="top-nav">
-            <a href="/" class="back-btn">
-                <span>← Back to Command Center</span>
+
+<div class="container">
+
+    <!-- ── TOP BAR (Theme & Logout) ── -->
+    <header class="top-nav">
+        <a href="/" class="nav-btn">
+            <span>← Back to Command Center</span>
+        </a>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="nav-btn" onclick="toggleTheme()" id="theme-btn" style="color:#ff6b00; border-color:rgba(255,107,0,0.4);">
+                <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day Light Mode</span>
+            </button>
+            <a href="/logout" class="nav-btn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                <span>🔒 Logout</span>
             </a>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <button type="button" class="back-btn" onclick="toggleTheme()" id="theme-btn" style="cursor:pointer; color:#ff6b00; border-color:rgba(255,107,0,0.4); background:rgba(255,107,0,0.1); font-family:inherit;">
-                    <span id="theme-btn-icon">☀️</span> <span id="theme-btn-text">Day Light Mode</span>
-                </button>
-                <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-muted);">
-                    Audited by Project Veronica Edge-IoT
+        </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STAGE 1: CLASSROOM SELECTION (First View)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="stage-classes">
+        <h1 class="page-title">
+            <span>🏛️ Principal's Academic Surveillance &amp; Audit Portal</span>
+        </h1>
+        <p class="page-sub">
+            Select a classroom node to inspect real-time teaching modes, derivation counts, and past 7-day lecture material archives.
+        </p>
+
+        <div class="class-grid">
+            <!-- 1. Class X (Active) -->
+            <div class="class-card active-pilot" onclick="selectClassroom('Class X')">
+                <div>
+                    <div class="class-badge badge-live">
+                        <span>●</span> <span>Active Pilot Deployment</span>
+                    </div>
+                    <h2 class="class-name">Class X</h2>
+                    <p class="class-desc">
+                        Full Veronica Smart Lectern online. 5 Academic Subjects active with Kreo Owl 4K Ceiling Sensor, Multi-Page Notes Compiler, and Live Drive Sync.
+                    </p>
                 </div>
-                <a href="/logout" class="back-btn" style="color: #ff6e99; border-color: rgba(255, 110, 153, 0.3); padding: 8px 14px; font-size: 12px;">
-                    <span>🔒 Logout</span>
-                </a>
+                <button type="button" class="class-enter-btn">
+                    <span>Inspect Class X Materials ➔</span>
+                </button>
+            </div>
+
+            <!-- 2. Class IX (Phase 2) -->
+            <div class="class-card" onclick="alertPending('Class IX')">
+                <div>
+                    <div class="class-badge badge-pending">Phase 2 Scheduled</div>
+                    <h2 class="class-name">Class IX</h2>
+                    <p class="class-desc">
+                        Hardware installation scheduled for Phase 2 expansion. Edge hub and optical sensors offline.
+                    </p>
+                </div>
+                <button type="button" class="nav-btn" style="justify-content:center; width:100%;">
+                    <span>Node Offline (Phase 2)</span>
+                </button>
+            </div>
+
+            <!-- 3. Class XI (Phase 2) -->
+            <div class="class-card" onclick="alertPending('Class XI')">
+                <div>
+                    <div class="class-badge badge-pending">Phase 2 Scheduled</div>
+                    <h2 class="class-name">Class XI</h2>
+                    <p class="class-desc">
+                        Advanced Science &amp; Mathematics lectern installation planned. Edge node offline.
+                    </p>
+                </div>
+                <button type="button" class="nav-btn" style="justify-content:center; width:100%;">
+                    <span>Node Offline (Phase 2)</span>
+                </button>
+            </div>
+
+            <!-- 4. Class XII (Phase 2) -->
+            <div class="class-card" onclick="alertPending('Class XII')">
+                <div>
+                    <div class="class-badge badge-pending">Phase 2 Scheduled</div>
+                    <h2 class="class-name">Class XII</h2>
+                    <p class="class-desc">
+                        Senior secondary lecture suite scheduled for Phase 2 hardware installation.
+                    </p>
+                </div>
+                <button type="button" class="nav-btn" style="justify-content:center; width:100%;">
+                    <span>Node Offline (Phase 2)</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STAGE 2: CLASS X DASHBOARD (Subject Tabs & Deep Dive)
+    ══════════════════════════════════════════════════════════ -->
+    <section id="stage-dashboard">
+
+        <!-- Classroom Header & Controls -->
+        <div class="class-bar">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button type="button" class="nav-btn" onclick="backToClassSelection()" title="Choose another classroom">
+                    <span>← Switch Class</span>
+                </button>
+                <div>
+                    <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>🏛️ Node: Class X</span>
+                        <span style="font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(52,211,153,0.15); color:var(--accent-green); border:1px solid rgba(52,211,153,0.3);">ONLINE</span>
+                    </h2>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;" id="portal-today-date">
+                        Academic Audit Ledger · Today
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button type="button" class="nav-btn" id="live-feed-btn" onclick="togglePrincipalFeed()" style="color:#ef4444; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.1);">
+                    <span style="width:8px; height:8px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444;"></span>
+                    <span id="live-feed-btn-text">🔴 Open Live Class Feed</span>
+                </button>
             </div>
         </div>
 
-        <div style="margin-bottom: 28px;">
-            <h1 class="header-title" style="flex-wrap: wrap;">
-                <span>🏛️ Principal's Academic &amp; Media Ledger</span>
-                <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: var(--accent-cyan); font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; letter-spacing: 0.5px; vertical-align: middle;">NODE: CLASS X (ACTIVE PILOT)</span>
-            </h1>
-            <p style="color:var(--text-secondary); font-size:14px; margin-top:6px;">
-                Verified tamper-resistant record of lectures conducted, blackboard derivations compiled, and lecture recordings produced in Class X.
-            </p>
+        <!-- 🔴 Collapsible Live Surveillance Feed Panel -->
+        <div class="feed-card" id="principal-feed-panel">
+            <div class="feed-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 10px #ef4444;"></span>
+                    <span style="font-weight:800; font-size:14px;">Class X Live Stream — Kreo Owl 4K Optical Sensor</span>
+                </div>
+                <button type="button" class="nav-btn" onclick="togglePrincipalFeed(false)" style="padding:4px 12px; font-size:11.5px;">
+                    <span>✕ Close Feed</span>
+                </button>
+            </div>
+            <div style="display:grid; grid-template-columns: 2fr 1fr; background:#000;">
+                <div style="position:relative; width:100%; min-height:360px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    <img src="" id="principal-live-img" alt="Class X Live Stream" style="width:100%; height:100%; object-fit:contain; max-height:450px;" onerror="this.onerror=null; this.src='/sample_board.svg';">
+                    <div style="position:absolute; bottom:12px; left:12px; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); padding:4px 10px; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#38bdf8;">
+                        STREAM: 1080P @ 30 FPS · CLASS X CEILING OPTICAL SENSOR
+                    </div>
+                </div>
+                <div style="padding:20px; background:var(--surface-card); display:flex; flex-direction:column; justify-content:space-between; gap:12px;">
+                    <div>
+                        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Active Class Subject</div>
+                        <div style="font-size:20px; font-weight:800; color:var(--accent-cyan); margin-top:4px;" id="feed-subj-name">PHYSICS</div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Kreo Owl 4K Ultra-Wide Feed</div>
+                    </div>
+                    <div style="padding:12px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid var(--surface-border); font-size:12.5px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                            <span>Chalkboard Snapshots:</span>
+                            <strong id="feed-snaps-count" style="color:var(--accent-cyan); font-family:'JetBrains Mono',monospace;">0</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>Recording State:</span>
+                            <strong id="feed-rec-state" style="color:var(--accent-green);">IDLE</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="nav-btn" onclick="triggerSnapshotFromPortal()" style="width:100%; justify-content:center; padding:10px; font-weight:800;">
+                            <span>📸 Snap Chalkboard Note</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Metrics -->
-        <div class="metric-grid">
-            <div class="metric-card">
-                <div class="metric-label">Total Subjects Logged</div>
-                <div class="metric-val" id="metric-classes" style="color:var(--accent-cyan);">0</div>
+        <!-- 📚 Academic Subject Selector Navigation Tabs -->
+        <nav class="subject-nav" id="subject-tabs">
+            <button class="subj-tab active" onclick="selectSubject('Physics')">
+                <span>⚛️</span> <span>Physics</span>
+            </button>
+            <button class="subj-tab" onclick="selectSubject('Chemistry')">
+                <span>🧪</span> <span>Chemistry</span>
+            </button>
+            <button class="subj-tab" onclick="selectSubject('Mathematics')">
+                <span>📐</span> <span>Mathematics</span>
+            </button>
+            <button class="subj-tab" onclick="selectSubject('English')">
+                <span>📖</span> <span>English</span>
+            </button>
+            <button class="subj-tab" onclick="selectSubject('Computer Science')">
+                <span>💻</span> <span>Computer Science</span>
+            </button>
+        </nav>
+
+        <!-- ── SUBJECT DETAILS DEEP DIVE CONTAINER ── -->
+        <div id="subject-content">
+
+            <!-- 1. Today's Modes and Numeric Usage Counts -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h3 style="font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span id="subj-heading-icon">⚛️</span>
+                        <span id="subj-heading-text">Physics</span>
+                        <span style="font-size:13px; font-weight:600; color:var(--text-secondary);">— Today's Teaching Modes</span>
+                    </h3>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                        Verified counts of optical derivations snapped, video streams, audio sessions, and compiled PDFs.
+                    </div>
+                </div>
+                <div style="font-size:12px; font-weight:700; color:var(--accent-cyan);" id="subj-today-indicator">
+                    Today: 24 Nov 2026
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-label">Chalkboard Snaps</div>
-                <div class="metric-val" id="metric-snaps" style="color:#fff;">0</div>
+
+            <!-- 4 Stat Cards: Exact Counts for Today -->
+            <div class="metrics-row">
+                <!-- Snapshots -->
+                <div class="metric-box cyan">
+                    <div class="metric-title">
+                        <span>📸</span> <span>Chalkboard Derivations</span>
+                    </div>
+                    <div class="metric-number" id="card-photos">0</div>
+                    <div class="metric-sub">Optical high-res board snapshots</div>
+                </div>
+
+                <!-- Video -->
+                <div class="metric-box indigo">
+                    <div class="metric-title">
+                        <span>🎥</span> <span>Video Stream</span>
+                    </div>
+                    <div class="metric-number" id="card-videos">0</div>
+                    <div class="metric-sub">1080P overhead recordings</div>
+                </div>
+
+                <!-- Audio -->
+                <div class="metric-box orange">
+                    <div class="metric-title">
+                        <span>🎙️</span> <span>Audio Lectures</span>
+                    </div>
+                    <div class="metric-number" id="card-audios">0</div>
+                    <div class="metric-sub">Noise-cancelled mic sessions</div>
+                </div>
+
+                <!-- Notes PDF -->
+                <div class="metric-box green">
+                    <div class="metric-title">
+                        <span>📚</span> <span>Master Notes PDF</span>
+                    </div>
+                    <div class="metric-number" id="card-notes">0</div>
+                    <div class="metric-sub">Vectorized notes compiled</div>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-label">Compiled PDF Notebooks</div>
-                <div class="metric-val" id="metric-notes" style="color:var(--accent-green);">0</div>
+
+            <!-- 2. Access to Latest Uploaded Material Card -->
+            <div class="latest-upload-card" id="latest-material-card">
+                <div class="upload-info">
+                    <div class="upload-icon" id="latest-mat-icon">📄</div>
+                    <div class="upload-details">
+                        <div style="font-size:11px; font-weight:800; color:var(--accent-green); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">
+                            ✦ Latest Uploaded Material Access
+                        </div>
+                        <h3 id="latest-mat-title">Physics_LectureNotes_1124_0138.pdf</h3>
+                        <div class="upload-meta">
+                            <span>Status: <strong style="color:var(--accent-green);">Uploaded to Cloud Drive</strong></span>
+                            <span>•</span>
+                            <span class="upload-filename" id="latest-mat-tag">PDF · Vector Chalkboard Notes</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="upload-actions">
+                    <a href="https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf" target="_blank" class="btn-drive" id="btn-latest-drive">
+                        <span>🔗 Open in Google Drive ↗</span>
+                    </a>
+                    <a href="#" target="_blank" class="btn-preview" id="btn-latest-local">
+                        <span>⬇️ Preview / Download</span>
+                    </a>
+                </div>
             </div>
-            <div class="metric-card">
-                <div class="metric-label">Video Captures</div>
-                <div class="metric-val" id="metric-videos" style="color:var(--accent-indigo);">0</div>
-            </div>
-        </div>
 
-        <!-- Table -->
-        <div class="table-card">
-            <div class="table-header">
-                <div style="font-weight:700; font-size:14px;">Academic Ledger Records</div>
-                <a href="/report/download" class="back-btn" style="padding: 8px 14px; font-size: 12px; text-decoration: none;">
-                    <span>📥 Export JSON Audit Log</span>
-                </a>
-            </div>
-
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th>Subject Name</th>
-                        <th>Classroom Date</th>
-                        <th>Derivations Snapped</th>
-                        <th>Compiled Notes</th>
-                        <th>Video Capture</th>
-                        <th>Handover Status</th>
-                    </tr>
-                </thead>
-                <tbody id="report-table-body">
-                    <tr>
-                        <td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">
-                            Loading verified audit entries...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-    </div>
-
-    <script>
-        // ☀️ THEME ENGINE
-        function toggleTheme() {
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            if (isLight) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('veronica_theme', 'dark');
-                updateThemeButton(false);
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('veronica_theme', 'light');
-                updateThemeButton(true);
-            }
-        }
-
-        function updateThemeButton(isLight) {
-            const icon = document.getElementById('theme-btn-icon');
-            const text = document.getElementById('theme-btn-text');
-            if (icon && text) {
-                icon.innerText = isLight ? '🌙' : '☀️';
-                text.innerText = isLight ? 'Night Mode' : 'Day Light Mode';
-            }
-        }
-
-        function loadReportData() {
-            fetch('/api/report_data')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('metric-classes').innerText = data.total_classes;
-                    document.getElementById('metric-snaps').innerText = data.total_photos;
-                    document.getElementById('metric-notes').innerText = data.total_notes;
-                    document.getElementById('metric-videos').innerText = data.total_videos;
-
-                    const tbody = document.getElementById('report-table-body');
-                    if (!data.records || data.records.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">
-                            No archived lecture sessions logged yet.<br>
-                            <small style="opacity:0.7;">Tap an NFC card or snap chalkboard photos on the lectern to generate verified audit entries.</small>
-                        </td></tr>`;
-                        return;
-                    }
-
-                    const colors = ['#38bdf8', '#a78bfa', '#f472b6', '#34d399', '#fbbf24'];
-                    tbody.innerHTML = data.records.map((r, i) => `
+            <!-- 3. Last 7 Days Teaching Usage & Uploaded Archives -->
+            <div class="history-card">
+                <div class="history-header">
+                    <div class="history-title">
+                        <span>📊</span>
+                        <span>Last 7 Days Usage &amp; Daily Material Links</span>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted);">
+                        Audited teaching log with daily uploaded lecture links
+                    </div>
+                </div>
+                <table class="history-table">
+                    <thead>
                         <tr>
-                            <td>
-                                <div class="subj-badge">
-                                    <div class="badge-dot" style="background:${colors[i % colors.length]};"></div>
-                                    <span>${r.subject}</span>
-                                </div>
-                            </td>
-                            <td>${r.date}</td>
-                            <td class="num-tag">${r.photos} Page(s)</td>
-                            <td style="color:var(--accent-cyan); font-family:monospace;">${r.subject}_Notes.pdf</td>
-                            <td style="color:${r.videos > 0 ? 'var(--accent-green)' : 'var(--text-muted)'};">${r.videos > 0 ? 'Recorded (' + r.videos + ')' : 'None'}</td>
-                            <td><span style="color:var(--accent-green);">● Auto-Compiled via NFC/Pod</span></td>
+                            <th style="width:22%;">Day &amp; Date</th>
+                            <th style="width:36%;">Teaching Modes &amp; Quantities</th>
+                            <th style="width:42%;">Day's Last Uploaded Material</th>
                         </tr>
-                    `).join('');
-                })
-                .catch(() => {
-                    const tbody = document.getElementById('report-table-body');
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">
-                        Unable to connect to Veronica activity logger service.
-                    </td></tr>`;
-                });
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div><!-- /#subject-content -->
+
+    </section>
+
+</div><!-- /.container -->
+
+<script>
+    let reportData = null;
+    let currentClass = 'Class X';
+    let currentSubject = 'Physics';
+    let isFeedOpen = false;
+    let feedPollTimer = null;
+
+    const SUBJECT_ICONS = {
+        'Physics': '⚛️',
+        'Chemistry': '🧪',
+        'Mathematics': '📐',
+        'English': '📖',
+        'Computer Science': '💻'
+    };
+
+    function toggleTheme() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const next = isLight ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('veronica_theme', next);
+        updateThemeBtn(!isLight);
+    }
+
+    function updateThemeBtn(isLight) {
+        const icon = document.getElementById('theme-btn-icon');
+        const text = document.getElementById('theme-btn-text');
+        if (isLight) {
+            icon.innerText = '🌙';
+            text.innerText = 'Night Dark Mode';
+        } else {
+            icon.innerText = '☀️';
+            text.innerText = 'Day Light Mode';
+        }
+    }
+
+    function alertPending(cName) {
+        alert(`${cName} Hardware Offline: Project Veronica Smart Lectern is scheduled for Phase 2 hardware installation. Please select active node: Class X.`);
+    }
+
+    function selectClassroom(className) {
+        currentClass = className;
+        document.getElementById('stage-classes').style.display = 'none';
+        document.getElementById('stage-dashboard').style.display = 'block';
+        loadPrincipalReport();
+    }
+
+    function backToClassSelection() {
+        togglePrincipalFeed(false);
+        document.getElementById('stage-dashboard').style.display = 'none';
+        document.getElementById('stage-classes').style.display = 'block';
+    }
+
+    function selectSubject(subjName) {
+        currentSubject = subjName;
+        // Update tab classes
+        document.querySelectorAll('.subj-tab').forEach(b => {
+            b.classList.toggle('active', b.innerText.includes(subjName));
+        });
+        renderActiveSubjectView();
+    }
+
+    function loadPrincipalReport() {
+        fetch('/api/report_data')
+            .then(r => r.json())
+            .then(data => {
+                reportData = data;
+                if (data.today_str) {
+                    document.getElementById('portal-today-date').innerText = `Academic Audit Ledger · ${data.today_str}`;
+                }
+                renderActiveSubjectView();
+            })
+            .catch(err => {
+                console.error('Failed to load report data:', err);
+            });
+    }
+
+    function renderActiveSubjectView() {
+        if (!reportData || !reportData.subjects) return;
+        const subjData = reportData.subjects[currentSubject];
+        if (!subjData) return;
+
+        const icon = SUBJECT_ICONS[currentSubject] || '📚';
+        document.getElementById('subj-heading-icon').innerText = icon;
+        document.getElementById('subj-heading-text').innerText = currentSubject;
+
+        // 1. Today's Exact Counts
+        const today = subjData.today || {};
+        document.getElementById('card-photos').innerText = today.photos || 0;
+        document.getElementById('card-videos').innerText = today.videos || 0;
+        document.getElementById('card-audios').innerText = today.audios || 0;
+        document.getElementById('card-notes').innerText = today.notes || 0;
+        document.getElementById('subj-today-indicator').innerText = `Today: ${today.formatted_date || reportData.today_str || 'Current Day'}`;
+
+        // 2. Latest Material Access Card
+        const latest = today.latest_material || subjData.global_latest_material;
+        const matCard = document.getElementById('latest-material-card');
+        const btnDrive = document.getElementById('btn-latest-drive');
+        const btnLocal = document.getElementById('btn-latest-local');
+
+        if (latest && latest.filename) {
+            matCard.style.display = 'flex';
+            document.getElementById('latest-mat-icon').innerText = latest.type === 'video' ? '🎥' : latest.type === 'audio' ? '🎙️' : '📄';
+            document.getElementById('latest-mat-title').innerText = latest.filename;
+            document.getElementById('latest-mat-tag').innerText = latest.label || (latest.type === 'video' ? 'Classroom Video Stream' : 'Compiled Notes PDF');
+            btnDrive.href = latest.cloud_url || 'https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf';
+            btnLocal.href = latest.local_url || '#';
+            btnLocal.style.display = latest.local_url ? 'inline-flex' : 'none';
+        } else {
+            document.getElementById('latest-mat-title').innerText = `No ${currentSubject} materials recorded yet today`;
+            document.getElementById('latest-mat-tag').innerText = 'Start class session on lectern or snap chalkboard photo to generate';
+            btnDrive.href = 'https://drive.google.com/drive/folders/12l5mNFGeAIcPHt-GZSti8KvHNAf-OENf';
+            btnLocal.style.display = 'none';
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const isLight = localStorage.getItem('veronica_theme') === 'light';
-            updateThemeButton(isLight);
-            loadReportData();
-        });
-    </script>
+        // 3. Last 7 Days History Table
+        const tbody = document.getElementById('history-table-body');
+        const historyList = subjData.last_7_days || [];
+
+        tbody.innerHTML = historyList.map(day => {
+            const isToday = day.is_today;
+            const hasActivity = day.has_activity;
+
+            // Modes chips
+            let modesHtml = '';
+            if (hasActivity && day.modes_used && day.modes_used.length > 0) {
+                modesHtml = `<div class="modes-list">` + 
+                    day.modes_used.map(m => `<span class="mode-chip active">${m}</span>`).join('') +
+                    `</div>`;
+            } else {
+                modesHtml = `<span style="color:var(--text-muted); font-size:12px;">No lectures held · Break/Weekend</span>`;
+            }
+
+            // Latest material link
+            let matHtml = '';
+            if (day.latest_material && day.latest_material.filename) {
+                const mat = day.latest_material;
+                const mIcon = mat.type === 'video' ? '🎥' : mat.type === 'audio' ? '🎙️' : '📄';
+                matHtml = `
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <span class="link-archive" title="${mat.filename}">
+                            <span>${mIcon}</span>
+                            <span style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${mat.filename}</span>
+                        </span>
+                        <a href="${mat.cloud_url}" target="_blank" class="nav-btn" style="padding:4px 10px; font-size:11px; color:var(--accent-green); border-color:rgba(52,211,153,0.3);">
+                            <span>Drive ↗</span>
+                        </a>
+                    </div>
+                `;
+            } else {
+                matHtml = `<span style="color:var(--text-muted); font-size:12px;">—</span>`;
+            }
+
+            return `
+                <tr>
+                    <td>
+                        <div class="day-badge ${isToday ? 'today' : ''}">
+                            <span>${day.day_name}, ${day.formatted_date.slice(0, 6)}</span>
+                            ${isToday ? '<span class="today-pill">TODAY</span>' : ''}
+                        </div>
+                    </td>
+                    <td>${modesHtml}</td>
+                    <td>${matHtml}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ── LIVE SURVEILLANCE FEED ────────────────────────────────────
+    function togglePrincipalFeed(forceState) {
+        if (forceState !== undefined) {
+            isFeedOpen = forceState;
+        } else {
+            isFeedOpen = !isFeedOpen;
+        }
+        const panel = document.getElementById('principal-feed-panel');
+        const img = document.getElementById('principal-live-img');
+        const btnText = document.getElementById('live-feed-btn-text');
+
+        if (isFeedOpen) {
+            panel.style.display = 'block';
+            img.src = '/video_feed?t=' + Date.now();
+            btnText.innerText = '✕ Close Live Feed';
+            pollClassXFeed();
+            if (!feedPollTimer) feedPollTimer = setInterval(pollClassXFeed, 2000);
+        } else {
+            panel.style.display = 'none';
+            img.src = ''; // Releases hardware camera cleanly
+            btnText.innerText = '🔴 Open Live Class Feed';
+            if (feedPollTimer) {
+                clearInterval(feedPollTimer);
+                feedPollTimer = null;
+            }
+        }
+    }
+
+    function pollClassXFeed() {
+        if (!isFeedOpen) return;
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(d => {
+                if (d.current_subject || d.subject) {
+                    const s = d.current_subject || d.subject;
+                    document.getElementById('feed-subj-name').innerText = s.toUpperCase();
+                }
+                if (d.session_pages !== undefined) {
+                    document.getElementById('feed-snaps-count').innerText = `${d.session_pages} Pages`;
+                }
+                const recEl = document.getElementById('feed-rec-state');
+                if (d.recording_video) {
+                    recEl.innerText = '🔴 1080P RECORDING';
+                    recEl.style.color = '#ef4444';
+                } else if (d.recording_audio) {
+                    recEl.innerText = '🎙️ AUDIO RECORDING';
+                    recEl.style.color = '#f59e0b';
+                } else {
+                    recEl.innerText = 'IDLE';
+                    recEl.style.color = '#34d399';
+                }
+            })
+            .catch(() => {});
+    }
+
+    function triggerSnapshotFromPortal() {
+        fetch('/cmd/photo')
+            .then(r => r.json())
+            .then(() => {
+                alert('📸 Discrete Derivation Snapshot captured by overhead Kreo Owl 4K camera!');
+                pollClassXFeed();
+                loadPrincipalReport();
+            })
+            .catch(() => alert('Trigger notice: Command sent to lectern.'));
+    }
+
+    function cleanupFeedOnUnload() {
+        const img = document.getElementById('principal-live-img');
+        if (img) img.src = '';
+    }
+    window.addEventListener('beforeunload', cleanupFeedOnUnload);
+    window.addEventListener('pagehide', cleanupFeedOnUnload);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const isLight = localStorage.getItem('veronica_theme') === 'light';
+        updateThemeBtn(isLight);
+    });
+</script>
 </body>
 </html>
