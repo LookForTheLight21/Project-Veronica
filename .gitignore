@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Runtime Data & Logs
+activity_log.json
+last_update_id.txt
+pending_uploads.json
+storage/
+*.log
+
+# Sensitive Credentials & OAuth Tokens
+credentials.json
+token.json
+.env
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
