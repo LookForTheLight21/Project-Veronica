@@ -622,7 +622,7 @@
     <div class="recording-overlay" id="rec-overlay">
         <div class="overlay-label" id="rec-label">🔴 LIVE VIDEO RECORDING</div>
         <div style="font-size:14px; font-weight:700; color:var(--text-muted); margin-bottom:14px; text-transform:uppercase; letter-spacing:1px;">
-            Subject: <span style="color:#fff;" id="rec-subj-pill">Physics</span> · Resolution: 3840×2160 @ 30 FPS
+            Subject: <span style="color:#fff;" id="rec-subj-pill">Physics</span> · Resolution: 1920×1080 @ 30 FPS
         </div>
         
         <!-- Live Picture-in-Picture View Deck -->
@@ -675,10 +675,13 @@
                 <span style="color:var(--text-muted);font-weight:400;margin-left:6px;" id="disp-hostname">veronica-hub.local</span>
             </div>
             
-            <!-- 📶 NETWORK ONLINE STATUS INDICATOR -->
+            <!-- 📶 NETWORK / POD ONLINE STATUS INDICATOR -->
             <div class="glass-pill" style="gap:8px;">
                 <span class="status-dot" id="net-status-dot" style="background:#3fb950; box-shadow:0 0 10px #3fb950;"></span>
-                <span style="font-weight:700;" id="net-status-label">📶 Loading…</span>
+                <span style="font-weight:700; display:flex; align-items:center; gap:5px;" id="net-status-label">
+                    <svg style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                    <span>Pod Online</span>
+                </span>
                 <span style="color:var(--text-muted); font-size:11px; font-family:'JetBrains Mono',monospace;" id="net-status-pod"></span>
             </div>
 
@@ -686,11 +689,6 @@
                 <div class="status-dot" id="main-status-dot"></div> 
                 <span id="main-status-text">System Idle</span>
             </div>
-
-            <!-- 📱 TEST 20M SLEEP BUTTON (FOR JUDGES & DEMOS) -->
-            <button type="button" class="glass-pill" onclick="triggerIdleScreenSaver()" style="cursor:pointer; font-family:inherit; color:#c084fc; border-color:rgba(192, 132, 252, 0.4); background:rgba(192, 132, 252, 0.1);">
-                <span>📱</span> <span>Test 20m Sleep</span>
-            </button>
 
             <!-- ☀️ THEME TOGGLE BUTTON -->
             <button type="button" class="glass-pill" onclick="toggleTheme()" id="theme-btn" style="cursor:pointer; font-family:inherit; color:#ff6b00; border-color:rgba(255, 107, 0, 0.4); background:rgba(255, 107, 0, 0.1);">
@@ -1111,7 +1109,7 @@
             if (mode === 'video') {
                 timerEl.style.color = '#ff4b82';
                 timerEl.style.textShadow = '0 0 40px rgba(255, 75, 130, 0.5)';
-                labelEl.innerHTML = '<span style="color:#ff4b82;">●</span> LIVE VIDEO RECORDING (3840×2160 @ 30 FPS)';
+                labelEl.innerHTML = '<span style="color:#ff4b82;">●</span> LIVE VIDEO RECORDING (1920×1080 @ 30 FPS)';
                 btnEl.style.borderColor = '#ff4b82';
                 btnEl.style.color = '#ff4b82';
                 btnEl.style.background = 'rgba(255, 75, 130, 0.15)';
@@ -1298,12 +1296,14 @@
                 const ssNet = document.getElementById('screensaver-net-pill');
                 const wifiName = data.wifi_ssid || 'Wi-Fi';
 
+                const wifiIconSvg = `<svg style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; vertical-align:middle; margin-right:4px;" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>`;
+
                 if (data.pod_connected) {
                     if (netDot) {
                         netDot.style.background = '#3fb950';
                         netDot.style.boxShadow = '0 0 10px #3fb950';
                     }
-                    if (netLbl) netLbl.innerText = '📶 Pod Online';
+                    if (netLbl) netLbl.innerHTML = `${wifiIconSvg}<span>Pod Online</span>`;
                     const rssiStr = data.pod_rssi ? ` | ${data.pod_rssi} dBm` : '';
                     if (netPod) netPod.innerText = `(${data.pod_ip || 'Connected'} | ${wifiName}${rssiStr})`;
                     if (ssNet) ssNet.innerText = `● Pod Online · ${data.pod_ip || ''} (${wifiName})`;
@@ -1312,7 +1312,7 @@
                         netDot.style.background = '#ff4b82';
                         netDot.style.boxShadow = '0 0 10px #ff4b82';
                     }
-                    if (netLbl) netLbl.innerText = '📶 Pod Offline';
+                    if (netLbl) netLbl.innerHTML = `${wifiIconSvg}<span>Pod Offline</span>`;
                     if (netPod) netPod.innerText = `(${wifiName} | Searching port 8765)`;
                     if (ssNet) ssNet.innerText = `○ Pod Offline · ${wifiName}`;
                 }

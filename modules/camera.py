@@ -12,10 +12,12 @@ import signal
 import datetime
 import subprocess
 import threading
+import shutil
 from PIL import Image
 
 import state
 from config import (
+    STORAGE_DIR,
     PHOTOS_DIR,
     VIDEOS_DIR,
     NOTES_DIR,
@@ -43,17 +45,37 @@ def take_photo_and_upload():
         print(msg)
         return msg
 
-    # Prevent Linux V4L2 Device Busy conflict if full video recording is rolling
-    if state.recording:
-        msg = "⚠️ Video recording is currently active on camera. Stop video recording (Key 2 or 7) before taking a high-res photo."
-        print(msg)
-        send_telegram(msg)
-        return msg
-
     ts = datetime.datetime.now().strftime("%m%d_%H%M%S")
     prefix = f"{state.current_subject}_" if state.current_subject else ""
     filename_only = f"{prefix}photo_{ts}.jpg"
     full_photo_path = os.path.join(PHOTOS_DIR, filename_only)
+
+    # If full video recording is rolling, grab frame instantaneously from live RAM buffer
+    if state.recording and os.path.exists("/dev/shm/live_frame.jpg"):
+        try:
+            shutil.copyfile("/dev/shm/live_frame.jpg", full_photo_path)
+            with state.state_lock:
+                state.session_photos.append(full_photo_path)
+                state.last_photo_time = time.time()
+                state.latest_photo_path = full_photo_path
+                page_num = len(state.session_photos)
+
+            msg = f"📸 Board Derivation #{page_num} Saved (from live video feed): {filename_only}"
+            print(msg)
+            log_activity("photo")
+            return msg
+        except Exception as e:
+            print(f"⚠️ Live frame photo grab failed: {e}")
+
+    # Prevent Linux V4L2 Device Busy conflict if full video recording is rolling
+    if state.recording:
+        msg = "⚠️ Video recording is currently active on camera."
+        print(msg)
+        return msg
+
+    # Pause live stream capture worker to release /dev/video0 for fswebcam
+    state.camera_pause_event.set()
+    time.sleep(0.15)
 
     # CPU-blended computational photography via fswebcam (5-frame averaging)
     cmd = [
@@ -84,28 +106,17 @@ def take_photo_and_upload():
         print(msg)
         log_activity("photo")
 
-        # Instant in-line preview for students watching the channel
-        subject_label = state.current_subject if state.current_subject else "General Session"
-        caption = (
-            f"📸 Chalkboard Note [Page {page_num}] — {subject_label}\n"
-            f"⏱️ {datetime.datetime.now().strftime('%d %b %Y, %H:%M')}\n"
-            f"💡 Note: All pages will be compiled into a single PDF when the next period begins."
-        )
-        threading.Thread(
-            target=send_telegram_photo,
-            args=(full_photo_path, caption),
-            daemon=True
-        ).start()
-
-        # NOTE: We do NOT upload raw JPEGs to Google Drive to preserve the free 15GB tier.
-        # Only the clean compiled PDF lecture notebook is uploaded to Drive at end of class!
+        # NOTE: We do NOT upload raw JPEGs to Telegram or Google Drive to prevent channel spam.
+        # All pages are neatly compiled into a single high-res PDF when class ends!
         return msg
 
     except Exception as e:
         err_msg = f"❌ Photo capture failed: {e}"
         print(err_msg)
-        send_telegram(err_msg)
+        send_telegram("⚠️ Something went wrong with the classroom camera. Please contact the developer.")
         return err_msg
+    finally:
+        state.camera_pause_event.clear()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -163,12 +174,7 @@ def compile_and_publish_session_pdf(photos_to_compile=None, subject_name=None):
         num_pages = len(valid_photos)
         print(f"✅ PDF Compiled successfully: {pdf_filename_only} ({num_pages} pages)")
 
-        caption = (
-            f"📚 Complete Lecture Notes: {subj}\n"
-            f"📄 {num_pages} Board Derivation Page(s)\n"
-            f"📅 Date: {datetime.datetime.now().strftime('%d %B %Y')}\n"
-            f"🏫 Project Veronica — Frugal Digital Classroom"
-        )
+        caption = f"📚 {subj} Lecture Notes — {num_pages} Pages"
 
         # 1. Dispatch PDF directly to Telegram students channel
         threading.Thread(
@@ -180,16 +186,29 @@ def compile_and_publish_session_pdf(photos_to_compile=None, subject_name=None):
         # 2. Upload compiled PDF to Google Drive under Month / Subject folder
         threading.Thread(
             target=upload_to_drive,
-            args=(full_pdf_path, FOLDER_ID),
+            args=(full_pdf_path, FOLDER_ID, False, subj),
             daemon=True
         ).start()
+
+        # 3. Securely clean up any temporary presentation slides beamed during this session
+        try:
+            slides_dir = os.path.join(STORAGE_DIR, "temp_slides")
+            if os.path.exists(slides_dir):
+                for f in os.listdir(slides_dir):
+                    fp = os.path.join(slides_dir, f)
+                    if os.path.isfile(fp):
+                        os.remove(fp)
+            if hasattr(state, "current_slide_deck"):
+                state.current_slide_deck = None
+        except Exception as se:
+            print(f"ℹ️ Clean session slides notice: {se}")
 
         return full_pdf_path
 
     except Exception as e:
         err_msg = f"❌ Failed to compile session PDF: {e}"
         print(err_msg)
-        send_telegram(err_msg)
+        send_telegram("⚠️ Something went wrong compiling today's lecture notes. Please contact the developer.")
         return None
 
 
@@ -214,7 +233,13 @@ def _build_video_cmd(filename):
         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-c:a", "aac", "-b:a", "128k",
         "-movflags", "+faststart",
-        filename
+        filename,
+        "-map", "0:v",
+        "-c:v", "mjpeg",
+        "-q:v", "3",
+        "-f", "image2",
+        "-update", "1",
+        "/dev/shm/live_frame.jpg"
     ]
 
 
@@ -223,6 +248,10 @@ def start_video_audio():
         msg = f"❌ Video recording failed: Camera {KERO_VIDEO_DEVICE} not detected."
         print(msg)
         return msg
+
+    # Pause live stream capture worker to release /dev/video0 for FFmpeg
+    state.camera_pause_event.set()
+    time.sleep(0.2)
 
     ts = datetime.datetime.now().strftime("%m%d_%H%M")
     prefix = f"{state.current_subject}_" if state.current_subject else ""
@@ -233,46 +262,90 @@ def start_video_audio():
     cmd = _build_video_cmd(full_path)
     print(f"▶️ Video cmd: {' '.join(cmd)}")
     try:
-        state.ffmpeg_proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        log_path = os.path.join(STORAGE_DIR, "ffmpeg_video.log")
+        ffmpeg_log = open(log_path, "w")
+        state.ffmpeg_proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=ffmpeg_log
+        )
+        # Give ffmpeg a brief moment to initialize drivers and check for startup failure
+        time.sleep(0.5)
+        poll = state.ffmpeg_proc.poll()
+        if poll is not None:
+            state.recording = False
+            state.ffmpeg_proc = None
+            state.camera_pause_event.clear()
+            err_details = ""
+            try:
+                with open(log_path, "r") as lf:
+                    err_lines = [l.strip() for l in lf.readlines() if l.strip()]
+                    err_details = " | ".join(err_lines[-3:])
+            except Exception:
+                pass
+            msg = f"❌ Video recording crashed on startup (code {poll}): {err_details}"
+            print(msg)
+            send_telegram("⚠️ Something went wrong with video recording. Please contact the developer.")
+            return msg
+
         state.recording = True
         log_activity("video_start")
         sub_msg = f" [{state.current_subject}]" if state.current_subject else ""
         msg = f"🎥 Recording started{sub_msg} → {filename_only}"
-        send_telegram(msg)
         return msg
     except Exception as e:
         msg = f"❌ Video start failed: {e}"
         print(msg)
-        send_telegram(msg)
+        send_telegram("⚠️ Something went wrong with video recording. Please contact the developer.")
         state.recording = False
         state.ffmpeg_proc = None
+        state.camera_pause_event.clear()
         return msg
 
 
 def stop_video_audio():
     if not (state.ffmpeg_proc and state.recording):
+        if state.recording:
+            state.recording = False
+        state.camera_pause_event.clear()
         return "⚠️ No active video recording."
+
+    proc = state.ffmpeg_proc
     try:
-        if state.ffmpeg_proc.stdin:
-            state.ffmpeg_proc.stdin.write(b"q\n")
-            state.ffmpeg_proc.stdin.flush()
-        state.ffmpeg_proc.wait(timeout=15)
-    except subprocess.TimeoutExpired:
-        state.ffmpeg_proc.kill()
+        if proc.poll() is None:
+            if proc.stdin:
+                try:
+                    proc.stdin.write(b"q\n")
+                    proc.stdin.flush()
+                except (BrokenPipeError, OSError):
+                    pass
+            try:
+                proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+        else:
+            print(f"ℹ️ Video process had already exited with code {proc.poll()}")
     except Exception as e:
         print(f"⚠️ Stop video exception: {e}")
     finally:
         state.recording = False
         state.ffmpeg_proc = None
+        # Resume live stream capture worker
+        state.camera_pause_event.clear()
 
     fname = state.raw_filename
+    current_subj = state.current_subject or "General"
     state.raw_filename = None
-    if fname and os.path.exists(fname):
-        threading.Thread(target=upload_to_drive, args=(fname, FOLDER_ID), daemon=True).start()
+    if fname and os.path.exists(fname) and os.path.getsize(fname) > 1024:
+        threading.Thread(
+            target=upload_to_drive,
+            args=(fname, FOLDER_ID, False, current_subj),
+            daemon=True
+        ).start()
         msg = f"🛑 Video stopped → uploading {os.path.basename(fname)}"
     else:
         msg = "🛑 Video stopped (no file generated)"
-    send_telegram(msg)
     return msg
 
 
@@ -304,18 +377,42 @@ def start_audio_only(priority=False):
     cmd = _build_audio_cmd(full_path)
     print(f"▶️ Audio cmd: {' '.join(cmd)}")
     try:
-        state.audio_proc = subprocess.Popen(cmd, stderr=subprocess.DEVNULL)
+        log_path = os.path.join(STORAGE_DIR, "ffmpeg_audio.log")
+        audio_log = open(log_path, "w")
+        state.audio_proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=audio_log
+        )
+        time.sleep(0.5)
+        poll = state.audio_proc.poll()
+        if poll is not None:
+            state.audio_recording = False
+            state.audio_proc = None
+            state.audio_is_priority = False
+            err_details = ""
+            try:
+                with open(log_path, "r") as lf:
+                    err_lines = [l.strip() for l in lf.readlines() if l.strip()]
+                    err_details = " | ".join(err_lines[-3:])
+            except Exception:
+                pass
+            msg = f"❌ Audio recording crashed on startup (code {poll}): {err_details}"
+            print(msg)
+            send_telegram("⚠️ Something went wrong with audio recording. Please contact the developer.")
+            return msg
+
         state.audio_recording = True
         log_activity("audio_start")
         icon = "🚨" if priority else "🎙️"
         sub_msg = f" [{state.current_subject}]" if state.current_subject else ""
         msg = f"{icon} Audio recording started{sub_msg} → {filename_only}"
-        send_telegram(msg)
         return msg
     except Exception as e:
         msg = f"❌ Audio start failed: {e}"
         print(msg)
-        send_telegram(msg)
+        send_telegram("⚠️ Something went wrong with audio recording. Please contact the developer.")
         state.audio_recording = False
         state.audio_proc = None
         state.audio_is_priority = False
@@ -325,13 +422,23 @@ def start_audio_only(priority=False):
 def stop_audio_only():
     if not state.audio_recording:
         return "⚠️ No active audio recording."
+    proc = state.audio_proc
     try:
-        if state.audio_proc and state.audio_proc.poll() is None:
-            state.audio_proc.send_signal(signal.SIGINT)
+        if proc and proc.poll() is None:
+            if proc.stdin:
+                try:
+                    proc.stdin.write(b"q\n")
+                    proc.stdin.flush()
+                except (BrokenPipeError, OSError):
+                    pass
+            else:
+                proc.send_signal(signal.SIGINT)
             try:
-                state.audio_proc.wait(timeout=10)
+                proc.wait(timeout=10)
             except subprocess.TimeoutExpired:
-                state.audio_proc.kill()
+                proc.kill()
+        elif proc:
+            print(f"ℹ️ Audio process had already exited with code {proc.poll()}")
     except Exception as e:
         print(f"⚠️ Stop audio exception: {e}")
     finally:
@@ -339,14 +446,18 @@ def stop_audio_only():
         state.audio_proc = None
 
     fname = state.audio_filename
+    current_subj = state.current_subject or "General"
     state.audio_filename = None
     was_priority = state.audio_is_priority
     state.audio_is_priority = False
-    if fname and os.path.exists(fname):
-        threading.Thread(target=upload_to_drive, args=(fname, FOLDER_ID, was_priority), daemon=True).start()
+    if fname and os.path.exists(fname) and os.path.getsize(fname) > 1024:
+        threading.Thread(
+            target=upload_to_drive,
+            args=(fname, FOLDER_ID, was_priority, current_subj),
+            daemon=True
+        ).start()
         msg = f"🛑 Audio stopped → uploading {os.path.basename(fname)}"
     else:
         msg = "🛑 Audio stopped (no file generated)"
-    send_telegram(msg)
     return msg
 

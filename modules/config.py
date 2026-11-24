@@ -6,6 +6,8 @@ Tier 2: Raspberry Pi 5 Overhead Edge Compute Hub (Kreo Owl 4K, Projector Display
 import os
 import json
 import shutil
+import subprocess
+import socket
 
 # ==============================================================================
 # 1. STORAGE PATHS (Organized directory hierarchy in project root)
@@ -30,6 +32,59 @@ POD_SERVER_PORT = 8765
 WIFI_SSID = "Poor_soul_5G"
 WIFI_PASSWORD = "yoyo123@"
 
+
+def get_lan_ip():
+    """
+    Detects the host's actual local routable LAN/Wi-Fi IP address.
+    Returns the network IP so teachers and admins can easily connect from a laptop or phone.
+    """
+    # 0. Try Linux kernel routing table for active route source
+    try:
+        out = subprocess.check_output(["ip", "route", "get", "1.1.1.1"], stderr=subprocess.DEVNULL, text=True, timeout=1).strip()
+        parts = out.split()
+        if "src" in parts:
+            src_idx = parts.index("src")
+            if src_idx + 1 < len(parts):
+                cand = parts[src_idx + 1].strip()
+                if cand and not cand.startswith("127."):
+                    return cand
+    except Exception:
+        pass
+
+    # 1. Try hostname -I (standard on Raspberry Pi OS / Debian Linux)
+    try:
+        out = subprocess.check_output(["hostname", "-I"], text=True, timeout=1).strip()
+        ips = [ip.strip() for ip in out.split() if ip.strip() and not ip.startswith("127.")]
+        if ips:
+            return ips[0]
+    except Exception:
+        pass
+
+    # 2. Try socket routing trick (works when default gateway or route exists)
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.settimeout(0.5)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            if ip and not ip.startswith("127."):
+                return ip
+        finally:
+            s.close()
+    except Exception:
+        pass
+
+    # 3. Try socket.gethostbyname
+    try:
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        if ip and not ip.startswith("127."):
+            return ip
+    except Exception:
+        pass
+
+    return "127.0.0.1"
+
 # ==============================================================================
 # 3. TELEGRAM BOT
 # ==============================================================================
@@ -47,13 +102,51 @@ TOKEN_PATH = os.path.join(BASE_DIR, "token.json")
 # ==============================================================================
 # 5. OVERHEAD KREO OWL 4K OPTICAL & AUDIO SENSORS (TIER 2 - PI 5 USB)
 # ==============================================================================
-FFMPEG_BIN        = shutil.which("ffmpeg") or "/usr/bin/ffmpeg"
+def _resolve_ffmpeg_bin():
+    # Prefer native system ffmpeg (/usr/bin/ffmpeg) which properly links system ALSA and PulseAudio.
+    # Static binaries in /usr/local/bin often lack system ALSA plugins and fail with [Errno 32] / ALSA errors.
+    for path in ["/usr/bin/ffmpeg", "/bin/ffmpeg"]:
+        if os.path.exists(path) and os.access(path, os.X_OK):
+            return path
+    found = shutil.which("ffmpeg")
+    return found or "/usr/bin/ffmpeg"
+
+
+def _detect_audio_device():
+    # If the system has /proc/asound/cards, check for Depstech webcam or USB audio
+    if os.path.exists("/proc/asound/cards"):
+        try:
+            with open("/proc/asound/cards", "r") as f:
+                content = f.read()
+            if "webcam" in content:
+                return "plughw:CARD=webcam,DEV=0"
+            import re
+            m = re.search(r"^\s*(\d+)\s+\[(\w+)\s*\]:\s*USB-Audio", content, re.MULTILINE)
+            if m:
+                return f"plughw:CARD={m.group(2)},DEV=0"
+        except Exception:
+            pass
+    return "plughw:CARD=webcam,DEV=0"
+
+
+FFMPEG_BIN        = _resolve_ffmpeg_bin()
 KERO_VIDEO_DEVICE = "/dev/video0"
-KERO_AUDIO_DEVICE = "plughw:CARD=webcam,DEV=0"
+KERO_AUDIO_DEVICE = _detect_audio_device()
 KERO_WIDTH        = 3840
 KERO_HEIGHT       = 2160
 KERO_FPS          = 30
 KERO_INPUT_FORMAT = "mjpeg"
+
+
+def enforce_anti_flicker_50hz(device=KERO_VIDEO_DEVICE):
+    """
+    Enforces 50Hz anti-flicker / anti-banding filter on camera hardware.
+    Cancels AC light flicker and prevents rolling horizontal bands ('bending light').
+    """
+    try:
+        subprocess.run(["v4l2-ctl", "-d", device, "-c", "power_line_frequency=1"], capture_output=True, timeout=2)
+    except Exception:
+        pass
 
 # ==============================================================================
 # 6. HARDWARE & ACOUSTIC PARAMETERS
@@ -104,6 +197,18 @@ NFC_MAP = {
 SECURE_CODE_SEQ = [1, 9, 2, 7]
 
 # ==============================================================================
+# 7.1 USEFUL SITES & WEB APPS (Lectern Quick Launch Bookmarks)
+# ==============================================================================
+DEFAULT_USEFUL_SITES = [
+    {"name": "Google", "url": "https://www.google.com", "icon": "search", "color": "#4285f4"},
+    {"name": "YouTube", "url": "https://www.youtube.com", "icon": "video", "color": "#ef4444"},
+    {"name": "Gmail", "url": "https://mail.google.com", "icon": "mail", "color": "#ea4335"},
+    {"name": "Gemini", "url": "https://gemini.google.com", "icon": "ai", "color": "#8e75ff"},
+    {"name": "Google Drive", "url": f"https://drive.google.com/drive/folders/{FOLDER_ID}", "icon": "drive", "color": "#10b981"},
+]
+USEFUL_SITES = list(DEFAULT_USEFUL_SITES)
+
+# ==============================================================================
 # 8. DIAGNOSTIC PORTAL CREDENTIALS
 # ==============================================================================
 ADMIN_USERNAME = "Chorie"
@@ -136,6 +241,7 @@ def get_all_config():
         "CHAT_ID": CHAT_ID,
         "ALLOWED_USERS": ALLOWED_USERS,
         "FOLDER_ID": FOLDER_ID,
+        "FFMPEG_BIN": FFMPEG_BIN,
         "KERO_VIDEO_DEVICE": KERO_VIDEO_DEVICE,
         "KERO_AUDIO_DEVICE": KERO_AUDIO_DEVICE,
         "KERO_WIDTH": KERO_WIDTH,
@@ -150,7 +256,10 @@ def get_all_config():
         "SECURE_CODE_SEQ": SECURE_CODE_SEQ,
         "ADMIN_USERNAME": ADMIN_USERNAME,
         "ADMIN_PASSWORD": ADMIN_PASSWORD,
+        "USEFUL_SITES": USEFUL_SITES,
         "DRIVE_TOKEN_EXISTS": os.path.exists(TOKEN_PATH),
+        "DRIVE_CREDENTIALS_EXISTS": os.path.exists(os.path.join(BASE_DIR, "credentials.json")),
+        "DRIVE_FOLDER_URL": f"https://drive.google.com/drive/folders/{FOLDER_ID}",
         "SPOOL_PENDING_COUNT": get_spool_count(),
     }
 
@@ -158,9 +267,10 @@ def get_all_config():
 def load_dynamic_config():
     """Overrides in-memory constants if config.json exists."""
     global WIFI_SSID, WIFI_PASSWORD, POD_SERVER_PORT, BOT_TOKEN, CHAT_ID, ALLOWED_USERS
-    global FOLDER_ID, KERO_VIDEO_DEVICE, KERO_AUDIO_DEVICE, KERO_WIDTH, KERO_HEIGHT
+    global FOLDER_ID, FFMPEG_BIN, KERO_VIDEO_DEVICE, KERO_AUDIO_DEVICE, KERO_WIDTH, KERO_HEIGHT
     global KERO_FPS, KERO_INPUT_FORMAT, BUZZER_FREQ, INACTIVITY_TIMEOUT_SEC
     global NFC_MAP, MODE_KEYS, SUBJECT_KEYS, SECURE_CODE_SEQ, ADMIN_USERNAME, ADMIN_PASSWORD
+    global USEFUL_SITES
 
     if not os.path.exists(CONFIG_JSON_PATH):
         return
@@ -176,6 +286,7 @@ def load_dynamic_config():
         if "CHAT_ID" in data: CHAT_ID = str(data["CHAT_ID"])
         if "ALLOWED_USERS" in data: ALLOWED_USERS = [str(x) for x in data["ALLOWED_USERS"]]
         if "FOLDER_ID" in data: FOLDER_ID = data["FOLDER_ID"]
+        if "FFMPEG_BIN" in data: FFMPEG_BIN = data["FFMPEG_BIN"]
         if "KERO_VIDEO_DEVICE" in data: KERO_VIDEO_DEVICE = data["KERO_VIDEO_DEVICE"]
         if "KERO_AUDIO_DEVICE" in data: KERO_AUDIO_DEVICE = data["KERO_AUDIO_DEVICE"]
         if "KERO_WIDTH" in data: KERO_WIDTH = int(data["KERO_WIDTH"])
@@ -193,6 +304,8 @@ def load_dynamic_config():
         if "SECURE_CODE_SEQ" in data: SECURE_CODE_SEQ = [int(x) for x in data["SECURE_CODE_SEQ"]]
         if "ADMIN_USERNAME" in data: ADMIN_USERNAME = data["ADMIN_USERNAME"]
         if "ADMIN_PASSWORD" in data: ADMIN_PASSWORD = data["ADMIN_PASSWORD"]
+        if "USEFUL_SITES" in data and isinstance(data["USEFUL_SITES"], list):
+            USEFUL_SITES = data["USEFUL_SITES"]
 
         print("⚙️ Dynamic configuration loaded successfully from config.json")
     except Exception as e:

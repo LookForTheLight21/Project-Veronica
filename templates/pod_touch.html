@@ -282,6 +282,16 @@
             transition: all 0.15s ease;
             color: var(--text-primary);
         }
+        .btn-head-icon svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: block;
+        }
         [data-theme="light"] .btn-head-icon {
             background: #ffffff;
             border-color: #cbd5e1;
@@ -1133,7 +1143,7 @@
 
             <!-- Action Toast Notification -->
             <div class="toast-banner" id="pod-toast">
-                <span id="toast-icon">⚡</span> <span id="toast-text">Action Dispatched</span>
+                <span id="toast-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span> <span id="toast-text">Action Dispatched</span>
             </div>
 
             <!-- 1. Screen Header (44px) -->
@@ -1145,7 +1155,7 @@
                     </div>
                     <span class="class-tag">Class X</span>
                     <div class="pages-pill" id="hdr-pages-pill">
-                        <span>📄</span> <span id="hdr-pages">0</span> pgs
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> <span id="hdr-pages">0</span> pgs
                     </div>
                 </div>
 
@@ -1156,11 +1166,11 @@
                     <div class="time-box" id="hdr-clock">10:30 PM</div>
                     <!-- Discrete Day/Night Toggle -->
                     <button type="button" class="btn-head-icon" onclick="toggleTheme()" title="Toggle Day Light Mode" id="theme-btn">
-                        ☀️
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                     </button>
                     <!-- Manual Sleep Lock Button -->
                     <button type="button" class="btn-head-icon" onclick="triggerSleep()" title="Lock / Sleep Display">
-                        🔒
+                        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     </button>
                 </div>
             </div>
@@ -1281,7 +1291,7 @@
                         <!-- 9. Physics -->
                         <button type="button" class="pod-btn theme-purple" onclick="selectSubjectManual('Physics', 'Prof. H. C. Verma', 'Department of Physics')">
                             <div class="btn-top-row">
-                                <span style="font-size:22px;">⚛️</span>
+                                <svg class="btn-svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(30 12 12)"></ellipse><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"></ellipse></svg>
                                 <span class="btn-pill-tag">NFC #1</span>
                             </div>
                             <div class="btn-info">
@@ -1293,7 +1303,7 @@
                         <!-- 10. Chemistry -->
                         <button type="button" class="pod-btn theme-cyan" onclick="selectSubjectManual('Chemistry', 'Dr. P. Mukherjee', 'Department of Chemistry')">
                             <div class="btn-top-row">
-                                <span style="font-size:22px;">🧪</span>
+                                <svg class="btn-svg-icon" viewBox="0 0 24 24"><path d="M9 3h6v11l3.5 6H5.5L9 14V3z"></path><line x1="9" y1="7" x2="15" y2="7"></line></svg>
                                 <span class="btn-pill-tag">NFC #2</span>
                             </div>
                             <div class="btn-info">
@@ -1305,7 +1315,7 @@
                         <!-- 11. Mathematics -->
                         <button type="button" class="pod-btn theme-blue" onclick="selectSubjectManual('Mathematics', 'Prof. S. Ramanujan', 'Mathematics Dept')">
                             <div class="btn-top-row">
-                                <span style="font-size:22px;">📐</span>
+                                <svg class="btn-svg-icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="4"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="4" x2="20" y2="20"></line></svg>
                                 <span class="btn-pill-tag">NFC #3</span>
                             </div>
                             <div class="btn-info">
@@ -1317,7 +1327,7 @@
                         <!-- 12. Computer Science -->
                         <button type="button" class="pod-btn theme-green" onclick="selectSubjectManual('Computer Science', 'Prof. Alan Turing', 'Computer Science Dept')">
                             <div class="btn-top-row">
-                                <span style="font-size:22px;">💻</span>
+                                <svg class="btn-svg-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 <span class="btn-pill-tag">NFC #4</span>
                             </div>
                             <div class="btn-info">
@@ -1349,7 +1359,7 @@
                 <div class="pod-rec-top">
                     <div class="pod-rec-beacon">
                         <span class="pod-rec-dot"></span>
-                        <span id="pod-rec-title">LIVE 4K RECORDING IN PROGRESS</span>
+                        <span id="pod-rec-title">LIVE 1080P RECORDING IN PROGRESS</span>
                     </div>
                     <div class="pod-rec-subj" id="pod-rec-subj">PHYSICS</div>
                 </div>
@@ -1358,7 +1368,7 @@
                 <div class="pod-rec-center">
                     <div class="pod-rec-label">RECORDING DURATION (ELAPSED)</div>
                     <div class="pod-rec-timer" id="pod-rec-timer">00:00</div>
-                    <div class="pod-rec-meta" id="pod-rec-meta">KREO OWL 4K OPTICAL FEED · 3840×2160 @ 30 FPS · H.264 MP4</div>
+                    <div class="pod-rec-meta" id="pod-rec-meta">KREO OWL 1080P OPTICAL FEED · 1920×1080 @ 30 FPS · H.264 MP4</div>
                 </div>
 
                 <!-- Giant Tactile STOP Button -->
@@ -1399,7 +1409,7 @@
             <div class="interlock-overlay" id="interlock-overlay">
                 <div class="interlock-card">
                     <div class="interlock-badge">
-                        <span>🛡️</span> <span>CONSOLE INTERLOCKED</span>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> <span>CONSOLE INTERLOCKED</span>
                     </div>
                     <div class="interlock-title">Subject Not Selected!</div>
                     <div class="interlock-desc">
@@ -1441,9 +1451,9 @@
 
             <!-- Quick NFC Tap Simulator for Demos/Judges -->
             <div style="display:flex; align-items:center; gap:5px;">
-                <button type="button" onclick="simulateNFCTap('Physics')" class="btn-nfc-sim" title="Tap Prof. Verma's Card">🏷️ Tap NFC (Physics)</button>
-                <button type="button" onclick="simulateNFCTap('Chemistry')" class="btn-nfc-sim" title="Tap Dr. Mukherjee's Card">🧪 Chemistry</button>
-                <button type="button" onclick="simulateNFCTap('Lock')" class="btn-nfc-sim" style="border-color:#f59e0b; color:#f59e0b;" title="Simulate Student Lockout">🛡️ Lockout</button>
+                <button type="button" onclick="simulateNFCTap('Physics')" class="btn-nfc-sim" title="Tap Prof. Verma's Card"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:3px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Tap NFC (Physics)</button>
+                <button type="button" onclick="simulateNFCTap('Chemistry')" class="btn-nfc-sim" title="Tap Dr. Mukherjee's Card"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:3px;"><path d="M9 3h6v11l3.5 6H5.5L9 14V3z"></path></svg> Chemistry</button>
+                <button type="button" onclick="simulateNFCTap('Lock')" class="btn-nfc-sim" style="border-color:#f59e0b; color:#f59e0b;" title="Simulate Student Lockout"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:3px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Lockout</button>
             </div>
 
             <div><span>5V/2A USB-C</span></div>
@@ -1521,17 +1531,18 @@
             if (currentTheme === 'light') {
                 document.documentElement.removeAttribute('data-theme');
                 localStorage.setItem('veronica_theme', 'dark');
-                themeBtn.textContent = '☀️';
+                if (themeBtn) themeBtn.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
             } else {
                 document.documentElement.setAttribute('data-theme', 'light');
                 localStorage.setItem('veronica_theme', 'light');
-                themeBtn.textContent = '🌙';
+                if (themeBtn) themeBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
             }
             resetIdleTimer();
         }
 
         if (localStorage.getItem('veronica_theme') === 'light') {
-            document.getElementById('theme-btn').textContent = '🌙';
+            const tb = document.getElementById('theme-btn');
+            if (tb) tb.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
         }
 
         // ── 4. Clock Synchronizer ──────────────────────────────────
@@ -1565,10 +1576,39 @@
             } catch(e) {}
         }
 
+        function getToastSvg(icon) {
+            if (!icon) icon = 'bolt';
+            if (typeof icon === 'string' && icon.trim().startsWith('<svg')) return icon;
+            const s = 'style="width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:middle;"';
+            const k = String(icon).toLowerCase();
+            if (k.includes('shield') || k.includes('lock') || k.includes('🛡') || k.includes('🔒')) {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
+            }
+            if (k.includes('check') || k.includes('green') || k.includes('done') || k.includes('✅') || k.includes('🟢')) {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+            }
+            if (k.includes('photo') || k.includes('snap') || k.includes('cam') || k.includes('📸')) {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
+            }
+            if (k.includes('book') || k.includes('subj') || k.includes('pdf') || k.includes('📚') || k.includes('📘')) {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+            }
+            if (k.includes('stop') || k.includes('term') || k.includes('⏹')) {
+                return `<svg viewBox="0 0 24 24" ${s}><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>`;
+            }
+            if (k.includes('sync') || k.includes('reboot') || k.includes('🔁')) {
+                return `<svg viewBox="0 0 24 24" ${s}><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
+            }
+            if (k.includes('stats') || k.includes('chart') || k.includes('📊')) {
+                return `<svg viewBox="0 0 24 24" ${s}><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
+            }
+            return `<svg viewBox="0 0 24 24" ${s}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+        }
+
         function showToast(text, icon = '⚡') {
             const toast = document.getElementById('pod-toast');
             document.getElementById('toast-text').textContent = text;
-            document.getElementById('toast-icon').textContent = icon;
+            document.getElementById('toast-icon').innerHTML = getToastSvg(icon);
             toast.classList.add('show');
             setTimeout(() => { toast.classList.remove('show'); }, 2200);
         }
@@ -1715,7 +1755,7 @@
             if (type.indexOf('AUDIO') >= 0) {
                 meta.textContent = 'POD ROOM MICROPHONE · STEREO 48kHz · LIVE AUDIO ENCODING';
             } else {
-                meta.textContent = 'KREO OWL 4K OPTICAL FEED · 3840×2160 @ 30 FPS · H.264 MP4';
+                meta.textContent = 'KREO OWL 1080P OPTICAL FEED · 1920×1080 @ 30 FPS · H.264 MP4';
             }
 
             document.getElementById('pod-rec-overlay').classList.add('active');

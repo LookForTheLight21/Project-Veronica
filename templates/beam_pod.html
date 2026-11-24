@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>Veronica Slide Beam — Lectern Receiver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --bg: #05070a;
+            --surface: #0d1117;
+            --card: #121820;
+            --border: rgba(255, 255, 255, 0.1);
+            --cyan: #00f2fe;
+            --cyan-glow: rgba(0, 242, 254, 0.25);
+            --orange: #ff6b00;
+            --green: #34d399;
+            --green-glow: rgba(52, 211, 153, 0.3);
+            --muted: #8b949e;
+            --white: #f8fafc;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--white);
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        /* ── TOP PERSISTENT NAVIGATION BAR (50px) ── */
+        .topbar {
+            height: 50px;
+            background: rgba(13, 17, 23, 0.98);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 50;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%);
+            border: 1px solid rgba(255, 107, 0, 0.5);
+            border-radius: 999px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.35);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .btn-back:active { transform: scale(0.96); }
+
+        .topbar-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--cyan);
+            text-transform: uppercase;
+        }
+
+        .topbar-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        /* ── MAIN CONTENT (800×430 Viewport) ── */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: calc(100vh - 50px);
+            padding: 16px 20px;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* ── QR CODE CARD ── */
+        .qr-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .qr-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--orange));
+        }
+
+        .qr-frame {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px var(--cyan-glow);
+            display: inline-flex;
+            margin-bottom: 12px;
+        }
+        .qr-frame img {
+            width: 170px;
+            height: 170px;
+            display: block;
+        }
+
+        .qr-tip {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .qr-sub {
+            font-size: 11.5px;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        /* ── STATUS & LAUNCHER PANEL ── */
+        .status-panel {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .panel-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .panel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--orange);
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+        .panel-heading {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        /* Deck State Display */
+        .deck-box {
+            background: var(--card);
+            border: 1.5px dashed var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            min-height: 180px;
+        }
+
+        .deck-box.ready {
+            border-style: solid;
+            border-color: rgba(52, 211, 153, 0.6);
+            background: rgba(52, 211, 153, 0.05);
+            box-shadow: 0 0 30px var(--green-glow);
+        }
+
+        .deck-icon {
+            font-size: 38px;
+            line-height: 1;
+        }
+
+        .deck-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--white);
+            max-width: 380px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .deck-desc {
+            font-size: 12.5px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .pulse-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+        .pulse-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+            animation: pulse-ring 1.5s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.8; }
+        }
+
+        /* Launch Action Buttons */
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+        }
+
+        .btn-present {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            border-radius: 14px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4);
+            transition: all 0.15s ease;
+        }
+        .btn-present:active { transform: scale(0.97); }
+        .btn-present.disabled {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+            color: var(--muted);
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .btn-clear {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 16px 20px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 14px;
+            color: #f87171;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-clear:active { transform: scale(0.97); }
+        .btn-clear.hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- ── TOP PERSISTENT CONTROLS ── -->
+    <header class="topbar">
+        <a href="/pi" class="btn-back" title="Return to Touchscreen Pod Dashboard">
+            <span>← Return to Pod Dashboard</span>
+        </a>
+
+        <div class="topbar-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 6a6 6 0 0 1 6 6"></path><path d="M12 10a2 2 0 0 1 2 2"></path><circle cx="12" cy="14" r="1"></circle><path d="M12 15v7"></path><path d="M8 22h8"></path></svg>
+            <span>Class X — Wireless Slide Beam</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+            <div class="topbar-url" id="beam-link">Loading link…</div>
+            <button type="button" class="btn-clear" onclick="promptCustomHost()" style="padding:6px 12px; font-size:11px; border-radius:8px; background:rgba(0,242,254,0.1); border-color:rgba(0,242,254,0.3); color:var(--cyan); display:inline-flex; align-items:center; gap:4px;" title="Change IP or Hostname if your phone is on another network"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> <span>Edit Host</span></button>
+        </div>
+    </header>
+
+    <!-- ── MAIN VIEWPORT ── -->
+    <main class="main-grid">
+
+        <!-- 1. QR Code Display -->
+        <section class="qr-card">
+            <div class="qr-frame">
+                <img src="/api/beam/qr.svg" alt="Scan QR Code to Upload Lecture Slides" id="qr-img">
+            </div>
+            <div class="qr-tip">Scan with Smartphone Camera</div>
+            <div class="qr-sub" style="margin-bottom:8px;">
+                Uploads PDF, PPTX &amp; PPT instantly.<br/>
+                No teacher laptop required on podium.
+            </div>
+            <!-- Wi-Fi Callout -->
+            <div style="background:rgba(255,107,0,0.1); border:1px solid rgba(255,107,0,0.3); border-radius:10px; padding:8px 10px; font-size:11px; line-height:1.35; color:#ffedd5; width:100%;">
+                <div style="display:flex; align-items:center; gap:4px; margin-bottom:2px;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+                    <span>Wi-Fi: <strong id="wifi-ssid-label" style="color:var(--orange);">Poor_soul_5G</strong></span>
+                </div>
+                <span style="font-size:10px; opacity:0.8;">(Phone &amp; Veronica must share same Wi-Fi)</span>
+            </div>
+            <a href="/beam" id="link-direct-beam" target="_blank" style="margin-top:8px; font-size:10.5px; color:var(--cyan); text-decoration:none;">
+                Open Upload Site in Tab ↗
+            </a>
+        </section>
+
+        <!-- 2. Live Deck Status & Presentation Launcher -->
+        <section class="status-panel">
+            <div class="panel-header">
+                <div class="panel-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Edge Slide Receiver</div>
+                <h1 class="panel-heading">Teacher Presentation Deck</h1>
+            </div>
+
+            <!-- Dynamic Deck Box -->
+            <div class="deck-box" id="deck-box">
+                <div class="deck-icon" id="deck-icon" style="display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg></div>
+                <div class="deck-title" id="deck-title">Awaiting Slide Transmission…</div>
+                <div class="deck-desc" id="deck-desc">
+                    Scan the QR code on the left using your phone camera to cast your lecture presentation directly to the lectern.
+                </div>
+                <div class="pulse-indicator" id="pulse-ind">
+                    <div class="pulse-dot"></div>
+                    <span>Listening for wireless upload</span>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="action-row">
+                <a href="/viewer" id="btn-present" class="btn-present disabled" style="display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>Open Fullscreen Presentation</span>
+                </a>
+                <button type="button" id="btn-clear" class="btn-clear hidden" onclick="clearDeck()" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>Clear</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+<script>
+    let pollTimer = null;
+    let currentDeckActive = false;
+    let customHost = localStorage.getItem('veronica_beam_host') || '';
+
+    function getEffectiveHost() {
+        if (customHost) return customHost;
+        if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            return window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+        }
+        return '';
+    }
+
+    function promptCustomHost() {
+        const cur = customHost || document.getElementById('beam-link').innerText.replace(/^https?:\/\//, '').replace(/\/beam$/, '');
+        const updated = prompt('Enter your computer/Pi Wi-Fi IP address or hostname:\n(Phone must reach this IP on your Wi-Fi)', cur);
+        if (updated !== null) {
+            customHost = updated.trim();
+            if (customHost) {
+                localStorage.setItem('veronica_beam_host', customHost);
+            } else {
+                localStorage.removeItem('veronica_beam_host');
+            }
+            checkDeckStatus(true);
+        }
+    }
+
+    function checkDeckStatus(forceQrRefresh = false) {
+        const effHost = getEffectiveHost();
+        const query = effHost ? ('?host=' + encodeURIComponent(effHost)) : '';
+
+        fetch('/api/beam/status' + query)
+            .then(r => r.json())
+            .then(data => {
+                if (data.beam_url) {
+                    document.getElementById('beam-link').innerText = data.beam_url;
+                    const directLnk = document.getElementById('link-direct-beam');
+                    if (directLnk) directLnk.href = data.beam_url;
+                }
+                if (data.wifi_ssid) {
+                    const wifiEl = document.getElementById('wifi-ssid-label');
+                    if (wifiEl) wifiEl.innerText = data.wifi_ssid;
+                }
+
+                // Update QR code URL if not set or forced
+                const qrImg = document.getElementById('qr-img');
+                const desiredQr = '/api/beam/qr.svg' + (data.host ? ('?host=' + encodeURIComponent(data.host)) : query);
+                if (forceQrRefresh || !qrImg.getAttribute('data-loaded')) {
+                    qrImg.src = desiredQr;
+                    qrImg.setAttribute('data-loaded', 'true');
+                }
+
+                const deckBox = document.getElementById('deck-box');
+                const deckIcon = document.getElementById('deck-icon');
+                const deckTitle = document.getElementById('deck-title');
+                const deckDesc = document.getElementById('deck-desc');
+                const pulseInd = document.getElementById('pulse-ind');
+                const btnPresent = document.getElementById('btn-present');
+                const btnClear = document.getElementById('btn-clear');
+
+                if (data.active && data.deck) {
+                    currentDeckActive = true;
+                    deckBox.classList.add('ready');
+                    deckIcon.innerHTML = '<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+                    deckTitle.innerText = data.deck.filename || 'Lecture Presentation';
+                    deckDesc.innerText = 'Slide deck received and prepared! Tap the button below to display in fullscreen on the classroom projector.';
+                    pulseInd.innerHTML = '<span style="color:#34d399; font-weight:800;">● Deck Ready for Projection</span>';
+                    btnPresent.classList.remove('disabled');
+                    btnClear.classList.remove('hidden');
+                } else {
+                    currentDeckActive = false;
+                    deckBox.classList.remove('ready');
+                    deckIcon.innerHTML = '<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line><path d="M16 6a3 3 0 0 1 0 5"></path><path d="M19 4a6 6 0 0 1 0 9"></path></svg>';
+                    deckTitle.innerText = 'Awaiting Slide Transmission…';
+                    deckDesc.innerText = 'Scan the QR code on the left using your phone camera to cast your lecture presentation directly to the lectern.';
+                    pulseInd.innerHTML = '<div class="pulse-dot"></div><span>Listening for wireless upload</span>';
+                    btnPresent.classList.add('disabled');
+                    btnClear.classList.add('hidden');
+                }
+            })
+            .catch(err => {
+                console.warn('Status poll notice:', err);
+            });
+    }
+
+    function clearDeck() {
+        if (!confirm('Erase current presentation slides from lectern?')) return;
+        fetch('/api/beam/clear', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => checkDeckStatus())
+            .catch(err => console.error(err));
+    }
+
+    // Initial check & continuous poll
+    checkDeckStatus();
+    pollTimer = setInterval(checkDeckStatus, 1500);
+
+    // Clean up timer on unload
+    window.addEventListener('beforeunload', () => {
+        if (pollTimer) clearInterval(pollTimer);
+    });
+</script>
+</body>
+</html>

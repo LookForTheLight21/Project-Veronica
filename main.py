@@ -12,7 +12,7 @@ MODULES_DIR = os.path.join(BASE_DIR, "modules")
 if MODULES_DIR not in sys.path:
     sys.path.insert(0, MODULES_DIR)
 
-from main import main
+from modules.main import main
 
 if __name__ == "__main__":
     main()
