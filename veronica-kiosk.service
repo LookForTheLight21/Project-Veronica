@@ -1,19 +1,18 @@
 [Unit]
 Description=Project Veronica Kiosk Dashboard
-After=network.target graphical-session.target
-Wants=graphical-session.target
+After=network-online.target graphical.target
+Wants=network-online.target graphical.target
 
 [Service]
 Type=simple
-User=pi
+User=lookforthelight
 Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/pi/.Xauthority
-WorkingDirectory=/home/pi/Project Veronica
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+WorkingDirectory=/home/lookforthelight/Project Veronica
 ExecStartPre=/bin/sleep 5
-ExecStart=/bin/bash /home/pi/Project\ Veronica/launch_kiosk.sh
+ExecStart=/bin/bash "/home/lookforthelight/Project Veronica/launch_kiosk.sh"
 Restart=on-failure
 RestartSec=10
 
 [Install]
-WantedBy=graphical-session.target
-
+WantedBy=graphical.target

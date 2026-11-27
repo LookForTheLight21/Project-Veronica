@@ -5,67 +5,72 @@
   (paper "A4")
 
   (title_block
-    (title "Project Veronica — ESP32 Podium Interface (Direct Drive)")
-    (date "2026-10-12")
-    (rev "v4.0")
-    (company "Project Veronica — Independent Student Build")
+    (title "Project Veronica — New Build Wall Display & Behind-Screen Pod")
+    (date "2026-11-27")
+    (rev "v5.0")
+    (company "Project Veronica — Vishwakarma Awards 2026-27")
     (comment 1 "Application ID: VK26-AU-HCI-0072")
-    (comment 2 "Direct GPIO Piezo Drive + Common Ground Bus")
-    (comment 3 "Verified Physical Hardware Match")
+    (comment 2 "NodeMCU ESP-32S 38-Pin + PN532 (GPIO 21/22) + Buzzer (GPIO 27) + 800x480 Touch Display")
+    (comment 3 "Legacy TTP229 Keypad & 16x2/20x4 LCD Removed; Ceiling Pi 5 Hub Unchanged")
   )
 
   ;; =========================================================
-  ;; 1. ESP32 DEVKIT V1 (30-PIN MICROCONTROLLER)
+  ;; 1. NODEMCU ESP-32S (38-PIN MICROCONTROLLER - BEHIND SCREEN)
   ;; =========================================================
   (symbol (lib_id "MCU_Module:ESP32-DevKit-V1") (at 140.0 100.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "e1029384-1111-4001-a001-998877665544")
     (property "Reference" "U1" (at 140.0 65.0 0))
-    (property "Value" "ESP32_DevKit_V1_30Pin" (at 140.0 68.0 0))
-    (property "Footprint" "Module:ESP32-DevKit-V1" (at 140.0 60.0 0))
+    (property "Value" "NodeMCU_ESP-32S_38Pin" (at 140.0 68.0 0))
+    (property "Footprint" "Module:NodeMCU_ESP-32S_38Pin" (at 140.0 60.0 0))
     (property "Datasheet" "https://www.espressif.com" (at 140.0 55.0 0))
-    (property "Description" "ESP32 Dual-Core MCU with Native 2.4GHz Wi-Fi / ESP-NOW" (at 140.0 50.0 0))
+    (property "Description" "38-Pin ESP32 Wireless Sensor Node (TCP Port 8765 -> Pi 5 Ceiling Hub)" (at 140.0 50.0 0))
   )
 
   ;; =========================================================
-  ;; 2. NXP PN532 NFC BOARD (I2C MODE)
+  ;; 2. NXP PN532 NFC V3 BOARD (I2C MODE - SCREEN-BACK COUPLED)
   ;; =========================================================
   (symbol (lib_id "Sensor_RFID:PN532_Breakout") (at 60.0 70.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "e1029384-2222-4002-a002-998877665544")
     (property "Reference" "U2" (at 60.0 52.0 0))
-    (property "Value" "PN532_NFC_Module" (at 60.0 55.0 0))
+    (property "Value" "PN532_NFC_V3_Module" (at 60.0 55.0 0))
     (property "Footprint" "Module:PN532_Breakout_V3" (at 60.0 48.0 0))
-    (property "Description" "NFC Reader: I2C Mode (SEL0=0, SEL1=1)" (at 60.0 45.0 0))
+    (property "Description" "I2C Mode (SEL0=1, SEL1=0, 0x24) behind 800x480 screen with 0.4mm Ferrite Shield" (at 60.0 45.0 0))
   )
 
   ;; =========================================================
-  ;; 3. TTP229 16-KEY CAPACITIVE KEYPAD
+  ;; 3. PASSIVE PIEZO BUZZER MODULE (GPIO 27 PWM)
   ;; =========================================================
-  (symbol (lib_id "Sensor_Touch:TTP229_Module") (at 60.0 135.0 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid "e1029384-3333-4003-a003-998877665544")
-    (property "Reference" "U3" (at 60.0 118.0 0))
-    (property "Value" "TTP229_Capacitive_16Key" (at 60.0 121.0 0))
-    (property "Footprint" "Module:TTP229_Keypad" (at 60.0 114.0 0))
-    (property "Description" "16-Channel Touch Sensor (Bridged Pads 3 & 7)" (at 60.0 110.0 0))
-  )
-
-  ;; =========================================================
-  ;; 4. DIRECT PIEZO BUZZER (NO TRANSISTOR)
-  ;; =========================================================
-  (symbol (lib_id "Device:Buzzer") (at 215.0 95.0 0) (unit 1)
+  (symbol (lib_id "Device:Buzzer") (at 60.0 135.0 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid "e1029384-4444-4004-a004-998877665544")
-    (property "Reference" "BZ1" (at 215.0 80.0 0))
-    (property "Value" "Piezo_Buzzer_Direct" (at 215.0 83.0 0))
-    (property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6" (at 215.0 76.0 0))
-    (property "Description" "Direct PWM Driven Active Piezo Element" (at 215.0 72.0 0))
+    (property "Reference" "BZ1" (at 60.0 120.0 0))
+    (property "Value" "Piezo_Buzzer_3Pin_Module" (at 60.0 123.0 0))
+    (property "Footprint" "Buzzer_Beeper:Buzzer_Module_3Pin" (at 60.0 116.0 0))
+    (property "Description" "PWM Acoustic Feedback Buzzer (2000Hz-3200Hz via GPIO 27)" (at 60.0 112.0 0))
   )
 
   ;; =========================================================
-  ;; POWER SYMBOLS: +3.3V BUS
+  ;; 4. 800x480 TOUCH MONITOR INTERFACE (PI 5 KIOSK LINK)
   ;; =========================================================
+  (symbol (lib_id "Connector_Generic:Conn_01x04") (at 220.0 95.0 0) (unit 1)
+    (in_bom yes) (on_board no) (dnp no)
+    (uuid "e1029384-5555-4005-a005-998877665544")
+    (property "Reference" "J1" (at 220.0 80.0 0))
+    (property "Value" "Display_800x480_HDMI_USB_Touch" (at 220.0 83.0 0))
+    (property "Footprint" "Connector:HDMI_USB_Touch_Trunk" (at 220.0 76.0 0))
+    (property "Description" "5V Power + HDMI/DSI + USB Touch from Pi 5 Ceiling Hub (/pi Kiosk)" (at 220.0 72.0 0))
+  )
+
+  ;; =========================================================
+  ;; POWER SYMBOLS: +5V & +3.3V BUSES
+  ;; =========================================================
+  (symbol (lib_id "power:+5V") (at 140.0 62.0 0) (unit 1)
+    (uuid "p5000000-0001-4000-8000-000000000001")
+    (property "Reference" "#PWR0" (at 140.0 65.0 0))
+    (property "Value" "+5V" (at 140.0 59.0 0))
+  )
   (symbol (lib_id "power:+3V3") (at 140.0 75.0 0) (unit 1)
     (uuid "p1000000-0001-4000-8000-000000000001")
     (property "Reference" "#PWR1" (at 140.0 78.0 0))
@@ -100,33 +105,27 @@
     (property "Reference" "#GND3" (at 60.0 148.0 0))
     (property "Value" "GND" (at 60.0 152.0 0))
   )
-  (symbol (lib_id "power:GND") (at 215.0 115.0 0) (unit 1)
+  (symbol (lib_id "power:GND") (at 220.0 115.0 0) (unit 1)
     (uuid "g1000000-0004-4000-8000-000000000004")
-    (property "Reference" "#GND4" (at 215.0 118.0 0))
-    (property "Value" "GND" (at 215.0 122.0 0))
+    (property "Reference" "#GND4" (at 220.0 118.0 0))
+    (property "Value" "GND" (at 220.0 122.0 0))
   )
 
   ;; =========================================================
   ;; SIGNAL BUS CONNECTIONS (WIRES & GLOBAL NET LABELS)
   ;; =========================================================
-  ;; NXP PN532 I2C Bus to ESP32
+  ;; NXP PN532 I2C Bus to NodeMCU ESP-32S
   (wire (pts (xy 75.0 68.0) (xy 120.0 68.0)) (stroke (width 0) (type default)))
   (label "ESP32_GPIO21_SDA" (at 95.0 67.0 0) (fields_autoplaced))
 
   (wire (pts (xy 75.0 72.0) (xy 120.0 72.0)) (stroke (width 0) (type default)))
   (label "ESP32_GPIO22_SCL" (at 95.0 71.0 0) (fields_autoplaced))
 
-  ;; TTP229 Shift Register to ESP32
+  ;; Piezo Buzzer Signal Line: ESP32 GPIO 27 to Buzzer I/O
   (wire (pts (xy 75.0 133.0) (xy 120.0 133.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO19_DATA" (at 95.0 132.0 0) (fields_autoplaced))
+  (label "ESP32_GPIO27_BUZZER_PWM" (at 95.0 132.0 0) (fields_autoplaced))
 
-  (wire (pts (xy 75.0 137.0) (xy 120.0 137.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO18_CLK" (at 95.0 136.0 0) (fields_autoplaced))
-
-  ;; Direct Buzzer Trigger Line: ESP32 GPIO 23 to Buzzer (+)
-  (wire (pts (xy 160.0 95.0) (xy 205.0 95.0)) (stroke (width 0) (type default)))
-  (label "ESP32_GPIO23_BUZZER_POS" (at 180.0 94.0 0) (fields_autoplaced))
-
-  ;; Buzzer (-) to Ground
-  (wire (pts (xy 215.0 102.0) (xy 215.0 115.0)) (stroke (width 0) (type default)))
+  ;; 5V Supply to Monitor & ESP32
+  (wire (pts (xy 160.0 90.0) (xy 210.0 90.0)) (stroke (width 0) (type default)))
+  (label "USB_5V_DISPLAY_PWR" (at 185.0 89.0 0) (fields_autoplaced))
 )
