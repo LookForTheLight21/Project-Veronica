@@ -34,7 +34,7 @@ A typical deployment provides:
 
 ### Tier 1 — ESP32 lectern pod
 
-The primary current pod interface is a standalone **3.5-inch Robocrazе?** style touch display (480×320) using an ESP32-WROOM-32D. It provides:
+The primary current pod interface is a standalone **3.5-inch Robocrazе?** style touch display (800x480) using an ESP32-WROOM-32D. It provides:
 
 - A three-slide landscape touch interface
 - Capture, compile, record, subject, and system controls
@@ -228,8 +228,8 @@ Project-Veronica/
 │   └── legacy_archive/             # Older firmware variants
 ├── templates/
 │   ├── index.html                  # Command-center dashboard
-│   ├── pi_dashboard.html           # 480×320 Pi kiosk dashboard
-│   ├── pod_touch.html              # 3.5-inch touch-pod emulator
+│   ├── pi_dashboard.html           # 800x480 Pi kiosk dashboard
+│   ├── pod_touch.html              # 5-inch touch-pod emulator
 │   ├── projector.html              # Classroom projector view
 │   ├── report.html                 # Principal ledger
 │   ├── admin.html                  # Diagnostic control portal
