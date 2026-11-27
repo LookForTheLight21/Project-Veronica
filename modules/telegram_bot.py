@@ -10,9 +10,11 @@ Functions:
 import os
 import re
 import glob
+import html
 import json
 import time
 import datetime
+import urllib.parse
 import requests
 from config import BASE_DIR, BOT_TOKEN, CHAT_ID, ALLOWED_USERS, NOTES_DIR, VIDEOS_DIR, PHOTOS_DIR
 import state
@@ -44,7 +46,7 @@ HELP_TEXT = (
 # TELEGRAM SEND FUNCTIONS
 # ==============================================================================
 
-def send_telegram(msg, retries=3, delay=2, pin=False, chat_id=None, reply_markup=None, parse_mode=None):
+def send_telegram(msg, retries=3, delay=2, pin=False, chat_id=None, reply_markup=None, parse_mode=None, disable_web_page_preview=False):
     """Send text message to Telegram chat with optional inline keyboard."""
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     target_chat = chat_id or CHAT_ID
@@ -53,6 +55,8 @@ def send_telegram(msg, retries=3, delay=2, pin=False, chat_id=None, reply_markup
         data["reply_markup"] = json.dumps(reply_markup)
     if parse_mode:
         data["parse_mode"] = parse_mode
+    if disable_web_page_preview:
+        data["disable_web_page_preview"] = "true"
     for attempt in range(1, retries + 1):
         try:
             r = requests.post(url, data=data, timeout=10)
@@ -260,12 +264,13 @@ def _parse_file_date(filename):
     base = os.path.basename(filename)
     # Match patterns like: Subject_type_MMDD_HHMM.ext or Subject_type_MMDD_HHMMSS.ext
     m = re.search(r'_(?:photo|video|audio|PRIORITY_audio|LectureNotes)_(\d{4})_', base)
+    if not m:
+        m = re.search(r'_(\d{4})_\d{4,6}\.', base)
     if m:
         date_tag = m.group(1)
         try:
             month = int(date_tag[:2])
             day = int(date_tag[2:])
-            # Assume current year
             year = datetime.datetime.now().year
             return datetime.date(year, month, day)
         except (ValueError, OverflowError):
@@ -276,71 +281,243 @@ def _parse_file_date(filename):
 def _file_matches_subject(filename, subject):
     """Check if a file belongs to the given subject (case-insensitive prefix match)."""
     base = os.path.basename(filename).lower()
-    return base.startswith(subject.lower() + "_")
+    s = subject.strip().lower()
+    if base.startswith(s + "_"):
+        return True
+    if s in ("math", "mathematics") and (base.startswith("math_") or base.startswith("mathematics_")):
+        return True
+    return False
 
 
-def _search_local_files(subject, target_date, file_type="all"):
+def _drive_subject_term(subject):
+    s = subject.strip()
+    if s.lower() == "mathematics":
+        return "Math"
+    return s
+
+
+def _build_local_media_url(filepath, folder):
+    """Returns a clickable LAN URL for files stored on the Veronica Hub when Drive link is unavailable."""
+    from config import get_lan_ip, POD_SERVER_PORT
+    encoded_name = urllib.parse.quote(os.path.basename(filepath))
+    return f"http://{get_lan_ip()}:{POD_SERVER_PORT}/media/{folder}/{encoded_name}"
+
+
+def _classify_extension(filename):
+    ext = os.path.splitext(filename)[1].lower()
+    if ext == ".pdf":
+        return "pdf", "notes"
+    if ext in (".mp4", ".mkv", ".avi", ".mov"):
+        return "video", "videos"
+    if ext in (".m4a", ".mp3", ".wav", ".aac"):
+        return "audio", "videos"
+    return None, None
+
+
+def _search_unified_links(subject, target_dates=None, file_type="all"):
     """
-    Search local storage for files matching subject and date.
-    file_type: 'all', 'pdf', 'video', 'audio', 'photo'
-    Returns dict: {pdfs: [...], videos: [...], audios: [...], photos: [...]}
+    Searches Google Drive (primary) and local storage (fallback) for matching materials.
+    target_dates: list/set of datetime.date objects, or None for ALL dates.
+    file_type: 'all', 'pdf', 'video', or 'audio'.
+    Returns dict: {"pdfs": [(name, link, date_obj)], "videos": [...], "audios": [...]}.
+    Never pushes files — only resolves links.
     """
-    results = {"pdfs": [], "videos": [], "audios": [], "photos": []}
+    results = {"pdfs": [], "videos": [], "audios": []}
+    seen_names = set()
+    date_set = set(target_dates) if target_dates else None
+    date_tags = {d.strftime("%m%d") for d in date_set} if date_set else None
 
+    # 1. Search Google Drive once
+    try:
+        from drive_upload import get_drive_service
+        service = get_drive_service()
+        drive_subj = _drive_subject_term(subject).replace("'", "\\'")
+        if date_tags and len(date_tags) == 1:
+            only_tag = next(iter(date_tags))
+            q = (
+                f"name contains '{drive_subj}' and name contains '{only_tag}' "
+                f"and mimeType != 'application/vnd.google-apps.folder' and trashed=false"
+            )
+        else:
+            q = (
+                f"name contains '{drive_subj}' "
+                f"and mimeType != 'application/vnd.google-apps.folder' and trashed=false"
+            )
+        items = service.files().list(
+            q=q,
+            pageSize=1000,
+            fields="files(id, name, webViewLink, mimeType)"
+        ).execute().get("files", [])
+
+        for item in items:
+            name = item.get("name", "")
+            if not _file_matches_subject(name, subject):
+                continue
+            category, _ = _classify_extension(name)
+            if not category:
+                continue
+            if file_type != "all" and category != file_type:
+                continue
+
+            fdate = _parse_file_date(name)
+            if date_set is not None:
+                if fdate is not None:
+                    if fdate not in date_set:
+                        continue
+                elif not any(tag in name for tag in date_tags):
+                    continue
+
+            key = name.lower()
+            if key in seen_names:
+                continue
+            seen_names.add(key)
+
+            link = item.get("webViewLink") or (
+                f"https://drive.google.com/file/d/{item['id']}/view" if item.get("id") else ""
+            )
+            if not link:
+                continue
+            bucket = {"pdf": "pdfs", "video": "videos", "audio": "audios"}[category]
+            results[bucket].append((name, link, fdate))
+    except Exception as e:
+        print(f"ℹ️ Drive search notice: {e}")
+
+    # 2. Check local storage for any files not yet present in Drive results
+    local_globs = []
     if file_type in ("all", "pdf"):
-        for f in glob.glob(os.path.join(NOTES_DIR, "*.pdf")):
-            if _file_matches_subject(f, subject):
-                fdate = _parse_file_date(f)
-                if fdate and fdate == target_date:
-                    results["pdfs"].append(f)
-
-    if file_type in ("all", "photo"):
-        for f in glob.glob(os.path.join(PHOTOS_DIR, "*.jpg")) + glob.glob(os.path.join(PHOTOS_DIR, "*.jpeg")) + glob.glob(os.path.join(PHOTOS_DIR, "*.png")):
-            if _file_matches_subject(f, subject):
-                fdate = _parse_file_date(f)
-                if fdate and fdate == target_date:
-                    results["photos"].append(f)
-
+        local_globs.append((os.path.join(NOTES_DIR, "*.pdf"), "pdf", "notes"))
     if file_type in ("all", "video"):
-        for f in glob.glob(os.path.join(VIDEOS_DIR, "*.mp4")):
-            if _file_matches_subject(f, subject):
-                fdate = _parse_file_date(f)
-                if fdate and fdate == target_date:
-                    results["videos"].append(f)
-
+        for ext in ("*.mp4", "*.mkv", "*.avi", "*.mov"):
+            local_globs.append((os.path.join(VIDEOS_DIR, ext), "video", "videos"))
     if file_type in ("all", "audio"):
-        for f in glob.glob(os.path.join(VIDEOS_DIR, "*.m4a")):
-            if _file_matches_subject(f, subject):
-                fdate = _parse_file_date(f)
-                if fdate and fdate == target_date:
-                    results["audios"].append(f)
+        for ext in ("*.m4a", "*.mp3", "*.wav", "*.aac"):
+            local_globs.append((os.path.join(VIDEOS_DIR, ext), "audio", "videos"))
+
+    for pattern, category, folder in local_globs:
+        for path in glob.glob(pattern):
+            name = os.path.basename(path)
+            if not _file_matches_subject(name, subject):
+                continue
+            fdate = _parse_file_date(name)
+            if date_set is not None:
+                if fdate is not None:
+                    if fdate not in date_set:
+                        continue
+                elif not any(tag in name for tag in date_tags):
+                    continue
+
+            key = name.lower()
+            if key in seen_names:
+                continue
+            seen_names.add(key)
+
+            link = _build_local_media_url(path, folder)
+            bucket = {"pdf": "pdfs", "video": "videos", "audio": "audios"}[category]
+            results[bucket].append((f"{name} (Local Hub)", link, fdate))
+
+    for bucket in results:
+        results[bucket].sort(key=lambda entry: (entry[2] or datetime.date.min, entry[0]))
 
     return results
 
 
+def _send_chunked_html(chat_id, blocks, reply_markup=None):
+    """Sends HTML blocks in one message when <= 4000 chars, or splits cleanly between items."""
+    full_text = "\n".join(blocks)
+    max_len = 4000
+    if len(full_text) <= max_len:
+        send_telegram(
+            full_text,
+            chat_id=chat_id,
+            reply_markup=reply_markup,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+        return
+
+    chunks = []
+    current_blocks = []
+    current_len = 0
+    for block in blocks:
+        add_len = len(block) + (1 if current_blocks else 0)
+        if current_len + add_len > max_len and current_blocks:
+            chunks.append("\n".join(current_blocks))
+            current_blocks = [block.lstrip("\n")]
+            current_len = len(current_blocks[0])
+        else:
+            current_blocks.append(block)
+            current_len += add_len
+    if current_blocks:
+        chunks.append("\n".join(current_blocks))
+
+    for idx, chunk in enumerate(chunks):
+        kb = reply_markup if idx == len(chunks) - 1 else None
+        send_telegram(
+            chunk,
+            chat_id=chat_id,
+            reply_markup=kb,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+
+
+def _format_and_send_links_message(chat_id, title_line, results, show_date_per_item=False, reply_markup=None):
+    """
+    Sends ONE message containing all requested links, keeping PDFs, Videos, and Audios
+    strictly separated under distinct sections. Never pushes files.
+    """
+    blocks = [
+        f"<b>{html.escape(title_line)}</b>",
+        "━━━━━━━━━━━━━━━━━━━━━━",
+    ]
+
+    category_meta = [
+        ("pdfs", "📄", "PDF Lecture Notes"),
+        ("videos", "🎥", "Classroom Video Recordings"),
+        ("audios", "🎙️", "Audio Recordings"),
+    ]
+
+    for key, icon, label in category_meta:
+        items = results.get(key, [])
+        if not items:
+            continue
+        blocks.append(f"\n{icon} <b>{label}:</b>")
+        for name, link, fdate in items:
+            date_prefix = f"[{fdate.strftime('%d/%m')}] " if (show_date_per_item and fdate) else ""
+            safe_name = html.escape(name)
+            safe_link = html.escape(link)
+            blocks.append(f"• {date_prefix}<code>{safe_name}</code>\n  🔗 {safe_link}")
+
+    _send_chunked_html(chat_id, blocks, reply_markup=reply_markup)
+
+
+def _search_local_files(subject, target_date, file_type="all"):
+    """Backwards-compatible single-date local storage search."""
+    res = {"pdfs": [], "videos": [], "audios": [], "photos": []}
+    date_tag = target_date.strftime("%m%d")
+    if file_type in ("all", "pdf"):
+        for f in glob.glob(os.path.join(NOTES_DIR, "*.pdf")):
+            if _file_matches_subject(f, subject) and (_parse_file_date(f) == target_date or date_tag in os.path.basename(f)):
+                res["pdfs"].append(f)
+    if file_type in ("all", "video"):
+        for f in glob.glob(os.path.join(VIDEOS_DIR, "*.mp4")):
+            if _file_matches_subject(f, subject) and (_parse_file_date(f) == target_date or date_tag in os.path.basename(f)):
+                res["videos"].append(f)
+    if file_type in ("all", "audio"):
+        for f in glob.glob(os.path.join(VIDEOS_DIR, "*.m4a")):
+            if _file_matches_subject(f, subject) and (_parse_file_date(f) == target_date or date_tag in os.path.basename(f)):
+                res["audios"].append(f)
+    return res
+
+
 def _search_drive_files(subject, target_date, file_type="all"):
-    """Search Google Drive for matching files. Returns Drive links."""
-    drive_results = {"pdfs": [], "videos": [], "audios": []}
-    date_tag = target_date.strftime("%m%d")  # e.g. '1122'
-
-    try:
-        from drive_upload import get_drive_service
-        service = get_drive_service()
-        q = f"name contains '{subject}' and name contains '{date_tag}' and trashed=false"
-        items = service.files().list(q=q, fields="files(id, name, webViewLink, mimeType)").execute().get("files", [])
-        for item in items:
-            name = item.get("name", "")
-            link = item.get("webViewLink", "")
-            if file_type in ("all", "pdf") and name.lower().endswith(".pdf"):
-                drive_results["pdfs"].append((name, link))
-            elif file_type in ("all", "video") and name.lower().endswith(".mp4"):
-                drive_results["videos"].append((name, link))
-            elif file_type in ("all", "audio") and name.lower().endswith(".m4a"):
-                drive_results["audios"].append((name, link))
-    except Exception as e:
-        print(f"ℹ️ Drive search notice: {e}")
-
-    return drive_results
+    """Backwards-compatible single-date Drive search returning {(name, link)} per category."""
+    unified = _search_unified_links(subject, target_dates=[target_date], file_type=file_type)
+    return {
+        "pdfs": [(n, l) for (n, l, _) in unified["pdfs"] if "(Local Hub)" not in n],
+        "videos": [(n, l) for (n, l, _) in unified["videos"] if "(Local Hub)" not in n],
+        "audios": [(n, l) for (n, l, _) in unified["audios"] if "(Local Hub)" not in n],
+    }
 
 
 def _parse_date_input(text):
@@ -456,10 +633,9 @@ def _handle_callback_query(callback_query):
         _set_user_state(chat_id, "await_search_date", subject, "search")
         send_telegram(
             f"🔍 *Search {subject} Materials*\n\n"
-            f"Send the date in this format:\n"
-            f"`DD/MM/YY`\n\n"
+            f"Send a date (`DD/MM/YY`), a date range (`DD/MM/YY to DD/MM/YY`), or type `all`:\n\n"
             f"Example: `27/11/26`\n\n"
-            f"I'll find all PDFs, videos, photos, and audio for {subject} on that day.",
+            f"I'll send one message with separate links for PDFs, videos, and audio.",
             chat_id=chat_id,
             parse_mode="Markdown"
         )
@@ -471,8 +647,7 @@ def _handle_callback_query(callback_query):
         _set_user_state(chat_id, "await_pdf_date", subject, "pdf")
         send_telegram(
             f"📄 *{subject} — PDF Notes*\n\n"
-            f"Send the date to get compiled lecture PDFs:\n"
-            f"`DD/MM/YY`\n\n"
+            f"Send a date (`DD/MM/YY`), a date range (`DD/MM/YY to DD/MM/YY`), or type `all`:\n\n"
             f"Example: `22/11/26`",
             chat_id=chat_id,
             parse_mode="Markdown"
@@ -485,8 +660,7 @@ def _handle_callback_query(callback_query):
         _set_user_state(chat_id, "await_video_date", subject, "video")
         send_telegram(
             f"🎥 *{subject} — Class Videos*\n\n"
-            f"Send the date to get class video recordings:\n"
-            f"`DD/MM/YY`\n\n"
+            f"Send a date (`DD/MM/YY`), a date range (`DD/MM/YY to DD/MM/YY`), or type `all`:\n\n"
             f"Example: `22/11/26`",
             chat_id=chat_id,
             parse_mode="Markdown"
@@ -499,8 +673,7 @@ def _handle_callback_query(callback_query):
         _set_user_state(chat_id, "await_audio_date", subject, "audio")
         send_telegram(
             f"🎙️ *{subject} — Audio Recordings*\n\n"
-            f"Send the date to get audio recordings:\n"
-            f"`DD/MM/YY`\n\n"
+            f"Send a date (`DD/MM/YY`), a date range (`DD/MM/YY to DD/MM/YY`), or type `all`:\n\n"
             f"Example: `22/11/26`",
             chat_id=chat_id,
             parse_mode="Markdown"
@@ -516,7 +689,7 @@ def _handle_callback_query(callback_query):
             f"Send start and end dates (max 7 days apart):\n"
             f"`DD/MM/YY to DD/MM/YY`\n\n"
             f"Example: `20/11/26 to 26/11/26`\n\n"
-            f"I'll send you all materials for each day in the range.",
+            f"I'll send one message containing all links separated by PDF, video, and audio.",
             chat_id=chat_id,
             parse_mode="Markdown"
         )
@@ -530,20 +703,29 @@ def _handle_callback_query(callback_query):
 def _handle_user_date_input(text, chat_id):
     """
     Handle a text message from a user who is in a pending input state
-    (waiting for a date or date range after pressing an inline button).
+    (waiting for a date, date range, or 'all' after pressing an inline button).
+    Always sends links in ONE message (separated by PDF, Video, and Audio) and never pushes files.
     Returns True if handled, False if not in a pending state.
     """
     us = _get_user_state(chat_id)
     if not us:
         return False
 
-    action = us["action"]
     subject = us["subject"]
-    mode = us.get("mode")
+    mode = us.get("mode", "search")
+    action = us["action"]
+    cleaned_text = text.strip()
 
-    # ── Date Range Mode ──
+    file_type = {"pdf": "pdf", "video": "video", "audio": "audio"}.get(mode, "all")
+    type_label = {"pdf": "PDF notes", "video": "videos", "audio": "audio recordings"}.get(file_type, "materials")
+
+    target_dates = None
+    show_date_per_item = False
+    title_line = ""
+
+    # ── Explicit Date Range Mode ──
     if action == "await_date_range":
-        d1, d2 = _parse_date_range_input(text)
+        d1, d2 = _parse_date_range_input(cleaned_text)
         if not d1 or not d2:
             send_telegram(
                 "⚠️ Invalid date range format.\n"
@@ -553,184 +735,77 @@ def _handle_user_date_input(text, chat_id):
                 parse_mode="Markdown"
             )
             return True
-
-        # Ensure d1 <= d2
         if d1 > d2:
             d1, d2 = d2, d1
-
-        # Cap at 7 days
         delta = (d2 - d1).days
         if delta > 7:
             send_telegram(
-                f"⚠️ Date range too large ({delta} days). Maximum allowed is *7 days* to prevent Telegram flooding.\n"
+                f"⚠️ Date range too large ({delta} days). Maximum allowed is *7 days*.\n"
                 f"Please narrow your range.",
                 chat_id=chat_id,
                 parse_mode="Markdown"
             )
             return True
+        target_dates = [d1 + datetime.timedelta(days=i) for i in range(delta + 1)]
+        show_date_per_item = True
+        title_line = f"📅 {subject} — {d1.strftime('%d/%m/%Y')} to {d2.strftime('%d/%m/%Y')}"
 
-        _clear_user_state(chat_id)
-        send_telegram(
-            f"🔍 Searching *{subject}* materials from {d1.strftime('%d/%m/%Y')} to {d2.strftime('%d/%m/%Y')}…",
-            chat_id=chat_id,
-            parse_mode="Markdown"
-        )
-
-        found_anything = False
-        current = d1
-        while current <= d2:
-            day_results = _search_local_files(subject, current, "all")
-            drive_results = _search_drive_files(subject, current, "all")
-
-            has_local = any(day_results[k] for k in day_results)
-            has_drive = any(drive_results[k] for k in drive_results)
-
-            if has_local or has_drive:
-                found_anything = True
-                day_str = current.strftime("%d/%m/%Y (%A)")
-                header = f"📅 *{day_str}*\n━━━━━━━━━━━━━━━━━━━━━━\n"
-                lines = [header]
-
-                # Send local PDFs as documents
-                for pdf_path in day_results["pdfs"]:
-                    send_telegram_document(pdf_path, caption=f"📄 {subject} Notes — {day_str}", chat_id=chat_id)
-                    lines.append(f"📄 `{os.path.basename(pdf_path)}` — Sent above ⬆️")
-
-                # Send local audio files directly
-                for audio_path in day_results["audios"]:
-                    send_telegram_audio(audio_path, caption=f"🎙️ {subject} Audio — {day_str}", chat_id=chat_id)
-                    lines.append(f"🎙️ `{os.path.basename(audio_path)}` — Sent above ⬆️")
-
-                # Videos: too large for Telegram, show Drive links or local note
-                for vid_path in day_results["videos"]:
-                    size_mb = os.path.getsize(vid_path) / (1024 * 1024)
-                    if size_mb <= 49:
-                        send_telegram_document(vid_path, caption=f"🎥 {subject} Video — {day_str}", chat_id=chat_id)
-                        lines.append(f"🎥 `{os.path.basename(vid_path)}` — Sent above ⬆️")
-                    else:
-                        lines.append(f"🎥 `{os.path.basename(vid_path)}` ({size_mb:.0f}MB) — Available on Google Drive")
-
-                # Photos
-                for photo_path in day_results["photos"]:
-                    lines.append(f"📸 `{os.path.basename(photo_path)}`")
-
-                # Drive-only results
-                for name, link in drive_results.get("pdfs", []):
-                    lines.append(f"📄 `{name}` — 🔗 {link}")
-                for name, link in drive_results.get("videos", []):
-                    lines.append(f"🎥 `{name}` — 🔗 {link}")
-                for name, link in drive_results.get("audios", []):
-                    lines.append(f"🎙️ `{name}` — 🔗 {link}")
-
-                send_telegram("\n".join(lines), chat_id=chat_id, parse_mode="Markdown")
-
-            current += datetime.timedelta(days=1)
-
-        if not found_anything:
-            send_telegram(
-                f"ℹ️ No materials found for *{subject}* in the range {d1.strftime('%d/%m/%Y')} to {d2.strftime('%d/%m/%Y')}.",
-                chat_id=chat_id,
-                parse_mode="Markdown"
-            )
-
-        # Show subject menu again
-        send_telegram(
-            "What else would you like to look up?",
-            chat_id=chat_id,
-            reply_markup=_build_mode_keyboard(subject)
-        )
-        return True
-
-    # ── Single Date Modes (search, pdf, video, audio) ──
-    target_date = _parse_date_input(text)
-    if not target_date:
-        send_telegram(
-            "⚠️ Invalid date format.\n"
-            "Please use: `DD/MM/YY`\n"
-            "Example: `22/11/26`",
-            chat_id=chat_id,
-            parse_mode="Markdown"
-        )
-        return True
+    # ── Single Date / Range / 'all' Modes (search, pdf, video, audio) ──
+    elif cleaned_text.lower() == "all":
+        target_dates = None
+        show_date_per_item = True
+        scope_title = {"pdf": "All PDF Notes", "video": "All Videos", "audio": "All Audio"}.get(file_type, "All Materials")
+        title_line = f"📚 {subject} — {scope_title}"
+    else:
+        d1, d2 = _parse_date_range_input(cleaned_text)
+        if d1 and d2:
+            if d1 > d2:
+                d1, d2 = d2, d1
+            delta = (d2 - d1).days
+            if delta > 7:
+                send_telegram(
+                    f"⚠️ Date range too large ({delta} days). Maximum allowed is *7 days*.\n"
+                    f"Please narrow your range.",
+                    chat_id=chat_id,
+                    parse_mode="Markdown"
+                )
+                return True
+            target_dates = [d1 + datetime.timedelta(days=i) for i in range(delta + 1)]
+            show_date_per_item = True
+            title_line = f"📅 {subject} — {d1.strftime('%d/%m/%Y')} to {d2.strftime('%d/%m/%Y')}"
+        else:
+            target_date = _parse_date_input(cleaned_text)
+            if not target_date:
+                send_telegram(
+                    "⚠️ Invalid date format.\n"
+                    "Send `DD/MM/YY` (e.g. `22/11/26`), `DD/MM/YY to DD/MM/YY`, or `all`.",
+                    chat_id=chat_id,
+                    parse_mode="Markdown"
+                )
+                return True
+            target_dates = [target_date]
+            show_date_per_item = False
+            title_line = f"📚 {subject} — {target_date.strftime('%d/%m/%Y (%A)')}"
 
     _clear_user_state(chat_id)
-    day_str = target_date.strftime("%d/%m/%Y (%A)")
+    results = _search_unified_links(subject, target_dates=target_dates, file_type=file_type)
+    has_results = any(results[k] for k in ("pdfs", "videos", "audios"))
 
-    # Determine which file types to search
-    if mode == "pdf":
-        file_type = "pdf"
-    elif mode == "video":
-        file_type = "video"
-    elif mode == "audio":
-        file_type = "audio"
-    else:
-        file_type = "all"
-
-    send_telegram(
-        f"🔍 Searching *{subject}* for {day_str}…",
-        chat_id=chat_id,
-        parse_mode="Markdown"
-    )
-
-    local_results = _search_local_files(subject, target_date, file_type)
-    drive_results = _search_drive_files(subject, target_date, file_type)
-
-    has_local = any(local_results[k] for k in local_results)
-    has_drive = any(drive_results[k] for k in drive_results)
-
-    if not has_local and not has_drive:
-        type_label = {"pdf": "PDF notes", "video": "videos", "audio": "audio recordings"}.get(mode, "materials")
+    if not has_results:
         send_telegram(
-            f"ℹ️ No {type_label} found for *{subject}* on {day_str}.\n\n"
+            f"ℹ️ No {type_label} found for <b>{html.escape(subject)}</b>.\n\n"
             f"💡 Make sure the date and subject are correct.",
             chat_id=chat_id,
             reply_markup=_build_mode_keyboard(subject),
-            parse_mode="Markdown"
+            parse_mode="HTML"
         )
         return True
 
-    lines = [
-        f"📚 *{subject} — {day_str}*",
-        "━━━━━━━━━━━━━━━━━━━━━━"
-    ]
-
-    # Send local PDFs directly
-    for pdf_path in local_results["pdfs"]:
-        send_telegram_document(pdf_path, caption=f"📄 {subject} Notes — {day_str}", chat_id=chat_id)
-        lines.append(f"📄 `{os.path.basename(pdf_path)}` — Sent above ⬆️")
-
-    # Send local audio files directly
-    for audio_path in local_results["audios"]:
-        send_telegram_audio(audio_path, caption=f"🎙️ {subject} Audio — {day_str}", chat_id=chat_id)
-        lines.append(f"🎙️ `{os.path.basename(audio_path)}` — Sent above ⬆️")
-
-    # Videos
-    for vid_path in local_results["videos"]:
-        size_mb = os.path.getsize(vid_path) / (1024 * 1024)
-        if size_mb <= 49:
-            send_telegram_document(vid_path, caption=f"🎥 {subject} Video — {day_str}", chat_id=chat_id)
-            lines.append(f"🎥 `{os.path.basename(vid_path)}` — Sent above ⬆️")
-        else:
-            lines.append(f"🎥 `{os.path.basename(vid_path)}` ({size_mb:.0f}MB) — Available on Google Drive")
-
-    # Photos
-    for photo_path in local_results["photos"]:
-        lines.append(f"📸 `{os.path.basename(photo_path)}`")
-
-    # Drive-only results
-    for name, link in drive_results.get("pdfs", []):
-        lines.append(f"📄 `{name}` — 🔗 {link}")
-    for name, link in drive_results.get("videos", []):
-        lines.append(f"🎥 `{name}` — 🔗 {link}")
-    for name, link in drive_results.get("audios", []):
-        lines.append(f"🎙️ `{name}` — 🔗 {link}")
-
-    send_telegram("\n".join(lines), chat_id=chat_id, parse_mode="Markdown")
-
-    # Show subject menu again
-    send_telegram(
-        "What else would you like to look up?",
-        chat_id=chat_id,
+    _format_and_send_links_message(
+        chat_id,
+        title_line,
+        results,
+        show_date_per_item=show_date_per_item,
         reply_markup=_build_mode_keyboard(subject)
     )
     return True
@@ -742,42 +817,28 @@ def _handle_user_date_input(text, chat_id):
 
 def search_lecture_materials(subject, dd, mm, yy):
     """
-    Searches Google Drive and local storage for lecture notes (PDF)
-    and class video recordings (MP4) matching the specified subject and date.
+    Searches Google Drive and local storage for lecture notes (PDF),
+    video recordings (MP4), and audio recordings (M4A) matching subject & date.
+    Returns links only, strictly separated by category.
     """
-    date_tag = f"{mm}{dd}"
-    results = {"pdfs": [], "videos": []}
-
-    # 1. Search Google Drive
     try:
-        from drive_upload import get_drive_service
-        service = get_drive_service()
-        q = f"name contains '{subject}' and name contains '{date_tag}' and trashed=false"
-        items = service.files().list(q=q, fields="files(id, name, webViewLink, mimeType)").execute().get("files", [])
-        for item in items:
-            name = item.get("name", "")
-            link = item.get("webViewLink", "")
-            if name.lower().endswith(".pdf"):
-                results["pdfs"].append((name, link))
-            elif name.lower().endswith(".mp4") or name.lower().endswith(".m4a"):
-                results["videos"].append((name, link))
+        target_date = datetime.date(int(yy), int(mm), int(dd))
+        unified = _search_unified_links(subject, target_dates=[target_date], file_type="all")
+        return {
+            "pdfs": [(name, link) for (name, link, _) in unified["pdfs"]],
+            "videos": [(name, link) for (name, link, _) in unified["videos"]],
+            "audios": [(name, link) for (name, link, _) in unified["audios"]],
+        }
     except Exception as e:
-        print(f"ℹ️ Google Drive archive search notice: {e}")
-
-    # 2. Check local storage if Drive returned nothing
-    if not results["pdfs"] and not results["videos"]:
-        for p in glob.glob(os.path.join(NOTES_DIR, f"*{subject}*{date_tag}*.pdf")):
-            results["pdfs"].append((os.path.basename(p), "Stored Locally on Veronica Hub"))
-        for p in glob.glob(os.path.join(VIDEOS_DIR, f"*{subject}*{date_tag}*.mp4")):
-            results["videos"].append((os.path.basename(p), "Stored Locally on Veronica Hub"))
-
-    return results
+        print(f"ℹ️ Search notice: {e}")
+        return {"pdfs": [], "videos": [], "audios": []}
 
 
 def _handle_sr_search_command(text, chat_id=None):
     """
     Handles student archive search requests:
       e.g. /sr English/23/11/26 or /sr. English/23/11/26
+    Always responds with ONE links-only message (PDF, Video, and Audio separated).
     """
     cleaned = re.sub(r"^/(?:sr|search)[.\s]*", "", text.strip(), flags=re.IGNORECASE).strip()
     if not cleaned:
@@ -792,9 +853,24 @@ def _handle_sr_search_command(text, chat_id=None):
             "• `/sr Math/21/11/26`\n"
             "• `/sr Chemistry/22/11/26`\n"
             "• `/sr Computer Science/23/11/26`\n\n"
-            "You will instantly receive direct cloud links for the PDF notes and class video recording!"
+            "You will receive one message with direct links separated by PDF, Video, and Audio!"
         )
-        send_telegram(msg, chat_id=chat_id)
+        send_telegram(msg, chat_id=chat_id, parse_mode="Markdown")
+        return
+
+    # Support /sr Subject/all as well
+    m_all = re.match(r"^([a-zA-Z\s]+)[/\s,]+all$", cleaned, flags=re.IGNORECASE)
+    if m_all:
+        subject = m_all.group(1).strip().title()
+        results = _search_unified_links(subject, target_dates=None, file_type="all")
+        if not any(results[k] for k in ("pdfs", "videos", "audios")):
+            send_telegram(
+                f"ℹ️ <b>No Materials Found</b>\nNo lecture notes, videos, or audio recordings were found for <b>{html.escape(subject)}</b>.",
+                chat_id=chat_id,
+                parse_mode="HTML"
+            )
+            return
+        _format_and_send_links_message(chat_id, f"📚 Class X Lecture Archive — {subject} (All)", results, show_date_per_item=True)
         return
 
     m = re.match(r"^([a-zA-Z\s]+)[/\s,]+(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$", cleaned)
@@ -802,10 +878,10 @@ def _handle_sr_search_command(text, chat_id=None):
         msg = (
             "⚠️ *Invalid Search Format*\n"
             "Please format your query as:\n"
-            "`/sr Subject/DD/MM/YY`\n"
+            "`/sr Subject/DD/MM/YY` (or `/sr Subject/all`)\n"
             "Example: `/sr English/23/11/26`"
         )
-        send_telegram(msg, chat_id=chat_id)
+        send_telegram(msg, chat_id=chat_id, parse_mode="Markdown")
         return
 
     raw_subj, dd, mm, yy = m.groups()
@@ -814,33 +890,29 @@ def _handle_sr_search_command(text, chat_id=None):
     yy_full = f"20{yy}" if len(yy) == 2 else yy
     subject = raw_subj.strip().title()
 
-    send_telegram(f"🔍 Searching Class X archives for *{subject}* on {dd}/{mm}/{yy_full}…", chat_id=chat_id)
-    results = search_lecture_materials(subject, dd, mm, yy_full)
-
-    if not results["pdfs"] and not results["videos"]:
-        msg = (
-            f"ℹ️ *No Materials Found*\n"
-            f"No lecture notes or video recordings were found for *{subject}* on *{dd}/{mm}/{yy_full}*.\n\n"
-            f"💡 Double-check the subject name and date."
-        )
-        send_telegram(msg, chat_id=chat_id)
+    try:
+        target_date = datetime.date(int(yy_full), int(mm), int(dd))
+    except ValueError:
+        send_telegram("⚠️ Invalid calendar date. Use `/sr Subject/DD/MM/YY`.", chat_id=chat_id, parse_mode="Markdown")
         return
 
-    response_lines = [
-        f"📚 *Class X Lecture Archive — {subject}*",
-        f"📅 Date: {dd}/{mm}/{yy_full}",
-        "━━━━━━━━━━━━━━━━━━━━━━"
-    ]
-    if results["pdfs"]:
-        response_lines.append("\n📄 *PDF Lecture Notes:*")
-        for name, link in results["pdfs"]:
-            response_lines.append(f"• `{name}`\n  🔗 {link}")
-    if results["videos"]:
-        response_lines.append("\n🎥 *Classroom Video Recording:*")
-        for name, link in results["videos"]:
-            response_lines.append(f"• `{name}`\n  🔗 {link}")
+    results = _search_unified_links(subject, target_dates=[target_date], file_type="all")
+    if not any(results[k] for k in ("pdfs", "videos", "audios")):
+        send_telegram(
+            f"ℹ️ <b>No Materials Found</b>\n"
+            f"No lecture notes, videos, or audio recordings were found for <b>{html.escape(subject)}</b> on <b>{dd}/{mm}/{yy_full}</b>.\n\n"
+            f"💡 Double-check the subject name and date.",
+            chat_id=chat_id,
+            parse_mode="HTML"
+        )
+        return
 
-    send_telegram("\n".join(response_lines), chat_id=chat_id)
+    _format_and_send_links_message(
+        chat_id,
+        f"📚 Class X Lecture Archive — {subject} ({dd}/{mm}/{yy_full})",
+        results,
+        show_date_per_item=False
+    )
 
 
 # ==============================================================================

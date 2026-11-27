@@ -446,17 +446,21 @@ def launch_kiosk_browser():
     if "XDG_RUNTIME_DIR" not in env and os.path.exists(f"/run/user/{uid}"):
         env["XDG_RUNTIME_DIR"] = f"/run/user/{uid}"
 
-    # Wait up to 5 seconds for local Flask server to be ready
+    # Wait up to 15 seconds for local Flask server to be ready
     target_url = "http://localhost:5000/pi"
-    for _ in range(25):
+    server_ready = False
+    for _ in range(75):
         time.sleep(0.2)
         try:
             import urllib.request
             with urllib.request.urlopen("http://127.0.0.1:5000/api/status", timeout=0.5) as resp:
                 if resp.status == 200:
+                    server_ready = True
                     break
         except Exception:
             pass
+    if not server_ready:
+        print("⚠️ Flask dashboard did not respond in time; attempting browser launch anyway...")
 
     browser_bin = None
     for b in ["chromium-browser", "chromium", "google-chrome-stable", "google-chrome"]:
@@ -482,16 +486,26 @@ def launch_kiosk_browser():
     kiosk_data_dir = "/tmp/veronica_chromium_kiosk"
     os.makedirs(kiosk_data_dir, exist_ok=True)
 
+    # Remove stale Chromium singleton locks so a previous crash/hostname change never blocks launch
+    for lock_file in ["SingletonLock", "SingletonSocket", "SingletonCookie"]:
+        lock_path = os.path.join(kiosk_data_dir, lock_file)
+        if os.path.lexists(lock_path):
+            try:
+                os.unlink(lock_path)
+            except Exception:
+                pass
+
     cmd = [
         browser_bin,
         "--kiosk",
+        "--ozone-platform-hint=auto",
         f"--user-data-dir={kiosk_data_dir}",
-        f"--app={target_url}",
         "--window-size=800,480",
         "--window-position=0,0",
         "--noerrdialogs",
         "--disable-infobars",
         "--disable-session-crashed-bubble",
+        "--disable-restore-session-state",
         "--disable-translate",
         "--no-first-run",
         "--fast",
