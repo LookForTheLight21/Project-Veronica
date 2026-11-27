@@ -261,10 +261,10 @@ Key entry points:
 ### Primary ESP32 touch pod
 
 - ESP32-WROOM-32D
-- Robocrazе? 3.5-inch ILI9486 TFT with XPT2046 touch
+- Waveshare 5-inch hdmi touch screen display 
 - PN532 NFC reader in I²C mode
 - Active buzzer
-- 480×320 landscape display
+- 800x480 touch screen display
 - TCP over Wi-Fi
 
 The display uses SPI for the TFT and touch controller. Detailed signal mapping is in `docs/ESP32_DISPLAY_SETUP_GUIDE.md`.
