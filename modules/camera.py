@@ -30,7 +30,7 @@ from config import (
     KERO_FPS,
     KERO_INPUT_FORMAT,
 )
-from telegram_bot import send_telegram, send_telegram_photo, send_telegram_document
+from telegram_bot import send_telegram, send_telegram_photo, send_telegram_document, send_telegram_audio
 from drive_upload import upload_to_drive
 from activity_logger import log_activity
 
@@ -451,6 +451,15 @@ def stop_audio_only():
     was_priority = state.audio_is_priority
     state.audio_is_priority = False
     if fname and os.path.exists(fname) and os.path.getsize(fname) > 1024:
+        # 1. Send audio file directly to Telegram group
+        sub_label = f" [{current_subj}]" if current_subj != "General" else ""
+        threading.Thread(
+            target=send_telegram_audio,
+            args=(fname,),
+            kwargs={"caption": f"🎙️ Audio Recording{sub_label} — {os.path.basename(fname)}"},
+            daemon=True
+        ).start()
+        # 2. Upload to Google Drive
         threading.Thread(
             target=upload_to_drive,
             args=(fname, FOLDER_ID, was_priority, current_subj),
